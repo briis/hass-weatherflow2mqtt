@@ -39,8 +39,8 @@ async def main():
     current_time = now.strftime("%H:%M:%S")
 
     #Read the settings.json file
-    filepath = "/config/settings.json"
-    # filepath = "settings.json"
+    filepath = "config.yaml"
+    filepath = "/config/config.yaml"
     with open(filepath) as json_file:
         data = yaml.load(json_file, Loader=yaml.FullLoader)
         weatherflow_ip = data["weatherflow"]["host"]
@@ -49,14 +49,12 @@ async def main():
         mqtt_port = data["mqtt"]["port"]
         mqtt_username = data["mqtt"]["username"]
         mqtt_password = data["mqtt"]["password"]
-        mqtt_topic = data["mqtt"]["topic"]
         elevation = data["station"]["elevation"]
 
     #Setup and connect to MQTT Broker
     client =mqtt.Client("WFMQTT")
     client.username_pw_set(username=mqtt_username,password=mqtt_password)
     client.connect(mqtt_host, port=mqtt_port)
-    client.publish(f"{mqtt_topic}/log",f"WE ARE CONNECTED TO MQTT at {current_time}")
 
     #Setup and start listening to WeatherFlow UDP Socket
     endpoint = await open_local_endpoint(host=weatherflow_ip, port=weatherflow_port)
