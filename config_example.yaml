@@ -1,0 +1,11 @@
+weatherflow:
+  host: "0.0.0.0"
+  port: "50222"
+mqtt:
+  host: "YOUR_MQTT_IP_HERE"
+  port: 1883
+  username: "YOUR_MQTT_USERNAME_HERE"
+  password: "YOUR_MQTT_PASSWORD_HERE"
+station:
+  # Station Elevation above sea level
+  elevation: 50
