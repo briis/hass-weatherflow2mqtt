@@ -39,7 +39,7 @@ async def main():
     current_time = now.strftime("%H:%M:%S")
 
     #Read the settings.json file
-    filepath = "config.yaml"
+    # filepath = "config.yaml"
     filepath = "/config/config.yaml"
     with open(filepath) as json_file:
         data = yaml.load(json_file, Loader=yaml.FullLoader)
