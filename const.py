@@ -4,6 +4,7 @@ DEVICE_CLASS_HUMIDITY = "humidity"
 DEVICE_CLASS_ILLUMINANCE = "illuminance"
 DEVICE_CLASS_PRESSURRE = "pressure"
 DEVICE_CLASS_TEMPERATURE = "temperature"
+DEVICE_CLASS_TIMESTAMP = "timestamp"
 DEVICE_CLASS_VOLTAGE = "voltage"
 
 DOMAIN = "weatherflow2mqtt"
@@ -42,6 +43,7 @@ WEATHERFLOW_SENSORS = [
     ["solar_radiation", "Solar Radiation", "W/m^2", None, EVENT_SKY_DATA],
     ["local_day_rain_accumulation", "Local Day Rain", "mm", None, EVENT_SKY_DATA],
     ["precipitation_type", "Precipitation Type", None, None, EVENT_SKY_DATA],
+    ["rain_start_time", "Rain Start Time", None, DEVICE_CLASS_TIMESTAMP, EVENT_PRECIP_START],
 ]
 
 SENSOR_ID = 0

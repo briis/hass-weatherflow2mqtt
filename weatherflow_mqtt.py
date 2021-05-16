@@ -40,7 +40,7 @@ async def main():
 
     #Read the settings.json file
     filepath = "config.yaml"
-    filepath = "/config/config.yaml"
+    # filepath = "/config/config.yaml"
     with open(filepath) as json_file:
         data = yaml.load(json_file, Loader=yaml.FullLoader)
         weatherflow_ip = data["weatherflow"]["host"]
@@ -77,6 +77,10 @@ async def main():
                 obs = json_response["ob"]
                 data['wind_speed'] = obs[1]
                 data['wind_bearing'] = obs[2]
+                client.publish(state_topic, json.dumps(data))
+            if msg_type in EVENT_PRECIP_START:
+                obs = json_response["evt"]
+                data['rain_start_time'] = datetime.fromtimestamp(obs[0])
                 client.publish(state_topic, json.dumps(data))
             if msg_type in EVENT_STRIKE:
                 obs = json_response["evt"]
