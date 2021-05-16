@@ -12,6 +12,7 @@ import yaml
 from datetime import datetime
 
 from aioudp import open_local_endpoint
+from helpers import ConversionFunctions
 from const import (
     DOMAIN,
     DOMAIN_SHORT,
@@ -27,7 +28,9 @@ from const import (
     SENSOR_DEVICE,
     SENSOR_ID,
     SENSOR_NAME,
-    SENSOR_UNIT,
+    SENSOR_UNIT_I,
+    SENSOR_UNIT_M,
+    UNITS_IMPERIAL,
     WEATHERFLOW_SENSORS,
 )
 
@@ -50,6 +53,9 @@ async def main():
         mqtt_username = data["mqtt"]["username"]
         mqtt_password = data["mqtt"]["password"]
         elevation = data["station"]["elevation"]
+        unit_system = data["unit_system"]
+
+    cnv = ConversionFunctions(unit_system)
 
     #Setup and connect to MQTT Broker
     client =mqtt.Client("WFMQTT")
@@ -61,7 +67,7 @@ async def main():
     _LOGGER.debug("The UDP server is running on port %s...", endpoint.address[1])
 
     # Configure Sensors in MQTT
-    await setup_sensors(endpoint, client)
+    await setup_sensors(endpoint, client, unit_system)
 
 
     while True:
@@ -75,8 +81,9 @@ async def main():
             state_topic = 'homeassistant/sensor/{}/{}/state'.format(DOMAIN, msg_type)
             if msg_type in EVENT_RAPID_WIND:
                 obs = json_response["ob"]
-                data['wind_speed'] = obs[1]
+                data['wind_speed'] = await cnv.speed(obs[1])
                 data['wind_bearing'] = obs[2]
+                data['wind_direction'] = await cnv.direction(obs[2])
                 client.publish(state_topic, json.dumps(data))
             if msg_type in EVENT_PRECIP_START:
                 obs = json_response["evt"]
@@ -84,59 +91,60 @@ async def main():
                 client.publish(state_topic, json.dumps(data))
             if msg_type in EVENT_STRIKE:
                 obs = json_response["evt"]
-                data['lightning_strike_distance'] = obs[1]
+                data['lightning_strike_distance'] = await cnv.distance(obs[1])
                 data['lightning_strike_energy'] = obs[2]
                 client.publish(state_topic, json.dumps(data))
             if msg_type in EVENT_AIR_DATA:
                 obs = json_response["obs"][0]
-                data['station_pressure'] = obs[1]
+                data['station_pressure'] = await cnv.pressure(obs[1])
                 data['air_temperature'] = obs[2]
                 data['relative_humidity'] = obs[3]
                 data['lightning_strike_count'] = obs[4]
-                data['lightning_strike_avg_distance'] = obs[5]
+                data['lightning_strike_avg_distance'] = await cnv.distance(obs[5])
                 data['battery_air'] = obs[6]
-                data['sealevel_pressure'] = round(obs[1] + (elevation / 9.2), 2)
+                data['sealevel_pressure'] = await cnv.pressure(obs[1] + (elevation / 9.2))
                 client.publish(state_topic, json.dumps(data))
             if msg_type in EVENT_SKY_DATA:
                 obs = json_response["obs"][0]
                 data['illuminance'] = obs[1]
                 data['uv'] = obs[2]
-                data['rain_accumulated'] = obs[3]
-                data['wind_lull'] = obs[4]
-                data['wind_speed_avg'] = obs[5]
-                data['wind_gust'] = obs[6]
+                data['rain_accumulated'] = await cnv.rain(obs[3])
+                data['wind_lull'] = await cnv.speed(obs[4])
+                data['wind_speed_avg'] = await cnv.speed(obs[5])
+                data['wind_gust'] = await cnv.speed(obs[6])
                 data['wind_bearing_avg'] = obs[7]
+                data['wind_direction_avg'] = await cnv.direction(obs[7])
                 data['battery_sky'] = obs[8]
                 data['solar_radiation'] = obs[10]
-                data['local_day_rain_accumulation'] = obs[11]
-                data['precipitation_type'] = obs[12]
+                data['precipitation_type'] = await cnv.rain_type(obs[12])
                 client.publish(state_topic, json.dumps(data))
             if msg_type in EVENT_TEMPEST_DATA:
                 obs = json_response["obs"][0]
                 state_topic = 'homeassistant/sensor/{}/obs_sky/state'.format(DOMAIN)
-                data['wind_lull'] = obs[1]
-                data['wind_speed_avg'] = obs[2]
-                data['wind_gust'] = obs[3]
+                data['wind_lull'] = await cnv.speed(obs[1])
+                data['wind_speed_avg'] = await cnv.speed(obs[2])
+                data['wind_gust'] = await cnv.speed(obs[3])
                 data['wind_bearing_avg'] = obs[4]
+                data['wind_direction_avg'] = await cnv.direction(obs[4])
                 data['illuminance'] = obs[9]
                 data['uv'] = obs[10]
                 data['solar_radiation'] = obs[11]
-                data['rain_accumulated'] = obs[12]
-                data['precipitation_type'] = obs[13]
+                data['rain_accumulated'] = await cnv.rain(obs[12])
+                data['precipitation_type'] = await cnv.rain_type(obs[13])
                 data['battery_sky'] = obs[16]
                 client.publish(state_topic, json.dumps(data))
                 state_topic = 'homeassistant/sensor/{}/obs_air/state'.format(DOMAIN)
                 data = OrderedDict()
-                data['station_pressure'] = obs[6]
+                data['station_pressure'] = await cnv.pressure(obs[6])
                 data['air_temperature'] = obs[7]
                 data['relative_humidity'] = obs[8]
                 data['lightning_strike_count'] = obs[15]
-                data['lightning_strike_avg_distance'] = obs[14]
-                data['sealevel_pressure'] = round(obs[6] + (elevation / 9.2), 2)
+                data['lightning_strike_avg_distance'] = await cnv.distance(obs[14])
+                data['sealevel_pressure'] = await cnv.pressure(obs[6] + (elevation / 9.2), 2)
                 client.publish(state_topic, json.dumps(data))
 
 
-async def setup_sensors(endpoint, mqtt_client):
+async def setup_sensors(endpoint, mqtt_client, unit_system):
     """Setup the Sensors in Home Assistant."""
 
     # Get Hub Information
@@ -150,6 +158,7 @@ async def setup_sensors(endpoint, mqtt_client):
             uptime = json_response.get("uptime")
             break
 
+    units = SENSOR_UNIT_I if unit_system == UNITS_IMPERIAL else SENSOR_UNIT_M
     for sensor in WEATHERFLOW_SENSORS:
         _LOGGER.debug("SETTING UP %s SENSOR", sensor[SENSOR_NAME])
         state_topic = 'homeassistant/sensor/{}/{}/state'.format(DOMAIN, sensor[SENSOR_DEVICE])
@@ -157,7 +166,7 @@ async def setup_sensors(endpoint, mqtt_client):
         payload = OrderedDict()
         payload['name'] = "{} {}".format(DOMAIN_SHORT, sensor[SENSOR_NAME])
         payload['unique_id'] = "{}-{}".format(serial_number, sensor[SENSOR_ID])
-        payload['unit_of_measurement'] = sensor[SENSOR_UNIT]
+        payload['unit_of_measurement'] = sensor[units]
         if sensor[SENSOR_CLASS] is not None:
             payload['device_class'] = sensor[SENSOR_CLASS]
         payload['state_topic'] = state_topic
