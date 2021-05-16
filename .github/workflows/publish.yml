@@ -1,0 +1,23 @@
+name: publish
+
+on: [push]
+
+jobs:
+  publish-weatherflow2mqtt-image:
+    runs-on: python3-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build the hello-world Docker image
+      run: |
+        docker build . --tag ghcr.io//briis/hass-weatherflow2mqtt:latest
+        docker run ghcr.io//briis/hass-weatherflow2mqtt:latest
+        docker push ghcr.io//briis/hass-weatherflow2mqtt:latest
