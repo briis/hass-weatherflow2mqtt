@@ -1,0 +1,16 @@
+{
+    "weatherflow": {
+        "host": "0.0.0.0",
+        "port": "50222"
+    },
+    "mqtt": {
+        "host": "192.168.1.4",
+        "port": 1883,
+        "username": "hass_mqtt",
+        "password": "Shitface.1",
+        "topic": "weatherflow2mqtt"
+    },
+    "station": {
+        "elevation": 50
+    }
+}
