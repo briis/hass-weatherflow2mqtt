@@ -8,6 +8,7 @@ from typing import OrderedDict
 import paho.mqtt.client as mqtt
 import asyncio
 import logging
+import yaml
 from datetime import datetime
 
 from aioudp import open_local_endpoint
@@ -41,7 +42,7 @@ async def main():
     filepath = "/config/settings.json"
     # filepath = "settings.json"
     with open(filepath) as json_file:
-        data = json.load(json_file)
+        data = yaml.load(json_file, Loader=yaml.FullLoader)
         weatherflow_ip = data["weatherflow"]["host"]
         weatherflow_port = data["weatherflow"]["port"]
         mqtt_host = data["mqtt"]["host"]
