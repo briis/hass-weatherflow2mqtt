@@ -1,5 +1,5 @@
 FROM python:3
-RUN pip install paho-mqtt asyncio
+RUN pip install paho-mqtt asyncio pyyaml
 RUN mkdir /app
 ADD __init__.py /app
 ADD aioudp.py /app
