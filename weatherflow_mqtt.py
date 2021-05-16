@@ -39,8 +39,8 @@ async def main():
     current_time = now.strftime("%H:%M:%S")
 
     #Read the settings.json file
-    filepath = "config.yaml"
-    # filepath = "/config/config.yaml"
+    # filepath = "config.yaml"
+    filepath = "/config/config.yaml"
     with open(filepath) as json_file:
         data = yaml.load(json_file, Loader=yaml.FullLoader)
         weatherflow_ip = data["weatherflow"]["host"]
@@ -110,6 +110,29 @@ async def main():
                 data['solar_radiation'] = obs[10]
                 data['local_day_rain_accumulation'] = obs[11]
                 data['precipitation_type'] = obs[12]
+                client.publish(state_topic, json.dumps(data))
+            if msg_type in EVENT_TEMPEST_DATA:
+                obs = json_response["obs"][0]
+                state_topic = 'homeassistant/sensor/{}/obs_sky/state'.format(DOMAIN)
+                data['wind_lull'] = obs[1]
+                data['wind_speed_avg'] = obs[2]
+                data['wind_gust'] = obs[3]
+                data['wind_bearing_avg'] = obs[4]
+                data['illuminance'] = obs[9]
+                data['uv'] = obs[10]
+                data['solar_radiation'] = obs[11]
+                data['rain_accumulated'] = obs[12]
+                data['precipitation_type'] = obs[13]
+                data['battery_sky'] = obs[16]
+                client.publish(state_topic, json.dumps(data))
+                state_topic = 'homeassistant/sensor/{}/obs_air/state'.format(DOMAIN)
+                data = OrderedDict()
+                data['station_pressure'] = obs[6]
+                data['air_temperature'] = obs[7]
+                data['relative_humidity'] = obs[8]
+                data['lightning_strike_count'] = obs[15]
+                data['lightning_strike_avg_distance'] = obs[14]
+                data['sealevel_pressure'] = round(obs[6] + (elevation / 9.2), 2)
                 client.publish(state_topic, json.dumps(data))
 
 
