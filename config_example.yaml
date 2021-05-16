@@ -8,5 +8,4 @@ mqtt:
   username: "YOUR_MQTT_USERNAME_HERE"
   password: "YOUR_MQTT_PASSWORD_HERE"
 station:
-  # Station Elevation above sea level
-  elevation: 50
+  elevation: 50 # Station Elevation above sea level
