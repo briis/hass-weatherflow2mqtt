@@ -11,4 +11,4 @@ ADD helpers.py /app
 ENV TZ=Europe/Copenhagen
 EXPOSE 50222/udp
 EXPOSE 1883
-CMD [ "python", "./app/weatherflow_mqtt.py" ]
+CMD [ "python", "weatherflow_mqtt.py" ]
