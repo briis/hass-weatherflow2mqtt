@@ -126,6 +126,8 @@ async def main():
                 data['lightning_strike_avg_distance'] = await cnv.distance(obs[5])
                 data['battery_air'] = obs[6]
                 data['sealevel_pressure'] = await cnv.pressure(obs[1] + (elevation / 9.2))
+                data['air_density'] = await cnv.air_density(obs[2], obs[1])
+                data['dewpoint'] = await cnv.dewpoint(obs[2], obs[3])
                 client.publish(state_topic, json.dumps(data))
             if msg_type in EVENT_SKY_DATA:
                 obs = json_response["obs"][0]
@@ -140,9 +142,11 @@ async def main():
                 data['battery_sky'] = obs[8]
                 data['solar_radiation'] = obs[10]
                 data['precipitation_type'] = await cnv.rain_type(obs[12])
+                data['rain_rate'] = await cnv.rain_rate(obs[3])
                 client.publish(state_topic, json.dumps(data))
             if msg_type in EVENT_TEMPEST_DATA:
                 obs = json_response["obs"][0]
+
                 state_topic = 'homeassistant/sensor/{}/obs_sky/state'.format(DOMAIN)
                 data['wind_lull'] = await cnv.speed(obs[1])
                 data['wind_speed_avg'] = await cnv.speed(obs[2])
@@ -155,7 +159,9 @@ async def main():
                 data['rain_accumulated'] = await cnv.rain(obs[12])
                 data['precipitation_type'] = await cnv.rain_type(obs[13])
                 data['battery_sky'] = obs[16]
+                data['rain_rate'] = await cnv.rain_rate(obs[12])
                 client.publish(state_topic, json.dumps(data))
+
                 state_topic = 'homeassistant/sensor/{}/obs_air/state'.format(DOMAIN)
                 data = OrderedDict()
                 data['station_pressure'] = await cnv.pressure(obs[6])
@@ -164,6 +170,8 @@ async def main():
                 data['lightning_strike_count'] = obs[15]
                 data['lightning_strike_avg_distance'] = await cnv.distance(obs[14])
                 data['sealevel_pressure'] = await cnv.pressure(obs[6] + (elevation / 9.2), 2)
+                data['air_density'] = await cnv.air_density(obs[7], obs[6])
+                data['dewpoint'] = await cnv.dewpoint(obs[7], obs[8])
                 client.publish(state_topic, json.dumps(data))
 
 
