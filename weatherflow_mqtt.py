@@ -40,8 +40,8 @@ async def main():
     logging.basicConfig(level=logging.DEBUG)
 
     # Read the config file
-    # filepath = "config.yaml"
-    filepath = "/config/config.yaml"
+    filepath = "config.yaml"
+    # filepath = "/config/config.yaml"
     with open(filepath) as json_file:
         data = yaml.load(json_file, Loader=yaml.FullLoader)
         weatherflow_ip = data["weatherflow"]["host"]
@@ -59,6 +59,7 @@ async def main():
     #Setup and connect to MQTT Broker
     client =mqtt.Client("WFMQTT")
     client.username_pw_set(username=mqtt_username,password=mqtt_password)
+    client.max_inflight_messages_set(40)
     client.connect(mqtt_host, port=mqtt_port)
 
     #Setup and start listening to WeatherFlow UDP Socket
