@@ -19,5 +19,5 @@ jobs:
     - name: Build the hello-world Docker image
       run: |
         docker build . --tag ghcr.io/briis/hass-weatherflow2mqtt:latest
-        docker run -v $(pwd):/config -p 50222:50222/udp ghcr.io/briis/hass-weatherflow2mqtt:latest
+        docker create -v $(pwd):/config -p 50222:50222/udp ghcr.io/briis/hass-weatherflow2mqtt:latest
         docker push ghcr.io/briis/hass-weatherflow2mqtt:latest
