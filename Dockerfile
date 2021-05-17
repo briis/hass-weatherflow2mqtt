@@ -2,6 +2,7 @@ FROM python:3
 LABEL org.opencontainers.image.source="https://github.com/briis/hass-weatherflow2mqtt"
 RUN pip install paho-mqtt asyncio pyyaml
 RUN mkdir /app
+WORKDIR /app
 ADD __init__.py /app
 ADD aioudp.py /app
 ADD const.py /app
