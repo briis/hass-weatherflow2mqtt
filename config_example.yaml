@@ -1,0 +1,11 @@
+unit_system: "metric" #Use metric or imperial
+weatherflow:
+  host: "0.0.0.0"
+  port: "50222"
+mqtt:
+  host: "YOUR_MQTT_IP_HERE"
+  port: 1883
+  username: "YOUR_MQTT_USERNAME_HERE"
+  password: "YOUR_MQTT_PASSWORD_HERE"
+station:
+  elevation: 50 # Station Elevation above sea level
