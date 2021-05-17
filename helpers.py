@@ -24,7 +24,7 @@ class ConversionFunctions:
         """Convert Wind Speed."""
         if self._unit_system == UNITS_IMPERIAL:
             return round(value * 2.2369362920544, 2)
-        return value
+        return round(value, 1)
 
     async def distance(self, value) -> float:
         """Convert distance."""

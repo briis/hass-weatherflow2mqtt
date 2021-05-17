@@ -8,5 +8,6 @@ mqtt:
   port: 1883
   username: "YOUR_MQTT_USERNAME_HERE"
   password: "YOUR_MQTT_PASSWORD_HERE"
+  debug: "off" # on or off to enable mqtt debug
 station:
   elevation: 50 # Station Elevation above sea level

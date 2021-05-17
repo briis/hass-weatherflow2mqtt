@@ -50,6 +50,7 @@ async def main():
         mqtt_port = data["mqtt"]["port"]
         mqtt_username = data["mqtt"]["username"]
         mqtt_password = data["mqtt"]["password"]
+        mqtt_debug = data["mqtt"]["debug"]
         elevation = data["station"]["elevation"]
         unit_system = data["unit_system"]
         rw_interval = data["rapid_wind_interval"]
@@ -60,6 +61,8 @@ async def main():
     client =mqtt.Client("WFMQTT")
     client.username_pw_set(username=mqtt_username,password=mqtt_password)
     client.max_inflight_messages_set(40)
+    if mqtt_debug == "on":
+        client.enable_logger(logger=_LOGGER)
     client.connect(mqtt_host, port=mqtt_port)
 
     #Setup and start listening to WeatherFlow UDP Socket
