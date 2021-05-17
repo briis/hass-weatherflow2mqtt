@@ -1,4 +1,5 @@
 unit_system: "metric" #Use metric or imperial
+rapid_wind_interval: 5
 weatherflow:
   host: "0.0.0.0"
   port: "50222"

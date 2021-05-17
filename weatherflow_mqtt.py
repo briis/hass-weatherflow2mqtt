@@ -17,7 +17,6 @@ from const import (
     DOMAIN,
     DOMAIN_SHORT,
     EVENT_AIR_DATA,
-    EVENT_DEVICE_STATUS,
     EVENT_RAPID_WIND,
     EVENT_HUB_STATUS,
     EVENT_PRECIP_START,
@@ -38,10 +37,8 @@ _LOGGER = logging.getLogger(__name__)
 
 async def main():
     logging.basicConfig(level=logging.DEBUG)
-    now = datetime.now()
-    current_time = now.strftime("%H:%M:%S")
 
-    #Read the settings.json file
+    # Read the config file
     # filepath = "config.yaml"
     filepath = "/config/config.yaml"
     with open(filepath) as json_file:
@@ -54,6 +51,7 @@ async def main():
         mqtt_password = data["mqtt"]["password"]
         elevation = data["station"]["elevation"]
         unit_system = data["unit_system"]
+        rw_interval = data["rapid_wind_interval"]
 
     cnv = ConversionFunctions(unit_system)
 
@@ -69,7 +67,10 @@ async def main():
     # Configure Sensors in MQTT
     await setup_sensors(endpoint, client, unit_system)
 
+    # Set timer variables (A time in the past)
+    rapid_last_run = 1621229580.583215
 
+    # Watch for message from the UDP socket
     while True:
         data, (host, port) = await endpoint.receive()
         json_response = json.loads(data.decode("utf-8"))
@@ -80,11 +81,14 @@ async def main():
             data = OrderedDict()
             state_topic = 'homeassistant/sensor/{}/{}/state'.format(DOMAIN, msg_type)
             if msg_type in EVENT_RAPID_WIND:
-                obs = json_response["ob"]
-                data['wind_speed'] = await cnv.speed(obs[1])
-                data['wind_bearing'] = obs[2]
-                data['wind_direction'] = await cnv.direction(obs[2])
-                client.publish(state_topic, json.dumps(data))
+                now = datetime.now().timestamp()
+                if (now - rapid_last_run) >= rw_interval:
+                    obs = json_response["ob"]
+                    data['wind_speed'] = await cnv.speed(obs[1])
+                    data['wind_bearing'] = obs[2]
+                    data['wind_direction'] = await cnv.direction(obs[2])
+                    client.publish(state_topic, json.dumps(data))
+                    rapid_last_run = datetime.now().timestamp()
             if msg_type in EVENT_PRECIP_START:
                 obs = json_response["evt"]
                 data['rain_start_time'] = datetime.fromtimestamp(obs[0])
@@ -158,6 +162,7 @@ async def setup_sensors(endpoint, mqtt_client, unit_system):
             uptime = json_response.get("uptime")
             break
 
+    # Create the config for the Sensors
     units = SENSOR_UNIT_I if unit_system == UNITS_IMPERIAL else SENSOR_UNIT_M
     for sensor in WEATHERFLOW_SENSORS:
         _LOGGER.debug("SETTING UP %s SENSOR", sensor[SENSOR_NAME])

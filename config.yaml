@@ -1,11 +1,12 @@
 unit_system: "metric" #Use metric or imperial
+rapid_wind_interval: 15
 weatherflow:
   host: "0.0.0.0"
   port: "50222"
 mqtt:
-  host: "YOUR_MQTT_IP_HERE"
+  host: "192.168.1.4"
   port: 1883
-  username: "YOUR_MQTT_USERNAME_HERE"
-  password: "YOUR_MQTT_PASSWORD_HERE"
+  username: "hass_mqtt"
+  password: "Shitface.1"
 station:
   elevation: 50 # Station Elevation above sea level
