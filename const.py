@@ -46,7 +46,7 @@ WEATHERFLOW_SENSORS = [
     ["battery_sky", "Battery SKY", "V", "V", DEVICE_CLASS_VOLTAGE, None, EVENT_SKY_DATA],
     ["solar_radiation", "Solar Radiation", "W/m^2", "W/m^2", None, "solar-power", EVENT_SKY_DATA],
     ["precipitation_type", "Precipitation Type", None, None, None, "weather-rainy", EVENT_SKY_DATA],
-    ["rain_start_time", "Rain Start Time", None, None, DEVICE_CLASS_TIMESTAMP, None, EVENT_PRECIP_START],
+    ["rain_start_time", "Rain Start Time", None, None, DEVICE_CLASS_TIMESTAMP, "clock-outline", EVENT_PRECIP_START],
 ]
 
 SENSOR_ID = 0

@@ -40,8 +40,8 @@ async def main():
     logging.basicConfig(level=logging.DEBUG)
 
     # Read the config file
-    # filepath = "config.yaml"
-    filepath = "/config/config.yaml"
+    filepath = "config.yaml"
+    # filepath = "/config/config.yaml"
     with open(filepath) as json_file:
         data = yaml.load(json_file, Loader=yaml.FullLoader)
         weatherflow_ip = data["weatherflow"]["host"]
@@ -70,6 +70,19 @@ async def main():
 
     # Set timer variables (A time in the past)
     rapid_last_run = 1621229580.583215
+
+    # Publish Initial Data for Lightning Event
+    data = OrderedDict()
+    state_topic = 'homeassistant/sensor/{}/{}/state'.format(DOMAIN, EVENT_STRIKE)
+    data['lightning_strike_distance'] = 0
+    data['lightning_strike_energy'] = 0
+    client.publish(state_topic, json.dumps(data))
+
+    # Publish Initial Data for Precipitation Start Event
+    data = OrderedDict()
+    state_topic = 'homeassistant/sensor/{}/{}/state'.format(DOMAIN, EVENT_PRECIP_START)
+    data['rain_start_time'] = "Not Recorded"
+    client.publish(state_topic, json.dumps(data))
 
     # Watch for message from the UDP socket
     while True:
@@ -172,7 +185,8 @@ async def setup_sensors(endpoint, mqtt_client, unit_system):
         payload = OrderedDict()
         payload['name'] = "{} {}".format(DOMAIN_SHORT, sensor[SENSOR_NAME])
         payload['unique_id'] = "{}-{}".format(serial_number, sensor[SENSOR_ID])
-        payload['unit_of_measurement'] = sensor[units]
+        if sensor[units] is not None:
+            payload['unit_of_measurement'] = sensor[units]
         if sensor[SENSOR_CLASS] is not None:
             payload['device_class'] = sensor[SENSOR_CLASS]
         if sensor[SENSOR_ICON] is not None:
@@ -187,8 +201,11 @@ async def setup_sensors(endpoint, mqtt_client, unit_system):
                 'model' : 'WeatherFlow Weather Station',
                 'sw_version': firmware
         }
-        mqtt_client.publish(discovery_topic, json.dumps(payload), 1, True)
+        mqtt_client.publish(discovery_topic, json.dumps(payload), qos=1, retain=True)
 
 #Main Program starts
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\nExiting Program")
