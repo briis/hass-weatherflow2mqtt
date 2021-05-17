@@ -25,6 +25,7 @@ from const import (
     EVENT_TEMPEST_DATA,
     SENSOR_CLASS,
     SENSOR_DEVICE,
+    SENSOR_ICON,
     SENSOR_ID,
     SENSOR_NAME,
     SENSOR_UNIT_I,
@@ -101,7 +102,7 @@ async def main():
             if msg_type in EVENT_AIR_DATA:
                 obs = json_response["obs"][0]
                 data['station_pressure'] = await cnv.pressure(obs[1])
-                data['air_temperature'] = obs[2]
+                data['air_temperature'] = await cnv.temperature(obs[2])
                 data['relative_humidity'] = obs[3]
                 data['lightning_strike_count'] = obs[4]
                 data['lightning_strike_avg_distance'] = await cnv.distance(obs[5])
@@ -140,7 +141,7 @@ async def main():
                 state_topic = 'homeassistant/sensor/{}/obs_air/state'.format(DOMAIN)
                 data = OrderedDict()
                 data['station_pressure'] = await cnv.pressure(obs[6])
-                data['air_temperature'] = obs[7]
+                data['air_temperature'] = await cnv.temperature(obs[7])
                 data['relative_humidity'] = obs[8]
                 data['lightning_strike_count'] = obs[15]
                 data['lightning_strike_avg_distance'] = await cnv.distance(obs[14])
@@ -174,6 +175,8 @@ async def setup_sensors(endpoint, mqtt_client, unit_system):
         payload['unit_of_measurement'] = sensor[units]
         if sensor[SENSOR_CLASS] is not None:
             payload['device_class'] = sensor[SENSOR_CLASS]
+        if sensor[SENSOR_ICON] is not None:
+            payload['icon'] = f"mdi:{sensor[SENSOR_ICON]}"
         payload['state_topic'] = state_topic
         payload['value_template'] = "{{{{ value_json.{} }}}}".format(sensor[SENSOR_ID])
         payload['device'] = {
