@@ -9,7 +9,7 @@ import paho.mqtt.client as mqtt
 import asyncio
 import logging
 import yaml
-from datetime import datetime
+from datetime import datetime, date
 
 from aioudp import open_local_endpoint
 from helpers import ConversionFunctions
@@ -80,8 +80,9 @@ async def main():
 
     # Publish Initial Data for Precipitation Start Event
     data = OrderedDict()
+    past_date = date(year=1970, month=1, day=1).isoformat()
     state_topic = 'homeassistant/sensor/{}/{}/state'.format(DOMAIN, EVENT_PRECIP_START)
-    data['rain_start_time'] = "Not Recorded"
+    data['rain_start_time'] = past_date
     client.publish(state_topic, json.dumps(data))
 
     # Watch for message from the UDP socket
