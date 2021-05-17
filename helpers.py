@@ -50,3 +50,17 @@ class ConversionFunctions:
         direction = direction_array[int((value + 11.25) / 22.5)]
         return direction
 
+    async def humanize_time(self, seconds):
+        """Humanize Time in Seconds."""
+        seconds_in_day = 60 * 60 * 24
+        seconds_in_hour = 60 * 60
+        seconds_in_minute = 60
+        days = seconds // seconds_in_day
+        hours = (seconds - (days * seconds_in_day)) // seconds_in_hour
+        minutes = (seconds - (days * seconds_in_day) - (hours * seconds_in_hour)) // seconds_in_minute
+        time_array = {
+            "days": days,
+            "hours": hours,
+            "minutes": minutes
+        }
+        return time_array

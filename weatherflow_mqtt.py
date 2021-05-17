@@ -185,7 +185,7 @@ async def setup_sensors(endpoint, mqtt_client, unit_system):
         state_topic = 'homeassistant/sensor/{}/{}/state'.format(DOMAIN, sensor[SENSOR_DEVICE])
         discovery_topic = 'homeassistant/sensor/{}/{}/config'.format(DOMAIN, sensor[SENSOR_ID])
         payload = OrderedDict()
-        payload['name'] = "{} {}".format(DOMAIN_SHORT, sensor[SENSOR_NAME])
+        payload['name'] = "{}".format(sensor[SENSOR_NAME])
         payload['unique_id'] = "{}-{}".format(serial_number, sensor[SENSOR_ID])
         if sensor[units] is not None:
             payload['unit_of_measurement'] = sensor[units]

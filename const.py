@@ -25,7 +25,7 @@ UNITS_IMPERIAL = "imperial"
 WEATHERFLOW_SENSORS = [
     ["wind_speed", "Wind Speed", "m/s", "mph", None, "weather-windy", EVENT_RAPID_WIND],
     ["wind_bearing", "Wind Bearing", "˚", "˚", None, "compass", EVENT_RAPID_WIND],
-    ["wind_direction", "Wind Direction", None, None, None, "compass", EVENT_RAPID_WIND],
+    ["wind_direction", "Wind Direction", None, None, None, "compass-outline", EVENT_RAPID_WIND],
     ["station_pressure", "Station Pressure", "hPa", "inHg", DEVICE_CLASS_PRESSURRE, None, EVENT_AIR_DATA],
     ["sealevel_pressure", "Sea Level Pressure", "hPa", "inHg", DEVICE_CLASS_PRESSURRE, None, EVENT_AIR_DATA],
     ["air_temperature", "Temperature", "˚C", "˚F", DEVICE_CLASS_TEMPERATURE, None, EVENT_AIR_DATA],
@@ -42,7 +42,7 @@ WEATHERFLOW_SENSORS = [
     ["wind_speed_avg", "Wind Speed Avg", "m/s", "mph", None, "weather-windy-variant", EVENT_SKY_DATA],
     ["wind_gust", "Wind Gust", "m/s", "mph", None, "weather-windy", EVENT_SKY_DATA],
     ["wind_bearing_avg", "Wind Bearing Avg", "˚", "˚", None, "compass", EVENT_SKY_DATA],
-    ["wind_direction_avg", "Wind Direction Avg", None, None, None, "compass", EVENT_SKY_DATA],
+    ["wind_direction_avg", "Wind Direction Avg", None, None, None, "compass-outline", EVENT_SKY_DATA],
     ["battery_sky", "Battery SKY", "V", "V", DEVICE_CLASS_VOLTAGE, None, EVENT_SKY_DATA],
     ["solar_radiation", "Solar Radiation", "W/m^2", "W/m^2", None, "solar-power", EVENT_SKY_DATA],
     ["precipitation_type", "Precipitation Type", None, None, None, "weather-rainy", EVENT_SKY_DATA],
