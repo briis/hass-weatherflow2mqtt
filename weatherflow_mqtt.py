@@ -42,8 +42,8 @@ async def main():
 
     
     # Read the config file
-    filepath = "config.yaml"
-    # filepath = "/config/config.yaml"
+    # filepath = "config.yaml"
+    filepath = "/config/config.yaml"
     with open(filepath) as json_file:
         data = yaml.load(json_file, Loader=yaml.FullLoader)
         weatherflow_ip = data["weatherflow"]["host"]
