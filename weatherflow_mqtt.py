@@ -15,7 +15,6 @@ from aioudp import open_local_endpoint
 from helpers import ConversionFunctions
 from const import (
     DOMAIN,
-    DOMAIN_SHORT,
     EVENT_AIR_DATA,
     EVENT_RAPID_WIND,
     EVENT_HUB_STATUS,
@@ -64,10 +63,11 @@ async def main():
     if mqtt_debug == "on":
         client.enable_logger(logger=_LOGGER)
     client.connect(mqtt_host, port=mqtt_port)
+    _LOGGER.info("Connected to the MQTT server on address %s and port %s...", mqtt_host, mqtt_port)
 
     #Setup and start listening to WeatherFlow UDP Socket
     endpoint = await open_local_endpoint(host=weatherflow_ip, port=weatherflow_port)
-    _LOGGER.debug("The UDP server is running on port %s...", endpoint.address[1])
+    _LOGGER.info("The UDP server is running on port %s...", endpoint.address[1])
 
     # Configure Sensors in MQTT
     await setup_sensors(endpoint, client, unit_system)
@@ -189,7 +189,6 @@ async def setup_sensors(endpoint, mqtt_client, unit_system):
         if msg_type == EVENT_HUB_STATUS:
             serial_number = json_response.get("serial_number")
             firmware = json_response.get("firmware_revision")
-            uptime = json_response.get("uptime")
             break
 
     # Create the config for the Sensors

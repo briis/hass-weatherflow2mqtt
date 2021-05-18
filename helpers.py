@@ -81,14 +81,3 @@ class ConversionFunctions:
         if value is None:
             return "None"
         return str(datetime.timedelta(seconds=value))
-        # seconds_in_day = 60 * 60 * 24
-        # seconds_in_hour = 60 * 60
-        # seconds_in_minute = 60
-        # days = seconds // seconds_in_day
-        # hours = (seconds - (days * seconds_in_day)) // seconds_in_hour
-        # minutes = (seconds - (days * seconds_in_day) - (hours * seconds_in_hour)) // seconds_in_minute
-        # m_string = "minutes" if minutes != 1 else "minute"
-        # h_string = "hours" if hours != 1 else "hour"
-        # d_string = "days" if days != 1 else "day"
-        # time_string = f"{days} {d_string} {hours} {h_string} {minutes} {m_string}"
-        # return time_string

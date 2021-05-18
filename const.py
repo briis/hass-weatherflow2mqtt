@@ -8,7 +8,6 @@ DEVICE_CLASS_TIMESTAMP = "timestamp"
 DEVICE_CLASS_VOLTAGE = "voltage"
 
 DOMAIN = "weatherflow2mqtt"
-DOMAIN_SHORT = "WF2MQTT"
 
 EVENT_RAPID_WIND = "rapid_wind"
 EVENT_HUB_STATUS = "hub_status"
