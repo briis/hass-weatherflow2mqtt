@@ -13,7 +13,7 @@ Everything runs in a pre-build Docker Container, so installation is very simple,
 - Copy the `config_example.yaml` file from this repo to that directory, and rename it to `config.yaml`.
 - Edit `config.yaml` as described below in the Configuration section.
 - Pull the docker image with this command: `docker pull ghcr.io/briis/hass-weatherflow2mqtt`
-- Create the docker container. Replace TZ (Timezone) with your Time Zone. `docker create --name weatherflow2mqtt -e TZ=Europe/Copenhagen -v $(pwd):/config -p 0.0.0.0:50222:50222/udp ghcr.io/briis/hass-weatherflow2mqtt` You might not need the 0.0.0.0 in front of port 50222, but if you run into IPv6 errors you can add this.
+- Create the docker container. Replace TZ (Timezone) with your Time Zone. `docker create --name weatherflow2mqtt -e TZ=Europe/Copenhagen -v $(pwd):/usr/local/config -p 0.0.0.0:50222:50222/udp ghcr.io/briis/hass-weatherflow2mqtt` You might not need the 0.0.0.0 in front of port 50222, but if you run into IPv6 errors you can add this.
 - Then finally start the Container with `docker start weatherflow2mqtt`
 
 If everything is setup correctly with MQTT and Home Assistant, you should now start seeing the sensors show up in HA.
