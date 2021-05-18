@@ -80,7 +80,7 @@ class ConversionFunctions:
         """Humanize Time in Seconds."""
         if value is None:
             return "None"
-        return datetime.timedelta(seconds=value)
+        return str(datetime.timedelta(seconds=value))
         # seconds_in_day = 60 * 60 * 24
         # seconds_in_hour = 60 * 60
         # seconds_in_minute = 60
