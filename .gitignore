@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 test.py
 config.yaml
+build_run.sh

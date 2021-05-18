@@ -40,8 +40,8 @@ async def main():
     logging.basicConfig(level=logging.DEBUG)
 
     # Read the config file
-    # filepath = "config.yaml"
-    filepath = "/config/config.yaml"
+    filepath = "config.yaml"
+    # filepath = "/config/config.yaml"
     with open(filepath) as json_file:
         data = yaml.load(json_file, Loader=yaml.FullLoader)
         weatherflow_ip = data["weatherflow"]["host"]
@@ -108,6 +108,9 @@ async def main():
                     data['wind_direction'] = await cnv.direction(obs[2])
                     client.publish(state_topic, json.dumps(data))
                     rapid_last_run = datetime.now().timestamp()
+            if msg_type in EVENT_HUB_STATUS:
+                data['uptime'] = await cnv.humanize_time(json_response.get("uptime"))
+                client.publish(state_topic, json.dumps(data))
             if msg_type in EVENT_PRECIP_START:
                 obs = json_response["evt"]
                 data['rain_start_time'] = datetime.fromtimestamp(obs[0])
