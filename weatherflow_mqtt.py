@@ -40,6 +40,7 @@ _LOGGER = logging.getLogger(__name__)
 async def main():
     logging.basicConfig(level=logging.DEBUG)
 
+    
     # Read the config file
     filepath = "config.yaml"
     # filepath = "/config/config.yaml"
@@ -58,28 +59,27 @@ async def main():
         show_debug = data["debug"]
 
     cnv = ConversionFunctions(unit_system)
-    errmsg = ErrorMessages()
 
     #Setup and connect to MQTT Broker
     try:
         client =mqtt.Client()
         client.max_inflight_messages_set(40)
-        client.on_connect = on_connect
         client.username_pw_set(username=mqtt_username,password=mqtt_password)
         if mqtt_debug == "on":
-            client.enable_logger(logger=_LOGGER)
-        result = client.connect(mqtt_host, port=mqtt_port)
-        _LOGGER.debug("RESULT: %s", result)
-        if result > 0:
-            raise Exception("MQTT Connect error. Error is %s", errmsg.ErrorMessages(result))
+            client.enable_logger()
+        client.connect(mqtt_host, port=mqtt_port)
         _LOGGER.info("Connected to the MQTT server on address %s and port %s...", mqtt_host, mqtt_port)
     except Exception as e:
         _LOGGER.error("Could not connect to MQTT Server. Error is: %s", e)
-        sys.exit()
+        sys.exit(1)
 
     #Setup and start listening to WeatherFlow UDP Socket
-    endpoint = await open_local_endpoint(host=weatherflow_ip, port=weatherflow_port)
-    _LOGGER.info("The UDP server is running on port %s...", endpoint.address[1])
+    try:
+        endpoint = await open_local_endpoint(host=weatherflow_ip, port=weatherflow_port)
+        _LOGGER.info("The UDP server is running on port %s...", endpoint.address[1])
+    except Exception as e:
+        _LOGGER.error("Could not start listening to the UDP Socket. Error is: %s", e)
+        sys.exit(1)
 
     # Configure Sensors in MQTT
     await setup_sensors(endpoint, client, unit_system)
@@ -192,7 +192,9 @@ async def main():
                 if show_debug == "on":
                     now = datetime.now()
                     serial_number = json_response.get("serial_number")
-                    _LOGGER.debug("DEVICE STATUS TRIGGERED AT %s for Device %s", str(now), serial_number)
+                    firmware_revision = json_response.get("firmware_revision")
+                    voltage = json_response.get("voltage")
+                    _LOGGER.debug("DEVICE STATUS TRIGGERED AT %s for Device %s\nFirmware Revision: %s\nVoltage: %s", str(now), serial_number, firmware_revision, voltage)
 
 
 async def setup_sensors(endpoint, mqtt_client, unit_system):
@@ -233,11 +235,12 @@ async def setup_sensors(endpoint, mqtt_client, unit_system):
                 'model' : 'WeatherFlow Weather Station',
                 'sw_version': firmware
         }
-        mqtt_client.publish(discovery_topic, json.dumps(payload), qos=1, retain=True)
-
-def on_connect(client, userdata, flags, rc):
-    print("Connected with flags [%s] rtn code [%d]"% (flags, rc) )
-
+        try:
+            mqtt_client.publish(discovery_topic, json.dumps(payload), qos=1, retain=True)
+            await asyncio.sleep(0.2)
+        except Exception as e:
+            _LOGGER.error("Could not connect to MQTT Server. Error is: %s", e)
+            break
 
 #Main Program starts
 if __name__ == "__main__":
