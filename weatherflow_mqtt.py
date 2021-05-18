@@ -10,9 +10,10 @@ import asyncio
 import logging
 import yaml
 from datetime import datetime, date
+import sys
 
 from aioudp import open_local_endpoint
-from helpers import ConversionFunctions
+from helpers import ConversionFunctions, ErrorMessages
 from const import (
     DOMAIN,
     EVENT_AIR_DATA,
@@ -40,8 +41,8 @@ async def main():
     logging.basicConfig(level=logging.DEBUG)
 
     # Read the config file
-    # filepath = "config.yaml"
-    filepath = "/config/config.yaml"
+    filepath = "config.yaml"
+    # filepath = "/config/config.yaml"
     with open(filepath) as json_file:
         data = yaml.load(json_file, Loader=yaml.FullLoader)
         weatherflow_ip = data["weatherflow"]["host"]
@@ -57,15 +58,24 @@ async def main():
         show_debug = data["debug"]
 
     cnv = ConversionFunctions(unit_system)
+    errmsg = ErrorMessages()
 
     #Setup and connect to MQTT Broker
-    client =mqtt.Client("WFMQTT")
-    client.username_pw_set(username=mqtt_username,password=mqtt_password)
-    client.max_inflight_messages_set(40)
-    if mqtt_debug == "on":
-        client.enable_logger(logger=_LOGGER)
-    client.connect(mqtt_host, port=mqtt_port)
-    _LOGGER.info("Connected to the MQTT server on address %s and port %s...", mqtt_host, mqtt_port)
+    try:
+        client =mqtt.Client()
+        client.max_inflight_messages_set(40)
+        client.on_connect = on_connect
+        client.username_pw_set(username=mqtt_username,password=mqtt_password)
+        if mqtt_debug == "on":
+            client.enable_logger(logger=_LOGGER)
+        result = client.connect(mqtt_host, port=mqtt_port)
+        _LOGGER.debug("RESULT: %s", result)
+        if result > 0:
+            raise Exception("MQTT Connect error. Error is %s", errmsg.ErrorMessages(result))
+        _LOGGER.info("Connected to the MQTT server on address %s and port %s...", mqtt_host, mqtt_port)
+    except Exception as e:
+        _LOGGER.error("Could not connect to MQTT Server. Error is: %s", e)
+        sys.exit()
 
     #Setup and start listening to WeatherFlow UDP Socket
     endpoint = await open_local_endpoint(host=weatherflow_ip, port=weatherflow_port)
@@ -224,6 +234,10 @@ async def setup_sensors(endpoint, mqtt_client, unit_system):
                 'sw_version': firmware
         }
         mqtt_client.publish(discovery_topic, json.dumps(payload), qos=1, retain=True)
+
+def on_connect(client, userdata, flags, rc):
+    print("Connected with flags [%s] rtn code [%d]"% (flags, rc) )
+
 
 #Main Program starts
 if __name__ == "__main__":

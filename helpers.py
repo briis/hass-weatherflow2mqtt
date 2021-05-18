@@ -81,3 +81,22 @@ class ConversionFunctions:
         if value is None:
             return "None"
         return str(datetime.timedelta(seconds=value))
+
+class ErrorMessages:
+
+    async def mqtt_connect_errors(error_value):
+        """Returns an error string based on error code."""
+        err = "success, connection accepted"
+        if error_value == 1:
+            err = "connection refused, bad protocol"
+        if error_value == 2:
+            err = "refused, client-id error"
+        if error_value == 3:
+            err = "refused, service unavailable"
+        if error_value == 4:
+            err = "refused, bad username or password"
+        if error_value == 5:
+            err = "refused, not authorized"
+        
+        return err
+            
