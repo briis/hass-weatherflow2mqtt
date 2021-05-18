@@ -194,7 +194,7 @@ async def main():
                     serial_number = json_response.get("serial_number")
                     firmware_revision = json_response.get("firmware_revision")
                     voltage = json_response.get("voltage")
-                    _LOGGER.debug("DEVICE STATUS TRIGGERED AT %s for Device %s\nFirmware Revision: %s\nVoltage: %s", str(now), serial_number, firmware_revision, voltage)
+                    _LOGGER.debug("DEVICE STATUS TRIGGERED AT %s \n  -- Device: %s\n -- Firmware Revision: %s\n -- Voltage: %s", str(now), serial_number, firmware_revision, voltage)
 
 
 async def setup_sensors(endpoint, mqtt_client, unit_system):
