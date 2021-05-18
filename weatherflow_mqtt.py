@@ -42,7 +42,6 @@ async def main():
 
     
     # Read the config file
-    # filepath = "config.yaml"
     filepath = "/usr/local/config/config.yaml"
     with open(filepath) as json_file:
         data = yaml.load(json_file, Loader=yaml.FullLoader)
@@ -64,7 +63,7 @@ async def main():
 
     cnv = ConversionFunctions(unit_system)
 
-    #Setup and connect to MQTT Broker
+    # Setup and connect to MQTT Broker
     try:
         client =mqtt.Client()
         client.max_inflight_messages_set(40)
@@ -78,7 +77,7 @@ async def main():
         _LOGGER.error("Could not connect to MQTT Server. Error is: %s", e)
         sys.exit(1)
 
-    #Setup and start listening to WeatherFlow UDP Socket
+    # Setup and start listening to WeatherFlow UDP Socket
     try:
         endpoint = await open_local_endpoint(host=weatherflow_ip, port=weatherflow_port)
         _LOGGER.info("The UDP server is running on port %s...", endpoint.address[1])
@@ -106,6 +105,9 @@ async def main():
     data['rain_start_time'] = past_date
     client.publish(state_topic, json.dumps(data))
 
+    # Setup variables for x-device calculations
+    wind_speed = None
+
     # Watch for message from the UDP socket
     while True:
         data, (host, port) = await endpoint.receive()
@@ -123,6 +125,7 @@ async def main():
                     data['wind_speed'] = await cnv.speed(obs[1])
                     data['wind_bearing'] = obs[2]
                     data['wind_direction'] = await cnv.direction(obs[2])
+                    wind_speed = obs[1]
                     client.publish(state_topic, json.dumps(data))
                     rapid_last_run = datetime.now().timestamp()
             if msg_type in EVENT_HUB_STATUS:
@@ -148,6 +151,7 @@ async def main():
                 data['sealevel_pressure'] = await cnv.pressure(obs[1] + (elevation / 9.2))
                 data['air_density'] = await cnv.air_density(obs[2], obs[1])
                 data['dewpoint'] = await cnv.dewpoint(obs[2], obs[3])
+                data['feelslike'] = await cnv.feels_like(obs[2], obs[3], wind_speed)
                 client.publish(state_topic, json.dumps(data))
             if msg_type in EVENT_SKY_DATA:
                 obs = json_response["obs"][0]
@@ -192,6 +196,7 @@ async def main():
                 data['sealevel_pressure'] = await cnv.pressure(obs[6] + (elevation / 9.2), 2)
                 data['air_density'] = await cnv.air_density(obs[7], obs[6])
                 data['dewpoint'] = await cnv.dewpoint(obs[7], obs[8])
+                data['feelslike'] = await cnv.feels_like(obs[7], obs[8], wind_speed)
                 client.publish(state_topic, json.dumps(data))
             if msg_type in EVENT_DEVICE_STATUS:
                 if show_debug == "on":

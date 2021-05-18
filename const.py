@@ -50,6 +50,7 @@ WEATHERFLOW_SENSORS = [
     ["dewpoint", "Dew Point", "˚C", "˚F", DEVICE_CLASS_TEMPERATURE, None, EVENT_AIR_DATA],
     ["rain_rate", "Rain Rate", "mm/h", "in/h", None, "weather-pouring", EVENT_SKY_DATA],
     ["uptime", "Uptime", None, None, None, "clock-outline", EVENT_HUB_STATUS],
+    ["feelslike", "Feels Like Temperature", "˚C", "˚F", DEVICE_CLASS_TEMPERATURE, None, EVENT_AIR_DATA],
 ]
 
 SENSOR_ID = 0
