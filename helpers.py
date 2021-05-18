@@ -45,6 +45,8 @@ class ConversionFunctions:
 
     async def direction(self, value) -> str:
         """Returns a directional Wind Direction string."""
+        if value is None:
+            return "N"
         direction_array = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW","N"]
         direction = direction_array[int((value + 11.25) / 22.5)]
         return direction
