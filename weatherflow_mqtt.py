@@ -181,7 +181,8 @@ async def main():
             if msg_type in EVENT_DEVICE_STATUS:
                 if show_debug == "on":
                     now = datetime.now()
-                    _LOGGER.debug("DEVICE STATUS TRIGGERED AT %s", str(now))
+                    serial_number = json_response.get("serial_number")
+                    _LOGGER.debug("DEVICE STATUS TRIGGERED AT %s for Device %s", str(now), serial_number)
 
 
 async def setup_sensors(endpoint, mqtt_client, unit_system):
