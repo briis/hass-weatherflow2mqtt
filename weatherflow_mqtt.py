@@ -16,6 +16,7 @@ from helpers import ConversionFunctions
 from const import (
     DOMAIN,
     EVENT_AIR_DATA,
+    EVENT_DEVICE_STATUS,
     EVENT_RAPID_WIND,
     EVENT_HUB_STATUS,
     EVENT_PRECIP_START,
@@ -53,6 +54,7 @@ async def main():
         elevation = data["station"]["elevation"]
         unit_system = data["unit_system"]
         rw_interval = data["rapid_wind_interval"]
+        show_debug = data["debug"]
 
     cnv = ConversionFunctions(unit_system)
 
@@ -176,6 +178,10 @@ async def main():
                 data['air_density'] = await cnv.air_density(obs[7], obs[6])
                 data['dewpoint'] = await cnv.dewpoint(obs[7], obs[8])
                 client.publish(state_topic, json.dumps(data))
+            if msg_type in EVENT_DEVICE_STATUS:
+                if show_debug == "on":
+                    now = datetime.now()
+                    _LOGGER.debug("DEVICE STATUS TRIGGERED AT %s", str(now))
 
 
 async def setup_sensors(endpoint, mqtt_client, unit_system):
@@ -194,7 +200,7 @@ async def setup_sensors(endpoint, mqtt_client, unit_system):
     # Create the config for the Sensors
     units = SENSOR_UNIT_I if unit_system == UNITS_IMPERIAL else SENSOR_UNIT_M
     for sensor in WEATHERFLOW_SENSORS:
-        _LOGGER.debug("SETTING UP %s SENSOR", sensor[SENSOR_NAME])
+        _LOGGER.info("SETTING UP %s SENSOR", sensor[SENSOR_NAME])
         state_topic = 'homeassistant/sensor/{}/{}/state'.format(DOMAIN, sensor[SENSOR_DEVICE])
         discovery_topic = 'homeassistant/sensor/{}/{}/config'.format(DOMAIN, sensor[SENSOR_ID])
         payload = OrderedDict()
