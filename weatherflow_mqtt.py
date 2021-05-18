@@ -42,8 +42,8 @@ async def main():
 
     
     # Read the config file
-    # filepath = "config.yaml"
-    filepath = "/config/config.yaml"
+    filepath = "config.yaml"
+    # filepath = "/config/config.yaml"
     with open(filepath) as json_file:
         data = yaml.load(json_file, Loader=yaml.FullLoader)
         weatherflow_ip = data["weatherflow"]["host"]
@@ -58,13 +58,18 @@ async def main():
         rw_interval = data["rapid_wind_interval"]
         show_debug = data["debug"]
 
+    mqtt_anonymous = False
+    if not mqtt_username or not mqtt_password:
+        mqtt_anonymous = True
+
     cnv = ConversionFunctions(unit_system)
 
     #Setup and connect to MQTT Broker
     try:
         client =mqtt.Client()
         client.max_inflight_messages_set(40)
-        client.username_pw_set(username=mqtt_username,password=mqtt_password)
+        if not mqtt_anonymous:
+            client.username_pw_set(username=mqtt_username,password=mqtt_password)
         if mqtt_debug == "on":
             client.enable_logger()
         client.connect(mqtt_host, port=mqtt_port)

@@ -48,8 +48,7 @@ Normally you would only have to change the MQTT settings to supply the address a
 - `weatherflow port`: Weatherflow always broadcasts on port 50222/udp, so don't change this
 - `mqtt host`: The IP address of your mqtt server
 - `mqtt port`: The Port for your mqtt server - Standard is 1883
-- `mqtt username`: The username used to connect to the mqtt server. Currently this does not support anonymous connections
-- `mqtt password`: The password used to connect to the mqtt server
+- `mqtt username`: The username used to connect to the mqtt server. Leave blank to use Anonymous connection
+- `mqtt password`: The password used to connect to the mqtt server. Leave blank to use Anonymous connection
 - `mqtt debug`: Set this to on, to get some more mqtt debugging messages in the Container log file
 - `station elevation`: The elevation above sea level (in meters) four your weather station. Is used by the program for some of the derived sensors.
-
