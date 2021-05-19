@@ -107,9 +107,8 @@ async def main():
 
     # Publish Initial Data for Precipitation Start Event
     data = OrderedDict()
-    past_date = date(year=1970, month=1, day=1).isoformat()
     state_topic = 'homeassistant/sensor/{}/{}/state'.format(DOMAIN, EVENT_PRECIP_START)
-    data['rain_start_time'] = past_date
+    data['rain_start_time'] = storage['rain_start']
     client.publish(state_topic, json.dumps(data))
 
     # Setup variables for x-device calculations
@@ -142,6 +141,8 @@ async def main():
                 obs = json_response["evt"]
                 data['rain_start_time'] = datetime.fromtimestamp(obs[0]).isoformat()
                 client.publish(state_topic, json.dumps(data))
+                storage['rain_start'] = datetime.fromtimestamp(obs[0]).isoformat()
+                await data_store.write_storage(storage)
             if msg_type in EVENT_STRIKE:
                 obs = json_response["evt"]
                 data['lightning_strike_distance'] = await cnv.distance(obs[1])
