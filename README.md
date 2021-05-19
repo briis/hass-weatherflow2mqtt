@@ -67,11 +67,10 @@ Here is the list of sensors that the program generates
 | sealevel_pressure | Station Pressure |
 | air_temperature | Temperature |
 | relative_humidity | Humidity |
-| lightning_strike_count | Lightning Strike Count |
-| lightning_strike_avg_distance | Lightning Strike Avg Distance |
+| lightning_strike_count | Lightning Count (3 hours) |
 | battery_air | Battery AIR |
-| lightning_strike_distance | Lightning Strike Distance |
-| lightning_strike_energy | Lightning Strike Energy |
+| lightning_strike_distance | Lightning Distance |
+| lightning_strike_energy | Lightning Energy |
 | illuminance | Illuminance |
 | uv | UV Index |
 | rain_accumulated | Rain Accumulated |
@@ -89,3 +88,35 @@ Here is the list of sensors that the program generates
 | rain_rate | Rain Rate |
 | uptime | Uptime |
 | feelslike | Feels Like Temperature |
+
+```yaml
+sensors:
+  - wind_speed
+  - wind_bearing
+  - wind_direction
+  - station_pressure
+  - sealevel_pressure
+  - air_temperature
+  - relative_humidity
+  - lightning_strike_count
+  - battery_air
+  - lightning_strike_distance
+  - lightning_strike_energy
+  - illuminance
+  - uv
+  - rain_accumulated
+  - wind_lull
+  - wind_speed_avg
+  - wind_gust
+  - wind_bearing_avg
+  - wind_direction_avg
+  - battery_sky
+  - solar_radiation
+  - precipitation_type
+  - rain_start_time
+  - air_density
+  - dewpoint
+  - rain_rate
+  - uptime
+  - feelslike
+```

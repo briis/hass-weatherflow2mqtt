@@ -158,7 +158,6 @@ async def main():
                 data['air_temperature'] = await cnv.temperature(obs[2])
                 data['relative_humidity'] = obs[3]
                 data['lightning_strike_count'] = storage['lightning_count'] + obs[4]
-                data['lightning_strike_avg_distance'] = await cnv.distance(obs[5])
                 data['battery_air'] = obs[6]
                 data['sealevel_pressure'] = await cnv.pressure(obs[1] + (elevation / 9.2))
                 data['air_density'] = await cnv.air_density(obs[2], obs[1])
@@ -206,13 +205,17 @@ async def main():
                 data['station_pressure'] = await cnv.pressure(obs[6])
                 data['air_temperature'] = await cnv.temperature(obs[7])
                 data['relative_humidity'] = obs[8]
-                data['lightning_strike_count'] = obs[15]
-                data['lightning_strike_avg_distance'] = await cnv.distance(obs[14])
+                data['lightning_strike_count'] = storage['lightning_count'] + obs[15]
                 data['sealevel_pressure'] = await cnv.pressure(obs[6] + (elevation / 9.2), 2)
                 data['air_density'] = await cnv.air_density(obs[7], obs[6])
                 data['dewpoint'] = await cnv.dewpoint(obs[7], obs[8])
                 data['feelslike'] = await cnv.feels_like(obs[7], obs[8], wind_speed)
                 client.publish(state_topic, json.dumps(data))
+
+                if obs[15] > 0:
+                    storage['lightning_count'] = storage['lightning_count'] + obs[15]
+                    await data_store.write_storage(storage)
+
             if msg_type in EVENT_DEVICE_STATUS:
                 if show_debug == "on":
                     now = datetime.now()
