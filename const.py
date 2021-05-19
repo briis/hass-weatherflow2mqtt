@@ -1,4 +1,6 @@
 """Constant file for weatherflow2mqtt."""
+EXTERNAL_DIRECTORY = "/usr/local/config"
+STORAGE_FILE = f"{EXTERNAL_DIRECTORY}/storage.json"
 
 DEVICE_CLASS_HUMIDITY = "humidity"
 DEVICE_CLASS_ILLUMINANCE = "illuminance"

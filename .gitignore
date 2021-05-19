@@ -130,3 +130,5 @@ dmypy.json
 test.py
 config.yaml
 build_run.sh
+data.json
+storage.json

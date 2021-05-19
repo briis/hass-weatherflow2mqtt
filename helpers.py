@@ -1,8 +1,14 @@
 """Several Helper Functions."""
 
 import datetime
+import json
 import math
-from const import UNITS_IMPERIAL
+from typing import OrderedDict
+import logging
+
+from const import UNITS_IMPERIAL, STORAGE_FILE
+
+_LOGGER = logging.getLogger(__name__)
 
 class ConversionFunctions:
     """Class to help with converting from different units."""
@@ -93,6 +99,51 @@ class ConversionFunctions:
             return "None"
         return str(datetime.timedelta(seconds=value))
 
+class DataStorage:
+    """Handles reading and writing of the external storage file."""
+
+    logging.basicConfig(level=logging.DEBUG)
+
+    def _initialize_storage(self):
+
+        _LOGGER.info("Creating new Stotage file.")
+        data = OrderedDict()
+        data['rain_count'] = 0
+        data['rain_start'] = ""
+        data['lightning_count'] = 0
+        data['last_lightning_time'] = ""
+        data['last_lightning_distance'] = 0
+        data['last_lightning_energy'] = 0
+
+        try:
+            with open(STORAGE_FILE, "w") as jsonFile:
+                json.dump(data, jsonFile)
+        except Exception as e:
+            _LOGGER.error("Could not save Storage File. Error message: %s", e)
+        
+        return data
+
+    async def read_storage(self):
+        """Read the storage file, and return values."""
+        try:
+            with open(STORAGE_FILE, "r") as jsonFile:
+                data = json.load(jsonFile)
+                return data
+        except FileNotFoundError as e:
+            data = self._initialize_storage()
+            return data
+        except Exception as e:
+            print(e)
+
+    async def write_storage(self, data: OrderedDict):
+        """Saves the last values in the Stotage file."""
+
+        try:
+            with open(STORAGE_FILE, "w") as jsonFile:
+                json.dump(data, jsonFile)
+        except Exception as e:
+            _LOGGER.error("Could not save Storage File. Error message: %s", e)
+                
 
 class ErrorMessages:
 

@@ -9,11 +9,12 @@ import paho.mqtt.client as mqtt
 import asyncio
 import logging
 import yaml
+import time
 from datetime import datetime, date
 import sys
 
 from aioudp import open_local_endpoint
-from helpers import ConversionFunctions, ErrorMessages
+from helpers import ConversionFunctions, DataStorage
 from const import (
     DOMAIN,
     EVENT_AIR_DATA,
@@ -24,6 +25,7 @@ from const import (
     EVENT_SKY_DATA,
     EVENT_STRIKE,
     EVENT_TEMPEST_DATA,
+    EXTERNAL_DIRECTORY,
     SENSOR_CLASS,
     SENSOR_DEVICE,
     SENSOR_ICON,
@@ -42,7 +44,7 @@ async def main():
 
     
     # Read the config file
-    filepath = "/usr/local/config/config.yaml"
+    filepath = f"{EXTERNAL_DIRECTORY}/config.yaml"
     with open(filepath) as json_file:
         data = yaml.load(json_file, Loader=yaml.FullLoader)
         weatherflow_ip = data["station"]["host"]
@@ -63,6 +65,7 @@ async def main():
         mqtt_anonymous = True
 
     cnv = ConversionFunctions(unit_system)
+    data_store = DataStorage()
 
     # Setup and connect to MQTT Broker
     try:
@@ -92,11 +95,14 @@ async def main():
     # Set timer variables (A time in the past)
     rapid_last_run = 1621229580.583215
 
-    # Publish Initial Data for Lightning Event
+    # Read stored Values
+    storage = await data_store.read_storage()
+
+    # Publish Initial Data
     data = OrderedDict()
     state_topic = 'homeassistant/sensor/{}/{}/state'.format(DOMAIN, EVENT_STRIKE)
-    data['lightning_strike_distance'] = 0
-    data['lightning_strike_energy'] = 0
+    data['lightning_strike_distance'] = storage['last_lightning_distance']
+    data['lightning_strike_energy'] = storage['last_lightning_energy']
     client.publish(state_topic, json.dumps(data))
 
     # Publish Initial Data for Precipitation Start Event
@@ -141,12 +147,16 @@ async def main():
                 data['lightning_strike_distance'] = await cnv.distance(obs[1])
                 data['lightning_strike_energy'] = obs[2]
                 client.publish(state_topic, json.dumps(data))
+                storage['last_lightning_distance'] = await cnv.distance(obs[1])
+                storage['last_lightning_energy'] = obs[2]
+                storage['last_lightning_time'] = time.time()
+                await data_store.write_storage(storage)
             if msg_type in EVENT_AIR_DATA:
                 obs = json_response["obs"][0]
                 data['station_pressure'] = await cnv.pressure(obs[1])
                 data['air_temperature'] = await cnv.temperature(obs[2])
                 data['relative_humidity'] = obs[3]
-                data['lightning_strike_count'] = obs[4]
+                data['lightning_strike_count'] = storage['lightning_count'] + obs[4]
                 data['lightning_strike_avg_distance'] = await cnv.distance(obs[5])
                 data['battery_air'] = obs[6]
                 data['sealevel_pressure'] = await cnv.pressure(obs[1] + (elevation / 9.2))
@@ -154,6 +164,9 @@ async def main():
                 data['dewpoint'] = await cnv.dewpoint(obs[2], obs[3])
                 data['feelslike'] = await cnv.feels_like(obs[2], obs[3], wind_speed)
                 client.publish(state_topic, json.dumps(data))
+                if obs[4] > 0:
+                    storage['lightning_count'] = storage['lightning_count'] + obs[4]
+                    await data_store.write_storage(storage)
             if msg_type in EVENT_SKY_DATA:
                 obs = json_response["obs"][0]
                 data['illuminance'] = obs[1]
