@@ -45,17 +45,18 @@ async def main():
     filepath = "/usr/local/config/config.yaml"
     with open(filepath) as json_file:
         data = yaml.load(json_file, Loader=yaml.FullLoader)
-        weatherflow_ip = data["weatherflow"]["host"]
-        weatherflow_port = data["weatherflow"]["port"]
+        weatherflow_ip = data["station"]["host"]
+        weatherflow_port = data["station"]["port"]
+        elevation = data["station"]["elevation"]
         mqtt_host = data["mqtt"]["host"]
         mqtt_port = data["mqtt"]["port"]
         mqtt_username = data["mqtt"]["username"]
         mqtt_password = data["mqtt"]["password"]
         mqtt_debug = data["mqtt"]["debug"]
-        elevation = data["station"]["elevation"]
         unit_system = data["unit_system"]
         rw_interval = data["rapid_wind_interval"]
         show_debug = data["debug"]
+        sensors = data.get("sensors")
 
     mqtt_anonymous = False
     if not mqtt_username or not mqtt_password:
@@ -86,7 +87,7 @@ async def main():
         sys.exit(1)
 
     # Configure Sensors in MQTT
-    await setup_sensors(endpoint, client, unit_system)
+    await setup_sensors(endpoint, client, unit_system, sensors)
 
     # Set timer variables (A time in the past)
     rapid_last_run = 1621229580.583215
@@ -207,7 +208,7 @@ async def main():
                     _LOGGER.debug("DEVICE STATUS TRIGGERED AT %s\n  -- Device: %s\n -- Firmware Revision: %s\n -- Voltage: %s", str(now), serial_number, firmware_revision, voltage)
 
 
-async def setup_sensors(endpoint, mqtt_client, unit_system):
+async def setup_sensors(endpoint, mqtt_client, unit_system, sensors):
     """Setup the Sensors in Home Assistant."""
 
     # Get Hub Information
@@ -223,28 +224,30 @@ async def setup_sensors(endpoint, mqtt_client, unit_system):
     # Create the config for the Sensors
     units = SENSOR_UNIT_I if unit_system == UNITS_IMPERIAL else SENSOR_UNIT_M
     for sensor in WEATHERFLOW_SENSORS:
-        _LOGGER.info("SETTING UP %s SENSOR", sensor[SENSOR_NAME])
         state_topic = 'homeassistant/sensor/{}/{}/state'.format(DOMAIN, sensor[SENSOR_DEVICE])
         discovery_topic = 'homeassistant/sensor/{}/{}/config'.format(DOMAIN, sensor[SENSOR_ID])
         payload = OrderedDict()
-        payload['name'] = "{}".format(sensor[SENSOR_NAME])
-        payload['unique_id'] = "{}-{}".format(serial_number, sensor[SENSOR_ID])
-        if sensor[units] is not None:
-            payload['unit_of_measurement'] = sensor[units]
-        if sensor[SENSOR_CLASS] is not None:
-            payload['device_class'] = sensor[SENSOR_CLASS]
-        if sensor[SENSOR_ICON] is not None:
-            payload['icon'] = f"mdi:{sensor[SENSOR_ICON]}"
-        payload['state_topic'] = state_topic
-        payload['value_template'] = "{{{{ value_json.{} }}}}".format(sensor[SENSOR_ID])
-        payload['device'] = {
-                'identifiers' : ["WeatherFlow_{}".format(serial_number)],
-                'connections' : [["mac", serial_number]],
-                'manufacturer' : 'WeatherFlow',
-                'name' : 'WeatherFlow2MQTT',
-                'model' : 'WeatherFlow Weather Station',
-                'sw_version': firmware
-        }
+        if sensors is None or sensor[SENSOR_ID] in sensors:
+            _LOGGER.info("SETTING UP %s SENSOR", sensor[SENSOR_NAME])
+            payload['name'] = "{}".format(sensor[SENSOR_NAME])
+            payload['unique_id'] = "{}-{}".format(serial_number, sensor[SENSOR_ID])
+            if sensor[units] is not None:
+                payload['unit_of_measurement'] = sensor[units]
+            if sensor[SENSOR_CLASS] is not None:
+                payload['device_class'] = sensor[SENSOR_CLASS]
+            if sensor[SENSOR_ICON] is not None:
+                payload['icon'] = f"mdi:{sensor[SENSOR_ICON]}"
+            payload['state_topic'] = state_topic
+            payload['value_template'] = "{{{{ value_json.{} }}}}".format(sensor[SENSOR_ID])
+            payload['device'] = {
+                    'identifiers' : ["WeatherFlow_{}".format(serial_number)],
+                    'connections' : [["mac", serial_number]],
+                    'manufacturer' : 'WeatherFlow',
+                    'name' : 'WeatherFlow2MQTT',
+                    'model' : 'WeatherFlow Weather Station',
+                    'sw_version': firmware
+            }
+            
         try:
             mqtt_client.publish(discovery_topic, json.dumps(payload), qos=1, retain=True)
             await asyncio.sleep(0.2)

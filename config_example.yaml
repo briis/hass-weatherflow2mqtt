@@ -1,7 +1,8 @@
-unit_system: "metric" #Use metric or imperial
+unit_system: "metric"
 rapid_wind_interval: 5
-debug: "off" # on or off to enable debug mesages
-weatherflow:
+debug: "off"
+station:
+  elevation: 50
   host: "0.0.0.0"
   port: "50222"
 mqtt:
@@ -9,6 +10,5 @@ mqtt:
   port: 1883
   username: "YOUR_MQTT_USERNAME_HERE"
   password: "YOUR_MQTT_PASSWORD_HERE"
-  debug: "off" # on or off to enable mqtt debug mesages
-station:
-  elevation: 50 # Station Elevation above sea level
+  debug: "off"
+sensors:
