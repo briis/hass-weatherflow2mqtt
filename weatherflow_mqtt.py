@@ -96,8 +96,9 @@ async def main():
     rapid_last_run = 1621229580.583215 # A time in the past
     current_day = datetime.today().weekday()
 
-    # Read stored Values
+    # Read stored Values and set variable values
     storage = await data_store.read_storage()
+    rain_today = storage['rain_today']
 
     # Publish Initial Data
     data = OrderedDict()
@@ -125,6 +126,7 @@ async def main():
         midnight_result = await data_store.new_day_function(current_day)
         if midnight_result:
             current_day = datetime.today().weekday()
+            rain_today = 0
 
         # TODO: Clear Ligtning Data if data older than 3 hours
 
@@ -179,8 +181,8 @@ async def main():
                 obs = json_response["obs"][0]
                 data['illuminance'] = obs[1]
                 data['uv'] = obs[2]
-                rain = storage['rain_today'] + obs[3]
-                data['rain_accumulated'] = await cnv.rain(rain)
+                rain_today = rain_today + obs[3]
+                data['rain_accumulated'] = await cnv.rain(rain_today)
                 data['wind_lull'] = await cnv.speed(obs[4])
                 data['wind_speed_avg'] = await cnv.speed(obs[5])
                 data['wind_gust'] = await cnv.speed(obs[6])
@@ -192,7 +194,7 @@ async def main():
                 data['rain_rate'] = await cnv.rain_rate(obs[3])
                 client.publish(state_topic, json.dumps(data))
                 if obs[3] > 0:
-                    storage['rain_today'] = rain
+                    storage['rain_today'] = rain_today
                     await data_store.write_storage(storage)
             if msg_type in EVENT_TEMPEST_DATA:
                 obs = json_response["obs"][0]
@@ -206,8 +208,8 @@ async def main():
                 data['illuminance'] = obs[9]
                 data['uv'] = obs[10]
                 data['solar_radiation'] = obs[11]
-                rain = storage['rain_today'] + obs[12]
-                data['rain_accumulated'] = await cnv.rain(rain)
+                rain_today = rain_today + obs[12]
+                data['rain_accumulated'] = await cnv.rain(rain_today)
                 data['precipitation_type'] = await cnv.rain_type(obs[13])
                 data['battery_sky'] = obs[16]
                 data['rain_rate'] = await cnv.rain_rate(obs[12])
@@ -226,7 +228,7 @@ async def main():
                 client.publish(state_topic, json.dumps(data))
 
                 if obs[15] > 0 or obs[12] > 0:
-                    storage['rain_today'] = rain
+                    storage['rain_today'] = rain_today
                     storage['lightning_count'] = storage['lightning_count'] + obs[15]
                     await data_store.write_storage(storage)
 
