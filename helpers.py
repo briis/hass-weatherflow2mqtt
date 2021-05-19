@@ -144,6 +144,23 @@ class DataStorage:
         except Exception as e:
             _LOGGER.error("Could not save Storage File. Error message: %s", e)
                 
+    async def new_day_function(self, previous_day):
+        """A set of functions that run when it is a new day."""
+        today = datetime.datetime.today().weekday()
+        if today != previous_day:
+            _LOGGER.debug("Resetting Values at Midnight") 
+            data = OrderedDict()
+            data['rain_today'] = 0
+
+            try:
+                with open(STORAGE_FILE, "w") as jsonFile:
+                    json.dump(data, jsonFile)
+            except Exception as e:
+                 _LOGGER.error("Could not save Storage File. Error message: %s", e)
+        
+            return True
+
+        return False
 
 class ErrorMessages:
 

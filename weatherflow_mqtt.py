@@ -92,8 +92,9 @@ async def main():
     # Configure Sensors in MQTT
     await setup_sensors(endpoint, client, unit_system, sensors)
 
-    # Set timer variables (A time in the past)
-    rapid_last_run = 1621229580.583215
+    # Set timer variables
+    rapid_last_run = 1621229580.583215 # A time in the past
+    current_day = datetime.today().weekday()
 
     # Read stored Values
     storage = await data_store.read_storage()
@@ -119,6 +120,13 @@ async def main():
         data, (host, port) = await endpoint.receive()
         json_response = json.loads(data.decode("utf-8"))
         msg_type = json_response.get("type")
+
+        # Run New day function if it is time
+        midnight_result = await data_store.new_day_function(current_day)
+        if midnight_result:
+            current_day = datetime.today().weekday()
+
+        # TODO: Clear Ligtning Data if data older than 3 hours
 
         #Process the data
         if msg_type is not None:
