@@ -108,7 +108,7 @@ class DataStorage:
 
         _LOGGER.info("Creating new Storage file...")
         data = OrderedDict()
-        data['rain_count'] = 0
+        data['rain_today'] = 0
         data['rain_start'] = datetime.datetime.fromtimestamp(0).isoformat()
         data['lightning_count'] = 0
         data['last_lightning_time'] = ""

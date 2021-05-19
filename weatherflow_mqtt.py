@@ -171,7 +171,8 @@ async def main():
                 obs = json_response["obs"][0]
                 data['illuminance'] = obs[1]
                 data['uv'] = obs[2]
-                data['rain_accumulated'] = await cnv.rain(obs[3])
+                rain = storage['rain_today'] + obs[3]
+                data['rain_accumulated'] = await cnv.rain(rain)
                 data['wind_lull'] = await cnv.speed(obs[4])
                 data['wind_speed_avg'] = await cnv.speed(obs[5])
                 data['wind_gust'] = await cnv.speed(obs[6])
@@ -182,6 +183,9 @@ async def main():
                 data['precipitation_type'] = await cnv.rain_type(obs[12])
                 data['rain_rate'] = await cnv.rain_rate(obs[3])
                 client.publish(state_topic, json.dumps(data))
+                if obs[3] > 0:
+                    storage['rain_today'] = rain
+                    await data_store.write_storage(storage)
             if msg_type in EVENT_TEMPEST_DATA:
                 obs = json_response["obs"][0]
 
@@ -194,7 +198,8 @@ async def main():
                 data['illuminance'] = obs[9]
                 data['uv'] = obs[10]
                 data['solar_radiation'] = obs[11]
-                data['rain_accumulated'] = await cnv.rain(obs[12])
+                rain = storage['rain_today'] + obs[12]
+                data['rain_accumulated'] = await cnv.rain(rain)
                 data['precipitation_type'] = await cnv.rain_type(obs[13])
                 data['battery_sky'] = obs[16]
                 data['rain_rate'] = await cnv.rain_rate(obs[12])
@@ -212,7 +217,8 @@ async def main():
                 data['feelslike'] = await cnv.feels_like(obs[7], obs[8], wind_speed)
                 client.publish(state_topic, json.dumps(data))
 
-                if obs[15] > 0:
+                if obs[15] > 0 or obs[12] > 0:
+                    storage['rain_today'] = rain
                     storage['lightning_count'] = storage['lightning_count'] + obs[15]
                     await data_store.write_storage(storage)
 
