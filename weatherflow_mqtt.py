@@ -133,7 +133,7 @@ async def main():
                 client.publish(state_topic, json.dumps(data))
             if msg_type in EVENT_PRECIP_START:
                 obs = json_response["evt"]
-                data['rain_start_time'] = str(datetime.fromtimestamp(obs[0]))
+                data['rain_start_time'] = datetime.fromtimestamp(obs[0]).isoformat()
                 client.publish(state_topic, json.dumps(data))
             if msg_type in EVENT_STRIKE:
                 obs = json_response["evt"]
