@@ -176,7 +176,7 @@ async def main():
                 data['air_temperature'] = await cnv.temperature(obs[2])
                 data['relative_humidity'] = obs[3]
                 data['lightning_strike_count'] = strike_count
-                data['battery_air'] = obs[6]
+                data['battery_air'] = round(obs[6], 2)
                 data['sealevel_pressure'] = await cnv.pressure(obs[1] + (elevation / 9.2))
                 data['air_density'] = await cnv.air_density(obs[2], obs[1])
                 data['dewpoint'] = await cnv.dewpoint(obs[2], obs[3])
@@ -189,14 +189,14 @@ async def main():
                 obs = json_response["obs"][0]
                 data['illuminance'] = obs[1]
                 data['uv'] = obs[2]
-                rain_today = rain_today + obs[3]
+                rain_today += obs[3]
                 data['rain_accumulated'] = await cnv.rain(rain_today)
                 data['wind_lull'] = await cnv.speed(obs[4])
                 data['wind_speed_avg'] = await cnv.speed(obs[5])
                 data['wind_gust'] = await cnv.speed(obs[6])
                 data['wind_bearing_avg'] = obs[7]
                 data['wind_direction_avg'] = await cnv.direction(obs[7])
-                data['battery'] = obs[8]
+                data['battery'] = round(obs[8], 2)
                 data['solar_radiation'] = obs[10]
                 data['precipitation_type'] = await cnv.rain_type(obs[12])
                 data['rain_rate'] = await cnv.rain_rate(obs[3])
@@ -216,10 +216,10 @@ async def main():
                 data['illuminance'] = obs[9]
                 data['uv'] = obs[10]
                 data['solar_radiation'] = obs[11]
-                rain_today = rain_today + obs[12]
+                rain_today += obs[12]
                 data['rain_accumulated'] = await cnv.rain(rain_today)
                 data['precipitation_type'] = await cnv.rain_type(obs[13])
-                data['battery'] = obs[16]
+                data['battery'] = round(obs[16], 2)
                 data['rain_rate'] = await cnv.rain_rate(obs[12])
                 client.publish(state_topic, json.dumps(data))
 

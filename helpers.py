@@ -44,7 +44,7 @@ class ConversionFunctions:
         """Convert rain."""
         if self._unit_system == UNITS_IMPERIAL:
             return round(value * 0.0393700787, 2)
-        return value
+        return round(value, 2)
 
     async def rain_type(self, value) -> str:
         """Convert rain type."""

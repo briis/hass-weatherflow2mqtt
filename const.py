@@ -38,7 +38,7 @@ WEATHERFLOW_SENSORS = [
     ["lightning_strike_time", "Last Lightning Time", None, None, DEVICE_CLASS_TIMESTAMP, "clock-outline", EVENT_STRIKE],
     ["illuminance", "Illuminance", "lx", "lx", DEVICE_CLASS_ILLUMINANCE, None, EVENT_SKY_DATA],
     ["uv", "UV Index", "UVI", "UVI", None, "weather-sunny-alert", EVENT_SKY_DATA],
-    ["rain_accumulated", "Rain Accumulated", "mm", "in", None, "weather-pouring", EVENT_SKY_DATA],
+    ["rain_accumulated", "Rain Today", "mm", "in", None, "weather-pouring", EVENT_SKY_DATA],
     ["wind_lull", "Wind Lull", "m/s", "mph", None, "weather-windy-variant", EVENT_SKY_DATA],
     ["wind_speed_avg", "Wind Speed Avg", "m/s", "mph", None, "weather-windy-variant", EVENT_SKY_DATA],
     ["wind_gust", "Wind Gust", "m/s", "mph", None, "weather-windy", EVENT_SKY_DATA],

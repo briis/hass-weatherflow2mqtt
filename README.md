@@ -84,7 +84,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | lightning_strike_time | Last Lightning Time | When the last lightning strike occurred | Yes
 | illuminance | Illuminance | How much the incident light illuminates the surface | No
 | uv | UV Index | The UV index | No
-| rain_accumulated | Rain Accumulated | Total rain for the current day. (Reset at midnight) | Yes
+| rain_accumulated | Rain Today | Total rain for the current day. (Reset at midnight) | Yes
 | wind_lull | Wind Lull | Lowest wind | No
 | wind_speed_avg | Wind Speed Avg | Average wind speed for the last minute | No
 | wind_gust | Wind Gust | Highest wind speed for the last minute | No
