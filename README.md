@@ -4,6 +4,14 @@ This project monitors the UDP socket (50222) from a WeatherFlow Hub, and publish
 
 Everything runs in a pre-build Docker Container, so installation is very simple, you only need Docker installed on a computer and a MQTT Server setup somewhere in your network. If you run the Supervised version of Home Assistant, MQTT is very easy to setup.
 
+## TODO
+
+This project is still very much in Beta, but the things that are there, work. I am currently working on or considering:
+
+- Still need some work on the persistent storage, in order to ensure data is correct on restart, and also to have the possibility to do som calculation based sensors. Som is already working, some I am not too sure about yet.
+- As I don't have Access to a Tempest Unit, I have not tested this with this device type. If anyone does, please report back here in the Discussions or Issue Area.
+- I consider to also integrate the AI based Forecast from WeatherFlow. This will require some calls to their REST API, and as such this program will not be *Local Data* only. But if I do it, I will make it optional.
+
 ## Installation
 
 - Ensure Docker is setup and running
@@ -20,9 +28,10 @@ If everything is setup correctly with MQTT and Home Assistant, you should now st
 
 ## Configuration
 
-The `config.yaml` looks like the below:
+The `config.yaml` structure must look like the below:
 
 ```yaml
+tempest_device: True
 unit_system: "metric" #Use metric or imperial
 rapid_wind_interval: 0
 debug: "off"
@@ -39,8 +48,9 @@ mqtt:
 sensors:
 ```
 
-Normally you would only have to change the MQTT settings to supply the address and credentials for your MQTT Server. But here is the complete walkthrough of the configuration settings:
+Normally you would only have to change the Unit System and MQTT settings to supply the address and credentials for your MQTT Server. But here is the complete walkthrough of the configuration settings:
 
+- `tempest_device`: If you have the older devices AIR and SKY, set this setting to `False`.
 - `unit_system`: Enter *imperial* or *metric* to decide what unit the data is delivered in
 - `rapid_wind_interval`: The weather stations delivers wind speed and bearing every 2 seconds. If you don't want to update the HA sensors so often, you can set a number here (in seconds), for how often they are updated. Default is zero, which means the two sensors are updated everytime WeatherFlow sends new data
 - `debug`: Set this to on, to get some more debugging messages in the Container log file
@@ -56,39 +66,39 @@ Normally you would only have to change the MQTT settings to supply the address a
 
 ## Available Sensors
 
-Here is the list of sensors that the program generates
+Here is the list of sensors that the program generates. Calculated Sensor means, if No, then data comes directly from the Weather Station, if yes, it is a sensor that is derived from some of the other sensors.
 
-| Sensor ID   | Name   | Description   |
-| --- | --- | --- |
-| wind_speed | Wind Speed | Current measured Wind Speed
-| wind_bearing | Wind Bearing | Current measured Wind bearing in degrees
-| wind_direction | Wind Direction | Current measured Wind bearing as compass symbol
-| station_pressure | Wind Direction | Pressure measurement where the station is located
-| sealevel_pressure | Station Pressure | Preasure measurement at Sea Level
-| air_temperature | Temperature | Outside Temperature
-| relative_humidity | Humidity | Relative Humidity
-| lightning_strike_count | Lightning Count (3 hours) | Number of lightning strikes the last 3 hours
-| battery_air | Battery AIR | The voltage on the AIR unit (If present)
-| lightning_strike_distance | Lightning Distance | Distance of the last strike
-| lightning_strike_energy | Lightning Energy | Energy of the last strike
-| lightning_strike_time | Last Lightning Time | When the last lightning strike occurred
-| illuminance | Illuminance | How much the incident light illuminates the surface
-| uv | UV Index | The UV index
-| rain_accumulated | Rain Accumulated | Total rain for the current day. (Reset at midnight)
-| wind_lull | Wind Lull | Lowest wind
-| wind_speed_avg | Wind Speed Avg | Average wind speed for the last minute
-| wind_gust | Wind Gust | Highest wind speed for the last minute
-| wind_bearing_avg | Wind Bearing Avg | The average wind bearing in degrees
-| wind_direction_avg | Wind Direction Avg | The average wind direction as a compass string
-| battery_sky | Battery SKY or TEMPEST | If this is a TEMPEST unit this where the Voltage is displayed. Else it will be the Voltage of the SKY unit
-| solar_radiation | Solar Radiation | Electromagnetic radiation emitted by the sun
-| precipitation_type | Precipitation Type | Can be one of None, Rain or Hail
-| rain_start_time | Last Rain | When was the last time it rained
-| air_density | Air Density | The Air density
-| dewpoint | Dew Point | Dewpoint in degrees
-| rain_rate | Rain Rate | How much is it raining right now
-| uptime | Uptime | How long has the HUB been running
-| feelslike | Feels Like Temperature | The experienced temperature, a mix of Heat Index and Wind Chill
+| Sensor ID   | Name   | Description   | Calculated Sensor   |
+| --- | --- | --- | --- |
+| wind_speed | Wind Speed | Current measured Wind Speed | No
+| wind_bearing | Wind Bearing | Current measured Wind bearing in degrees | No
+| wind_direction | Wind Direction | Current measured Wind bearing as compass symbol | Yes
+| station_pressure | Wind Direction | Pressure measurement where the station is located | No
+| sealevel_pressure | Station Pressure | Preasure measurement at Sea Level | Yes
+| air_temperature | Temperature | Outside Temperature | No
+| relative_humidity | Humidity | Relative Humidity | No
+| lightning_strike_count | Lightning Count (3 hours) | Number of lightning strikes the last 3 hours | Yes
+| battery_air | Battery AIR | The voltage on the AIR unit (If present) | No
+| lightning_strike_distance | Lightning Distance | Distance of the last strike | No
+| lightning_strike_energy | Lightning Energy | Energy of the last strike | No
+| lightning_strike_time | Last Lightning Time | When the last lightning strike occurred | Yes
+| illuminance | Illuminance | How much the incident light illuminates the surface | No
+| uv | UV Index | The UV index | No
+| rain_accumulated | Rain Accumulated | Total rain for the current day. (Reset at midnight) | Yes
+| wind_lull | Wind Lull | Lowest wind | No
+| wind_speed_avg | Wind Speed Avg | Average wind speed for the last minute | No
+| wind_gust | Wind Gust | Highest wind speed for the last minute | No
+| wind_bearing_avg | Wind Bearing Avg | The average wind bearing in degrees | No
+| wind_direction_avg | Wind Direction Avg | The average wind direction as a compass string | Yes
+| battery | Battery SKY or TEMPEST | If this is a TEMPEST unit this where the Voltage is displayed. Else it will be the Voltage of the SKY unit | No
+| solar_radiation | Solar Radiation | Electromagnetic radiation emitted by the sun | No
+| precipitation_type | Precipitation Type | Can be one of None, Rain or Hail | No
+| rain_start_time | Last Rain | When was the last time it rained | Yes
+| air_density | Air Density | The Air density | Yes
+| dewpoint | Dew Point | Dewpoint in degrees | Yes
+| rain_rate | Rain Rate | How much is it raining right now | Yes
+| uptime | Uptime | How long has the HUB been running | No
+| feelslike | Feels Like Temperature | The experienced temperature, a mix of Heat Index and Wind Chill | Yes
 
 ```yaml
 sensors:
@@ -112,7 +122,7 @@ sensors:
   - wind_gust
   - wind_bearing_avg
   - wind_direction_avg
-  - battery_sky
+  - battery
   - solar_radiation
   - precipitation_type
   - rain_start_time

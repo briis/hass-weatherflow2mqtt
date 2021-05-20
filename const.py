@@ -44,7 +44,7 @@ WEATHERFLOW_SENSORS = [
     ["wind_gust", "Wind Gust", "m/s", "mph", None, "weather-windy", EVENT_SKY_DATA],
     ["wind_bearing_avg", "Wind Bearing Avg", "˚", "˚", None, "compass", EVENT_SKY_DATA],
     ["wind_direction_avg", "Wind Direction Avg", None, None, None, "compass-outline", EVENT_SKY_DATA],
-    ["battery_sky", "Battery SKY or TEMPEST", "V", "V", DEVICE_CLASS_VOLTAGE, None, EVENT_SKY_DATA],
+    ["battery", "Battery SKY", "V", "V", DEVICE_CLASS_VOLTAGE, None, EVENT_SKY_DATA],
     ["solar_radiation", "Solar Radiation", "W/m^2", "W/m^2", None, "solar-power", EVENT_SKY_DATA],
     ["precipitation_type", "Precipitation Type", None, None, None, "weather-rainy", EVENT_SKY_DATA],
     ["rain_start_time", "Last Rain", None, None, DEVICE_CLASS_TIMESTAMP, "clock-outline", EVENT_PRECIP_START],

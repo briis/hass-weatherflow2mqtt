@@ -1,3 +1,4 @@
+tempest_device: True
 unit_system: "metric"
 rapid_wind_interval: 5
 debug: "off"

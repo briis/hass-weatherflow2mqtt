@@ -47,6 +47,7 @@ async def main():
     filepath = f"{EXTERNAL_DIRECTORY}/config.yaml"
     with open(filepath) as json_file:
         data = yaml.load(json_file, Loader=yaml.FullLoader)
+        is_tempest = data["tempest_device"]
         weatherflow_ip = data["station"]["host"]
         weatherflow_port = data["station"]["port"]
         elevation = data["station"]["elevation"]
@@ -90,7 +91,7 @@ async def main():
         sys.exit(1)
 
     # Configure Sensors in MQTT
-    await setup_sensors(endpoint, client, unit_system, sensors)
+    await setup_sensors(endpoint, client, unit_system, sensors, is_tempest)
 
     # Set timer variables
     rapid_last_run = 1621229580.583215 # A time in the past
@@ -195,7 +196,7 @@ async def main():
                 data['wind_gust'] = await cnv.speed(obs[6])
                 data['wind_bearing_avg'] = obs[7]
                 data['wind_direction_avg'] = await cnv.direction(obs[7])
-                data['battery_sky'] = obs[8]
+                data['battery'] = obs[8]
                 data['solar_radiation'] = obs[10]
                 data['precipitation_type'] = await cnv.rain_type(obs[12])
                 data['rain_rate'] = await cnv.rain_rate(obs[3])
@@ -218,7 +219,7 @@ async def main():
                 rain_today = rain_today + obs[12]
                 data['rain_accumulated'] = await cnv.rain(rain_today)
                 data['precipitation_type'] = await cnv.rain_type(obs[13])
-                data['battery_sky'] = obs[16]
+                data['battery'] = obs[16]
                 data['rain_rate'] = await cnv.rain_rate(obs[12])
                 client.publish(state_topic, json.dumps(data))
 
@@ -248,7 +249,7 @@ async def main():
                     _LOGGER.debug("DEVICE STATUS TRIGGERED AT %s\n  -- Device: %s\n -- Firmware Revision: %s\n -- Voltage: %s", str(now), serial_number, firmware_revision, voltage)
 
 
-async def setup_sensors(endpoint, mqtt_client, unit_system, sensors):
+async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest):
     """Setup the Sensors in Home Assistant."""
 
     # Get Hub Information
@@ -264,12 +265,19 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors):
     # Create the config for the Sensors
     units = SENSOR_UNIT_I if unit_system == UNITS_IMPERIAL else SENSOR_UNIT_M
     for sensor in WEATHERFLOW_SENSORS:
+        sensor_name = sensor[SENSOR_NAME]
+        # Don't add the AIR Unit Battery if this is a Tempest Device
+        if is_tempest and sensor[SENSOR_ID] == "battery_air":
+            continue
+        # Modify name of Battery Device if Tempest Unit
+        if is_tempest:
+            sensor_name = "Battery TEMPEST"
         state_topic = 'homeassistant/sensor/{}/{}/state'.format(DOMAIN, sensor[SENSOR_DEVICE])
         discovery_topic = 'homeassistant/sensor/{}/{}/config'.format(DOMAIN, sensor[SENSOR_ID])
         payload = OrderedDict()
         if sensors is None or sensor[SENSOR_ID] in sensors:
-            _LOGGER.info("SETTING UP %s SENSOR", sensor[SENSOR_NAME])
-            payload['name'] = "{}".format(sensor[SENSOR_NAME])
+            _LOGGER.info("SETTING UP %s SENSOR", sensor_name)
+            payload['name'] = "{}".format(sensor_name)
             payload['unique_id'] = "{}-{}".format(serial_number, sensor[SENSOR_ID])
             if sensor[units] is not None:
                 payload['unit_of_measurement'] = sensor[units]
