@@ -63,31 +63,32 @@ Here is the list of sensors that the program generates
 | wind_speed | Wind Speed | Current measured Wind Speed
 | wind_bearing | Wind Bearing | Current measured Wind bearing in degrees
 | wind_direction | Wind Direction | Current measured Wind bearing as compass symbol
-| station_pressure | Wind Direction |
-| sealevel_pressure | Station Pressure |
-| air_temperature | Temperature |
-| relative_humidity | Humidity |
-| lightning_strike_count | Lightning Count (3 hours) |
-| battery_air | Battery AIR |
-| lightning_strike_distance | Lightning Distance |
-| lightning_strike_energy | Lightning Energy |
-| illuminance | Illuminance |
-| uv | UV Index |
-| rain_accumulated | Rain Accumulated |
-| wind_lull | Wind Lull |
-| wind_speed_avg | Wind Speed Avg |
-| wind_gust | Wind Gust |
-| wind_bearing_avg | Wind Bearing Avg |
-| wind_direction_avg | Wind Direction Avg |
-| battery_sky | Battery SKY |
-| solar_radiation | Solar Radiation |
-| precipitation_type | Precipitation Type |
-| rain_start_time | Rain Start Time |
-| air_density | Air Density |
-| dewpoint | Dew Point |
-| rain_rate | Rain Rate |
-| uptime | Uptime |
-| feelslike | Feels Like Temperature |
+| station_pressure | Wind Direction | Pressure measurement where the station is located
+| sealevel_pressure | Station Pressure | Preasure measurement at Sea Level
+| air_temperature | Temperature | Outside Temperature
+| relative_humidity | Humidity | Relative Humidity
+| lightning_strike_count | Lightning Count (3 hours) | Number of lightning strikes the last 3 hours
+| battery_air | Battery AIR | The voltage on the AIR unit (If present)
+| lightning_strike_distance | Lightning Distance | Distance of the last strike
+| lightning_strike_energy | Lightning Energy | Energy of the last strike
+| lightning_strike_time | Last Lightning Time | When the last lightning strike occurred
+| illuminance | Illuminance | How much the incident light illuminates the surface
+| uv | UV Index | The UV index
+| rain_accumulated | Rain Accumulated | Total rain for the current day. (Reset at midnight)
+| wind_lull | Wind Lull | Lowest wind
+| wind_speed_avg | Wind Speed Avg | Average wind speed for the last minute
+| wind_gust | Wind Gust | Highest wind speed for the last minute
+| wind_bearing_avg | Wind Bearing Avg | The average wind bearing in degrees
+| wind_direction_avg | Wind Direction Avg | The average wind direction as a compass string
+| battery_sky | Battery SKY or TEMPEST | If this is a TEMPEST unit this where the Voltage is displayed. Else it will be the Voltage of the SKY unit
+| solar_radiation | Solar Radiation | Electromagnetic radiation emitted by the sun
+| precipitation_type | Precipitation Type | Can be one of None, Rain or Hail
+| rain_start_time | Last Rain | When was the last time it rained
+| air_density | Air Density | The Air density
+| dewpoint | Dew Point | Dewpoint in degrees
+| rain_rate | Rain Rate | How much is it raining right now
+| uptime | Uptime | How long has the HUB been running
+| feelslike | Feels Like Temperature | The experienced temperature, a mix of Heat Index and Wind Chill
 
 ```yaml
 sensors:
@@ -102,6 +103,7 @@ sensors:
   - battery_air
   - lightning_strike_distance
   - lightning_strike_energy
+  - lightning_strike_time
   - illuminance
   - uv
   - rain_accumulated
