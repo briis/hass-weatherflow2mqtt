@@ -106,6 +106,7 @@ async def main():
     state_topic = 'homeassistant/sensor/{}/{}/state'.format(DOMAIN, EVENT_STRIKE)
     data['lightning_strike_distance'] = storage['last_lightning_distance']
     data['lightning_strike_energy'] = storage['last_lightning_energy']
+    data['lightning_strike_time'] = datetime.fromtimestamp(storage['last_lightning_time']).isoformat()
     client.publish(state_topic, json.dumps(data))
 
     # Publish Initial Data for Precipitation Start Event
@@ -160,6 +161,7 @@ async def main():
                 obs = json_response["evt"]
                 data['lightning_strike_distance'] = await cnv.distance(obs[1])
                 data['lightning_strike_energy'] = obs[2]
+                data['lightning_strike_time'] = datetime.fromtimestamp(time.time()).isoformat()
                 client.publish(state_topic, json.dumps(data))
                 strike_count += 1
                 storage['last_lightning_distance'] = await cnv.distance(obs[1])
