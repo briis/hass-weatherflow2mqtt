@@ -1,8 +1,10 @@
-# WeatherFlow to MQTT for Home Assistant
+# WeatherFlow-2-MQTT for Home Assistant
 
 This project monitors the UDP socket (50222) from a WeatherFlow Hub, and publishes the data to a MQTT Server. Data is formatted in a way that, it supports the [MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/) format for Home Assistant, so a sensor will created for each entity that WeatherFlow sends out, if you have MQTT Discovery enabled.
 
-Everything runs in a pre-build Docker Container, so installation is very simple, you only need Docker installed on a computer and a MQTT Server setup somewhere in your network. If you run the Supervised version of Home Assistant, MQTT is very easy to setup.
+Everything runs in a pre-build Docker Container, so installation is very simple, you only need Docker installed on a computer and a MQTT Server setup somewhere in your network. If you run the Supervised version of Home Assistant, you will have easy access to both.ß
+
+There is support for both the AIR & SKY devices and the TEMPEST device.
 
 ## TODO
 
@@ -21,7 +23,7 @@ This project is still very much in Beta, but the things that are there, work. I 
 - Copy the `config_example.yaml` file from this repo to that directory, and rename it to `config.yaml`.
 - Edit `config.yaml` as described below in the Configuration section.
 - Pull the docker image with this command: `docker pull ghcr.io/briis/hass-weatherflow2mqtt`
-- Create the docker container. Replace TZ (Timezone) with your Time Zone. `docker create --name weatherflow2mqtt -e TZ=Europe/Copenhagen -v $(pwd):/usr/local/config -p 0.0.0.0:50222:50222/udp ghcr.io/briis/hass-weatherflow2mqtt` You might not need the 0.0.0.0 in front of port 50222, but if you run into IPv6 errors you can add this.
+- Create the docker container. Replace TZ (Timezone) with your Time Zone. `docker create --name weatherflow2mqtt -e TZ=YOUR_TIMEZONE -v $(pwd):/usr/local/config -p 0.0.0.0:50222:50222/udp ghcr.io/briis/hass-weatherflow2mqtt` You might not need the 0.0.0.0 in front of port 50222, but if you run into IPv6 errors you can add this.
 - Then finally start the Container with `docker start weatherflow2mqtt`
 
 If everything is setup correctly with MQTT and Home Assistant, you should now start seeing the sensors show up in HA. Please note, it can take up to 1 min after startup, before all sensors are populated with data.
@@ -50,7 +52,7 @@ sensors:
 
 Normally you would only have to change the Unit System and MQTT settings to supply the address and credentials for your MQTT Server. But here is the complete walkthrough of the configuration settings:
 
-- `tempest_device`: If you have the older devices AIR and SKY, set this setting to `False`.
+- `tempest_device`: If you have the older AIR and SKY devices, set this setting to `False`.
 - `unit_system`: Enter *imperial* or *metric* to decide what unit the data is delivered in
 - `rapid_wind_interval`: The weather stations delivers wind speed and bearing every 2 seconds. If you don't want to update the HA sensors so often, you can set a number here (in seconds), for how often they are updated. Default is zero, which means the two sensors are updated everytime WeatherFlow sends new data
 - `debug`: Set this to on, to get some more debugging messages in the Container log file
@@ -62,11 +64,11 @@ Normally you would only have to change the Unit System and MQTT settings to supp
 - `mqtt username`: The username used to connect to the mqtt server. Leave blank to use Anonymous connection
 - `mqtt password`: The password used to connect to the mqtt server. Leave blank to use Anonymous connection
 - `mqtt debug`: Set this to on, to get some more mqtt debugging messages in the Container log file
-- `sensors`: Leave blank to setup All available sensors, or enter a list of sensor ID's to setup. See *Available Sensors* for a list of sensors.
+- `sensors`: Leave blank to setup All available sensors, or enter a list of sensor ID's to setup. See [Available Sensors](#available-sensors) for a list of sensors.
 
 ## Available Sensors
 
-Here is the list of sensors that the program generates. Calculated Sensor means, if No, then data comes directly from the Weather Station, if yes, it is a sensor that is derived from some of the other sensors.
+Here is the list of sensors that the program generates. Calculated Sensor means, if No, then data comes directly from the Weather Station, if yes, it is a sensor that is derived from some of the other sensors. For a *copy ready* list se [further below](#sensor-structure)
 
 | Sensor ID   | Name   | Description   | Calculated Sensor   |
 | --- | --- | --- | --- |
@@ -99,6 +101,8 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | rain_rate | Rain Rate | How much is it raining right now | Yes
 | uptime | Uptime | How long has the HUB been running | No
 | feelslike | Feels Like Temperature | The experienced temperature, a mix of Heat Index and Wind Chill | Yes
+
+### Sensor Structure
 
 ```yaml
 sensors:
