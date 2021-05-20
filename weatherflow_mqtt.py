@@ -100,6 +100,7 @@ async def main():
     # Read stored Values and set variable values
     storage = await data_store.read_storage()
     rain_today = storage["rain_today"]
+    rain_yesterday = storage["rain_yesterday"]
     strike_count = storage["lightning_count"]
 
     # Publish Initial Data
@@ -127,8 +128,11 @@ async def main():
 
         # Run New day function if it is time
         if current_day != datetime.today().weekday():
+            rain_yesterday = rain_today
             rain_today = 0
             storage["rain_today"] = 0
+            storage["rain_yesterday"] = rain_yesterday
+            await data_store.write_storage(storage)
             current_day = datetime.today().weekday()
 
         # Clear Ligtning Data if data older than 3 hours
@@ -191,6 +195,7 @@ async def main():
                 data['uv'] = obs[2]
                 rain_today += obs[3]
                 data['rain_accumulated'] = await cnv.rain(rain_today)
+                data['rain_yesterday'] = await cnv.rain(rain_yesterday)
                 data['wind_lull'] = await cnv.speed(obs[4])
                 data['wind_speed_avg'] = await cnv.speed(obs[5])
                 data['wind_gust'] = await cnv.speed(obs[6])
