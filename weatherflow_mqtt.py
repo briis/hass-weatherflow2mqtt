@@ -98,7 +98,8 @@ async def main():
 
     # Read stored Values and set variable values
     storage = await data_store.read_storage()
-    rain_today = storage['rain_today']
+    rain_today = storage["rain_today"]
+    strike_count = storage["lightning_count"]
 
     # Publish Initial Data
     data = OrderedDict()
@@ -123,12 +124,14 @@ async def main():
         msg_type = json_response.get("type")
 
         # Run New day function if it is time
-        midnight_result = await data_store.new_day_function(current_day)
-        if midnight_result:
-            current_day = datetime.today().weekday()
+        if current_day != datetime.today().weekday():
             rain_today = 0
+            storage["rain_today"] = 0
+            current_day = datetime.today().weekday()
 
-        # TODO: Clear Ligtning Data if data older than 3 hours
+        # Clear Ligtning Data if data older than 3 hours
+        if time.time() - storage['last_lightning_time'] > 10800:
+            strike_count = 0
 
         #Process the data
         if msg_type is not None:
@@ -158,16 +161,18 @@ async def main():
                 data['lightning_strike_distance'] = await cnv.distance(obs[1])
                 data['lightning_strike_energy'] = obs[2]
                 client.publish(state_topic, json.dumps(data))
+                strike_count += 1
                 storage['last_lightning_distance'] = await cnv.distance(obs[1])
                 storage['last_lightning_energy'] = obs[2]
                 storage['last_lightning_time'] = time.time()
+                storage['lightning_count'] = strike_count
                 await data_store.write_storage(storage)
             if msg_type in EVENT_AIR_DATA:
                 obs = json_response["obs"][0]
                 data['station_pressure'] = await cnv.pressure(obs[1])
                 data['air_temperature'] = await cnv.temperature(obs[2])
                 data['relative_humidity'] = obs[3]
-                data['lightning_strike_count'] = storage['lightning_count'] + obs[4]
+                data['lightning_strike_count'] = strike_count
                 data['battery_air'] = obs[6]
                 data['sealevel_pressure'] = await cnv.pressure(obs[1] + (elevation / 9.2))
                 data['air_density'] = await cnv.air_density(obs[2], obs[1])
