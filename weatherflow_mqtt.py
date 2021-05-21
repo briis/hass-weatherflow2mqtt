@@ -46,23 +46,35 @@ async def main():
     
     # Read the config file
     _LOGGER.info("Timezone is %s", os.environ["TZ"])
-    _LOGGER.info("Is Tempest %s", os.environ["TEMPEST_DEVICE"])
-    _LOGGER.info("MQTT Username %s", os.environ["MQTT_USERNAME"])
+    is_tempest = os.environ["TEMPEST_DEVICE"]
+    weatherflow_ip = os.environ["WF_HOST"]
+    weatherflow_port = os.environ["WF_PORT"]
+    elevation = os.environ["WF_PORT"]
+    mqtt_host = os.environ["MQTT_HOST"]
+    mqtt_port = os.environ["MQTT_PORT"]
+    mqtt_username = os.environ["MQTT_USERNAME"]
+    mqtt_password = os.environ["MQTT_PASSWORD"]
+    mqtt_debug = os.environ["MQTT_DEBUG"]
+    unit_system = os.environ["UNIT_SYSTEM"]
+    rw_interval = os.environ["RAPID_WIND_INTERVAL"]
+    show_debug =os.environ["DEBUG"]
+
+
     filepath = f"{EXTERNAL_DIRECTORY}/config.yaml"
     with open(filepath) as json_file:
         data = yaml.load(json_file, Loader=yaml.FullLoader)
-        is_tempest = data["tempest_device"]
-        weatherflow_ip = data["station"]["host"]
-        weatherflow_port = data["station"]["port"]
-        elevation = data["station"]["elevation"]
-        mqtt_host = data["mqtt"]["host"]
-        mqtt_port = data["mqtt"]["port"]
-        mqtt_username = data["mqtt"]["username"]
-        mqtt_password = data["mqtt"]["password"]
-        mqtt_debug = data["mqtt"]["debug"]
-        unit_system = data["unit_system"]
-        rw_interval = data["rapid_wind_interval"]
-        show_debug = data["debug"]
+        # is_tempest = data["tempest_device"]
+        # weatherflow_ip = data["station"]["host"]
+        # weatherflow_port = data["station"]["port"]
+        # elevation = data["station"]["elevation"]
+        # mqtt_host = data["mqtt"]["host"]
+        # mqtt_port = data["mqtt"]["port"]
+        # mqtt_username = data["mqtt"]["username"]
+        # mqtt_password = data["mqtt"]["password"]
+        # mqtt_debug = data["mqtt"]["debug"]
+        # unit_system = data["unit_system"]
+        # rw_interval = data["rapid_wind_interval"]
+        # show_debug = data["debug"]
         sensors = data.get("sensors")
 
     mqtt_anonymous = False
