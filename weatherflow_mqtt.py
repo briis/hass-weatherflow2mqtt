@@ -46,7 +46,7 @@ async def main():
     
     # Read the config file
     _LOGGER.info("Timezone is %s", os.environ["TZ"])
-    is_tempest = os.environ["TEMPEST_DEVICE"]
+    is_tempest = bool(os.environ["TEMPEST_DEVICE"])
     weatherflow_ip = os.environ["WF_HOST"]
     weatherflow_port = int(os.environ["WF_PORT"])
     elevation = os.environ["WF_PORT"]
@@ -54,10 +54,10 @@ async def main():
     mqtt_port = int(os.environ["MQTT_PORT"])
     mqtt_username = os.environ["MQTT_USERNAME"]
     mqtt_password = os.environ["MQTT_PASSWORD"]
-    mqtt_debug = os.environ["MQTT_DEBUG"]
+    mqtt_debug = bool(os.environ["MQTT_DEBUG"])
     unit_system = os.environ["UNIT_SYSTEM"]
     rw_interval = int(os.environ["RAPID_WIND_INTERVAL"])
-    show_debug =os.environ["DEBUG"]
+    show_debug =bool(os.environ["DEBUG"])
 
 
     filepath = f"{EXTERNAL_DIRECTORY}/config.yaml"
