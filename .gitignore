@@ -133,3 +133,4 @@ build_run.sh
 data.json
 storage.json
 .storage.json
+.lightning.data

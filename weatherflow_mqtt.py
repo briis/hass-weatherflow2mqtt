@@ -116,9 +116,9 @@ async def main():
             current_day = datetime.today().weekday()
 
         # Clear Ligtning Data if data older than 3 hours
-        if time.time() - storage["last_lightning_time"] > 10800:
-            storage["lightning_count"] = 0
-            await data_store.write_storage(storage)
+        # if time.time() - storage["last_lightning_time"] > 10800:
+        #     storage["lightning_count"] = 0
+        #     await data_store.write_storage(storage)
 
         #Process the data
         if msg_type is not None:
@@ -143,7 +143,8 @@ async def main():
                 await data_store.write_storage(storage)
             if msg_type in EVENT_STRIKE:
                 obs = json_response["evt"]
-                storage["lightning_count"] += 1
+                # storage["lightning_count"] += 1
+                await data_store.write_strike_storage()
                 storage["lightning_count_today"] += 1
                 storage["last_lightning_distance"] = await cnv.distance(obs[1])
                 storage["last_lightning_energy"] = obs[2]
@@ -154,7 +155,8 @@ async def main():
                 data["station_pressure"] = await cnv.pressure(obs[1])
                 data["air_temperature"] = await cnv.temperature(obs[2])
                 data["relative_humidity"] = obs[3]
-                data["lightning_strike_count"] = storage["lightning_count"]
+                # data["lightning_strike_count"] = storage["lightning_count"]
+                data["lightning_strike_count"] = await data_store.read_strike_storage()
                 data["lightning_strike_count_today"] = storage["lightning_count_today"]
                 data["lightning_strike_distance"] = storage["last_lightning_distance"]
                 data["lightning_strike_energy"] = storage["last_lightning_energy"]
@@ -211,7 +213,8 @@ async def main():
                 data["station_pressure"] = await cnv.pressure(obs[6])
                 data["air_temperature"] = await cnv.temperature(obs[7])
                 data["relative_humidity"] = obs[8]
-                data["lightning_strike_count"] = storage["lightning_count"]
+                data["lightning_strike_count"] = await data_store.read_strike_storage()
+                # data["lightning_strike_count"] = storage["lightning_count"]
                 data["lightning_strike_count_today"] = storage["lightning_count_today"]
                 data["lightning_strike_distance"] = storage["last_lightning_distance"]
                 data["lightning_strike_energy"] = storage["last_lightning_energy"]

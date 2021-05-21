@@ -13,6 +13,7 @@ STORAGE_FIELDS = [
     ["last_lightning_distance", 0],
     ["last_lightning_energy", 0],
 ]
+STRIKE_STORAGE_FILE = f"{EXTERNAL_DIRECTORY}/.lightning.data"
 
 DEVICE_CLASS_HUMIDITY = "humidity"
 DEVICE_CLASS_ILLUMINANCE = "illuminance"

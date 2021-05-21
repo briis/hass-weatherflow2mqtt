@@ -1,12 +1,18 @@
 """Several Helper Functions."""
 
 import datetime
+import time
 import json
 import math
 from typing import OrderedDict
 import logging
 
-from const import UNITS_IMPERIAL, STORAGE_FILE, STORAGE_FIELDS
+from const import (
+    UNITS_IMPERIAL,
+    STORAGE_FILE,
+    STORAGE_FIELDS,
+    STRIKE_STORAGE_FILE,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -134,7 +140,7 @@ class DataStorage:
             data = self._initialize_storage()
             return data
         except Exception as e:
-            print(e)
+            _LOGGER.debug("Could not Read storage file. Error message: %s", e)
 
     async def _data_integrity(self, data):
         """Checks the Integrity of the Data File."""
@@ -156,3 +162,30 @@ class DataStorage:
             _LOGGER.error("Could not save Storage File. Error message: %s", e)
                 
 
+    async def read_strike_storage(self):
+        """Read the strike storage file, and return number of strikes in last three hours."""
+        try:
+            with open(STRIKE_STORAGE_FILE, "r") as file:
+                lines = file.readlines()
+            cnt = 0
+            for item in lines:
+                if time.time() - float(item) < 10800:
+                    cnt += 1
+            return cnt
+        except FileNotFoundError as e:
+            return 0
+        except Exception as e:
+            _LOGGER.debug("Could not read strike storage file. Error message: %s", e)
+
+    async def write_strike_storage(self):
+        """Saves an entry if a strike event occurs."""
+
+        try:
+            file = open(STRIKE_STORAGE_FILE, "a")
+            # data = OrderedDict()
+            # data["strike_time"] = time.time()
+            file.write(f"{time.time()}\n")
+            file.close()
+
+        except Exception as e:
+            _LOGGER.error("Could not save Storage File. Error message: %s", e)
