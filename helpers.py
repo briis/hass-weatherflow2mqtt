@@ -124,7 +124,7 @@ class DataStorage:
         try:
             with open(STORAGE_FILE, "r") as jsonFile:
                 tmp_data = json.load(jsonFile)
-                data = await self.data_integrity(tmp_data)
+                data = await self._data_integrity(tmp_data)
                 return data
         except FileNotFoundError as e:
             data = self._initialize_storage()
@@ -132,7 +132,7 @@ class DataStorage:
         except Exception as e:
             print(e)
 
-    async def data_integrity(self, data):
+    async def _data_integrity(self, data):
         """Checks the Integrity of the Data File."""
 
         for item in STORAGE_FIELDS:
