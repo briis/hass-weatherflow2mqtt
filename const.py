@@ -32,6 +32,7 @@ WEATHERFLOW_SENSORS = [
     ["air_temperature", "Temperature", "˚C", "˚F", DEVICE_CLASS_TEMPERATURE, None, EVENT_AIR_DATA],
     ["relative_humidity", "Humidity", "%", "%", DEVICE_CLASS_HUMIDITY, None, EVENT_AIR_DATA],
     ["lightning_strike_count", "Lightning Count (3 hours)", None, None, None, "weather-lightning", EVENT_AIR_DATA],
+    ["lightning_strike_count_today", "Lightning Count (Today)", None, None, None, "weather-lightning", EVENT_AIR_DATA],
     ["battery_air", "Battery AIR", "V", "V", DEVICE_CLASS_VOLTAGE, None, EVENT_AIR_DATA],
     ["lightning_strike_distance", "Lightning Distance", "Km", "mi", None, "flash", EVENT_STRIKE],
     ["lightning_strike_energy", "Lightning Energy", None, None, None, "flash", EVENT_STRIKE],

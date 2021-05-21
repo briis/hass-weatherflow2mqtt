@@ -100,8 +100,9 @@ async def main():
     # Read stored Values and set variable values
     storage = await data_store.read_storage()
     rain_today = storage["rain_today"]
-    rain_yesterday = storage["rain_yesterday"]
+    rain_yesterday = storage.get("rain_yesterday", 0)
     strike_count = storage["lightning_count"]
+    strike_count_today = storage.get("lightning_count_today", 0)
 
     # Publish Initial Data
     data = OrderedDict()
@@ -130,8 +131,10 @@ async def main():
         if current_day != datetime.today().weekday():
             rain_yesterday = rain_today
             rain_today = 0
-            storage["rain_today"] = 0
+            strike_count_today = 0
+            storage["rain_today"] = rain_today
             storage["rain_yesterday"] = rain_yesterday
+            storage['lightning_count_today'] = strike_count_today
             await data_store.write_storage(storage)
             current_day = datetime.today().weekday()
 
@@ -169,10 +172,12 @@ async def main():
                 data['lightning_strike_time'] = datetime.fromtimestamp(time.time()).isoformat()
                 client.publish(state_topic, json.dumps(data))
                 strike_count += 1
+                strike_count_today += 1
                 storage['last_lightning_distance'] = await cnv.distance(obs[1])
                 storage['last_lightning_energy'] = obs[2]
                 storage['last_lightning_time'] = time.time()
                 storage['lightning_count'] = strike_count
+                storage['lightning_count_today'] = strike_count_today
                 await data_store.write_storage(storage)
             if msg_type in EVENT_AIR_DATA:
                 obs = json_response["obs"][0]
@@ -180,6 +185,7 @@ async def main():
                 data['air_temperature'] = await cnv.temperature(obs[2])
                 data['relative_humidity'] = obs[3]
                 data['lightning_strike_count'] = strike_count
+                data['lightning_strike_count_today'] = strike_count_today
                 data['battery_air'] = round(obs[6], 2)
                 data['sealevel_pressure'] = await cnv.pressure(obs[1] + (elevation / 9.2))
                 data['air_density'] = await cnv.air_density(obs[2], obs[1])
