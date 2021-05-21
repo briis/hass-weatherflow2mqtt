@@ -46,35 +46,35 @@ async def main():
     
     # Read the config file
     _LOGGER.info("Timezone is %s", os.environ["TZ"])
-    is_tempest = bool(os.environ["TEMPEST_DEVICE"])
-    weatherflow_ip = os.environ["WF_HOST"]
-    weatherflow_port = int(os.environ["WF_PORT"])
-    elevation = int(os.environ["WF_PORT"])
-    mqtt_host = os.environ["MQTT_HOST"]
-    mqtt_port = int(os.environ["MQTT_PORT"])
-    mqtt_username = os.environ["MQTT_USERNAME"]
-    mqtt_password = os.environ["MQTT_PASSWORD"]
-    mqtt_debug = bool(os.environ["MQTT_DEBUG"])
-    unit_system = os.environ["UNIT_SYSTEM"]
-    rw_interval = int(os.environ["RAPID_WIND_INTERVAL"])
-    show_debug =bool(os.environ["DEBUG"])
+    # is_tempest = bool(os.environ["TEMPEST_DEVICE"])
+    # weatherflow_ip = os.environ["WF_HOST"]
+    # weatherflow_port = int(os.environ["WF_PORT"])
+    # elevation = int(os.environ["WF_PORT"])
+    # mqtt_host = os.environ["MQTT_HOST"]
+    # mqtt_port = int(os.environ["MQTT_PORT"])
+    # mqtt_username = os.environ["MQTT_USERNAME"]
+    # mqtt_password = os.environ["MQTT_PASSWORD"]
+    # mqtt_debug = bool(os.environ["MQTT_DEBUG"])
+    # unit_system = os.environ["UNIT_SYSTEM"]
+    # rw_interval = int(os.environ["RAPID_WIND_INTERVAL"])
+    # show_debug =bool(os.environ["DEBUG"])
 
 
     filepath = f"{EXTERNAL_DIRECTORY}/config.yaml"
     with open(filepath) as json_file:
         data = yaml.load(json_file, Loader=yaml.FullLoader)
-        # is_tempest = data["tempest_device"]
-        # weatherflow_ip = data["station"]["host"]
-        # weatherflow_port = data["station"]["port"]
-        # elevation = data["station"]["elevation"]
-        # mqtt_host = data["mqtt"]["host"]
-        # mqtt_port = data["mqtt"]["port"]
-        # mqtt_username = data["mqtt"]["username"]
-        # mqtt_password = data["mqtt"]["password"]
-        # mqtt_debug = data["mqtt"]["debug"]
-        # unit_system = data["unit_system"]
-        # rw_interval = data["rapid_wind_interval"]
-        # show_debug = data["debug"]
+        is_tempest = data["tempest_device"]
+        weatherflow_ip = data["station"]["host"]
+        weatherflow_port = data["station"]["port"]
+        elevation = data["station"]["elevation"]
+        mqtt_host = data["mqtt"]["host"]
+        mqtt_port = data["mqtt"]["port"]
+        mqtt_username = data["mqtt"]["username"]
+        mqtt_password = data["mqtt"]["password"]
+        mqtt_debug = data["mqtt"]["debug"]
+        unit_system = data["unit_system"]
+        rw_interval = data["rapid_wind_interval"]
+        show_debug = data["debug"]
         sensors = data.get("sensors")
 
     mqtt_anonymous = False
