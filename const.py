@@ -2,7 +2,7 @@
 import datetime
 
 EXTERNAL_DIRECTORY = "/usr/local/config"
-STORAGE_FILE = f"{EXTERNAL_DIRECTORY}/storage.json"
+STORAGE_FILE = f"{EXTERNAL_DIRECTORY}/.storage.json"
 STORAGE_FIELDS = [
     ["rain_today", 0],
     ["rain_yesterday", 0],
