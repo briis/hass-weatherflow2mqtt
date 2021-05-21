@@ -65,6 +65,14 @@ Normally you would only have to change the Unit System and MQTT settings to supp
 - `mqtt debug`: Set this to on, to get some more mqtt debugging messages in the Container log file
 - `sensors`: Leave blank to setup All available sensors, or enter a list of sensor ID's to setup. See [Available Sensors](#available-sensors) for a list of sensors.
 
+## Docker Setup
+
+There are two important things to notice before you run or create the Docker Container:
+
+`TZ=YOUR_TIMEZONE` make sure that you use the right timezone here, or else some of the calculations done by the container will not be correct. Default Timezone is *Europe/Copenhagen*.
+
+`-v YOUR_STORAGE_AREA:/usr/local/config` Please replace YOUR_STORAGE_AREA with a directory where Docker will have read an write access. It is also in this directory that you must place the *config.yaml* file. Once the program runs a hidden file called `.storage.yaml` will be created in this directory. This file is used to save some calculated values, and to ensure that you don't start from 0 if you have to restart Home Assistant or the container.
+
 ## Available Sensors
 
 Here is the list of sensors that the program generates. Calculated Sensor means, if No, then data comes directly from the Weather Station, if yes, it is a sensor that is derived from some of the other sensors. For a *copy ready* list se [further below](#sensor-structure)
