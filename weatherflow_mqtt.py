@@ -46,7 +46,7 @@ async def main():
     
     # Read the config file
     _LOGGER.info("Timezone is %s", os.environ["TZ"])
-    # is_tempest = bool(os.environ["TEMPEST_DEVICE"])
+    # is_tempest = eval(os.environ["TEMPEST_DEVICE"])
     # weatherflow_ip = os.environ["WF_HOST"]
     # weatherflow_port = int(os.environ["WF_PORT"])
     # elevation = int(os.environ["WF_PORT"])
@@ -54,10 +54,10 @@ async def main():
     # mqtt_port = int(os.environ["MQTT_PORT"])
     # mqtt_username = os.environ["MQTT_USERNAME"]
     # mqtt_password = os.environ["MQTT_PASSWORD"]
-    # mqtt_debug = bool(os.environ["MQTT_DEBUG"])
+    # mqtt_debug = eval(os.environ["MQTT_DEBUG"])
     # unit_system = os.environ["UNIT_SYSTEM"]
     # rw_interval = int(os.environ["RAPID_WIND_INTERVAL"])
-    # show_debug =bool(os.environ["DEBUG"])
+    # show_debug = eval(os.environ["DEBUG"])
 
 
     filepath = f"{EXTERNAL_DIRECTORY}/config.yaml"
@@ -180,6 +180,7 @@ async def main():
                 data["lightning_strike_time"] = datetime.fromtimestamp(storage["last_lightning_time"]).isoformat()
                 data["battery_air"] = round(obs[6], 2)
                 data["sealevel_pressure"] = await cnv.pressure(obs[1] + (elevation / 9.2))
+                data["sealevel_pressure"] = await cnv.sea_level_pressure(obs[2], obs[1], elevation)
                 data["air_density"] = await cnv.air_density(obs[2], obs[1])
                 data["dewpoint"] = await cnv.dewpoint(obs[2], obs[3])
                 data["feelslike"] = await cnv.feels_like(obs[2], obs[3], wind_speed)

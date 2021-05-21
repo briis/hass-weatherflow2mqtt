@@ -81,6 +81,12 @@ class ConversionFunctions:
 
         return round((pressure * 100) / (r_specific * kelvin), 4)
 
+    async def sea_level_pressure(self, temperature, station_press, elevation):
+        """Returns Sea Level pressure."""
+        slp = station_press +((station_press * 9.80665 * elevation) / (287 * (273 + temperature + (elevation / 400))))
+
+        return await self.pressure(slp)
+
     async def dewpoint(self, temperature, humidity):
         """Returns Dewpoint."""
         dewpoint_c = round(243.04*(math.log(humidity/100)+((17.625*temperature)/(243.04+temperature)))/(17.625-math.log(humidity/100)-((17.625*temperature)/(243.04+temperature))),1)
