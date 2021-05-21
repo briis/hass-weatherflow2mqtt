@@ -186,7 +186,7 @@ async def main():
                 data["illuminance"] = obs[1]
                 data["uv"] = obs[2]
                 rain_today += obs[3]
-                data["rain_accumulated"] = await cnv.rain(rain_today)
+                data["rain_today"] = await cnv.rain(rain_today)
                 data["rain_yesterday"] = await cnv.rain(rain_yesterday)
                 data["rain_start_time"] = rain_time
                 data["wind_lull"] = await cnv.speed(obs[4])
@@ -215,7 +215,7 @@ async def main():
                 data["uv"] = obs[10]
                 data["solar_radiation"] = obs[11]
                 rain_today += obs[12]
-                data["rain_accumulated"] = await cnv.rain(rain_today)
+                data["rain_today"] = await cnv.rain(rain_today)
                 data["rain_yesterday"] = await cnv.rain(rain_yesterday)
                 data["rain_start_time"] = rain_time
                 data["precipitation_type"] = await cnv.rain_type(obs[13])

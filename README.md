@@ -10,7 +10,6 @@ There is support for both the AIR & SKY devices and the TEMPEST device.
 
 This project is still very much in Beta, but the things that are there, work. I am currently working on or considering:
 
-- Still need some work on the persistent storage, in order to ensure data is correct on restart, and also to have the possibility to do som calculation based sensors. Som is already working, some I am not too sure about yet.
 - As I don't have Access to a Tempest Unit, I have not tested this with this device type. If anyone does, please report back here in the Discussions or Issue Area.
 - I consider to also integrate the AI based Forecast from WeatherFlow. This will require some calls to their REST API, and as such this program will not be *Local Data* only. But if I do it, I will make it optional.
 
@@ -72,67 +71,71 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 
 | Sensor ID   | Name   | Description   | Calculated Sensor   |
 | --- | --- | --- | --- |
-| wind_speed | Wind Speed | Current measured Wind Speed | No
-| wind_bearing | Wind Bearing | Current measured Wind bearing in degrees | No
-| wind_direction | Wind Direction | Current measured Wind bearing as compass symbol | Yes
-| station_pressure | Wind Direction | Pressure measurement where the station is located | No
-| sealevel_pressure | Station Pressure | Preasure measurement at Sea Level | Yes
+| air_density | Air Density | The Air density | Yes
 | air_temperature | Temperature | Outside Temperature | No
-| relative_humidity | Humidity | Relative Humidity | No
-| lightning_strike_count | Lightning Count (3 hours) | Number of lightning strikes the last 3 hours | Yes
+| battery | Battery SKY or TEMPEST | If this is a TEMPEST unit this where the Voltage is displayed. Else it will be the Voltage of the SKY unit | No
 | battery_air | Battery AIR | The voltage on the AIR unit (If present) | No
+| dewpoint | Dew Point | Dewpoint in degrees | Yes
+| feelslike | Feels Like Temperature | The experienced temperature, a mix of Heat Index and Wind Chill | Yes
+| illuminance | Illuminance | How much the incident light illuminates the surface | No
+| lightning_strike_count | Lightning Count (3 hours) | Number of lightning strikes the last 3 hours | Yes
+| lightning_strike_count_today | Lightning Count (Today) | Number of lightning strikes current day | Yes
 | lightning_strike_distance | Lightning Distance | Distance of the last strike | No
 | lightning_strike_energy | Lightning Energy | Energy of the last strike | No
 | lightning_strike_time | Last Lightning Time | When the last lightning strike occurred | Yes
-| illuminance | Illuminance | How much the incident light illuminates the surface | No
-| uv | UV Index | The UV index | No
-| rain_accumulated | Rain Today | Total rain for the current day. (Reset at midnight) | Yes
-| wind_lull | Wind Lull | Lowest wind | No
-| wind_speed_avg | Wind Speed Avg | Average wind speed for the last minute | No
-| wind_gust | Wind Gust | Highest wind speed for the last minute | No
-| wind_bearing_avg | Wind Bearing Avg | The average wind bearing in degrees | No
-| wind_direction_avg | Wind Direction Avg | The average wind direction as a compass string | Yes
-| battery | Battery SKY or TEMPEST | If this is a TEMPEST unit this where the Voltage is displayed. Else it will be the Voltage of the SKY unit | No
-| solar_radiation | Solar Radiation | Electromagnetic radiation emitted by the sun | No
 | precipitation_type | Precipitation Type | Can be one of None, Rain or Hail | No
-| rain_start_time | Last Rain | When was the last time it rained | Yes
-| air_density | Air Density | The Air density | Yes
-| dewpoint | Dew Point | Dewpoint in degrees | Yes
 | rain_rate | Rain Rate | How much is it raining right now | Yes
+| rain_start_time | Last Rain | When was the last time it rained | No
+| rain_today | Rain Today | Total rain for the current day. (Reset at midnight) | Yes
+| rain_yesterday | Rain Yesterday | Total rain for yesterday | Yes
+| relative_humidity | Humidity | Relative Humidity | No
+| sealevel_pressure | Station Pressure | Preasure measurement at Sea Level | Yes
+| solar_radiation | Solar Radiation | Electromagnetic radiation emitted by the sun | No
+| station_pressure | Wind Direction | Pressure measurement where the station is located | No
 | uptime | Uptime | How long has the HUB been running | No
-| feelslike | Feels Like Temperature | The experienced temperature, a mix of Heat Index and Wind Chill | Yes
+| uv | UV Index | The UV index | No
+| wind_bearing | Wind Bearing | Current measured Wind bearing in degrees | No
+| wind_bearing_avg | Wind Bearing Avg | The average wind bearing in degrees | No
+| wind_direction | Wind Direction | Current measured Wind bearing as compass symbol | Yes
+| wind_direction_avg | Wind Direction Avg | The average wind direction as a compass string | Yes
+| wind_gust | Wind Gust | Highest wind speed for the last minute | No
+| wind_lull | Wind Lull | Lowest wind | No
+| wind_speed | Wind Speed | Current measured Wind Speed | No
+| wind_speed_avg | Wind Speed Avg | Average wind speed for the last minute | No
 
 ### Sensor Structure
 
 ```yaml
 sensors:
-  - wind_speed
-  - wind_bearing
-  - wind_direction
-  - station_pressure
-  - sealevel_pressure
+  - air_density
   - air_temperature
-  - relative_humidity
-  - lightning_strike_count
+  - battery
   - battery_air
+  - dewpoint
+  - feelslike
+  - illuminance
+  - lightning_strike_count
+  - lightning_strike_count_today
   - lightning_strike_distance
   - lightning_strike_energy
   - lightning_strike_time
-  - illuminance
-  - uv
-  - rain_accumulated
-  - wind_lull
-  - wind_speed_avg
-  - wind_gust
-  - wind_bearing_avg
-  - wind_direction_avg
-  - battery
-  - solar_radiation
   - precipitation_type
-  - rain_start_time
-  - air_density
-  - dewpoint
   - rain_rate
+  - rain_start_time
+  - rain_today
+  - rain_yesterday
+  - relative_humidity
+  - sealevel_pressure
+  - solar_radiation
+  - station_pressure
   - uptime
-  - feelslike
+  - uv
+  - wind_bearing
+  - wind_bearing_avg
+  - wind_direction
+  - wind_direction_avg
+  - wind_gust
+  - wind_lull
+  - wind_speed
+  - wind_speed_avg
 ```
