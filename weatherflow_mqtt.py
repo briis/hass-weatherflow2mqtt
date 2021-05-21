@@ -12,6 +12,7 @@ import yaml
 import time
 from datetime import datetime, date
 import sys
+import os
 
 from aioudp import open_local_endpoint
 from helpers import ConversionFunctions, DataStorage
@@ -44,6 +45,7 @@ async def main():
 
     
     # Read the config file
+    _LOGGER.info("TZ is %s", os.environ["TZ"])
     filepath = f"{EXTERNAL_DIRECTORY}/config.yaml"
     with open(filepath) as json_file:
         data = yaml.load(json_file, Loader=yaml.FullLoader)
