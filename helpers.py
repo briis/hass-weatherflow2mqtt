@@ -49,7 +49,11 @@ class ConversionFunctions:
     async def rain_type(self, value) -> str:
         """Convert rain type."""
         type_array = ["None", "Rain", "Hail"]
-        return type_array[int(value)]
+        try:
+            return type_array[int(value)]
+        except IndexError as e:
+            _LOGGER.debug("VALUE is: %s", value)
+            return "Unknown"
 
     async def direction(self, value) -> str:
         """Returns a directional Wind Direction string."""

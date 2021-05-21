@@ -132,3 +132,4 @@ config.yaml
 build_run.sh
 data.json
 storage.json
+.storage.json
