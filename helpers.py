@@ -169,13 +169,15 @@ class DataStorage:
                 lines = file.readlines()
             cnt = 0
             for item in lines:
-                if time.time() - float(item) < 10800:
-                    cnt += 1
+                if item != "\n":
+                    if time.time() - float(item) < 10800:
+                        cnt += 1
             return cnt
         except FileNotFoundError as e:
             return 0
         except Exception as e:
             _LOGGER.debug("Could not read strike storage file. Error message: %s", e)
+            return 0
 
     async def write_strike_storage(self):
         """Saves an entry if a strike event occurs."""
@@ -188,7 +190,7 @@ class DataStorage:
         except Exception as e:
             _LOGGER.error("Could not save Storage File. Error message: %s", e)
 
-    async def housekeeping_strike():
+    async def housekeeping_strike(self):
         """Performs housekeeping tasks on the strike data file."""
 
         try:
@@ -196,8 +198,9 @@ class DataStorage:
                 lines = file.readlines()
             newlines = ""
             for item in lines:
-                if time.time() - float(item) < 10800:
-                    newlines += item
+                if item != "\n":
+                    if time.time() - float(item) < 10800:
+                        newlines += item
             file = open(STRIKE_STORAGE_FILE, "w")
             file.write(f"{newlines}\n")
             file.close()
@@ -206,3 +209,15 @@ class DataStorage:
             return 0
         except Exception as e:
             _LOGGER.debug("Could not perform housekeeping on strike storage file. Error message: %s", e)
+
+
+    async def dummy_strike_storage(self, data):
+        """Saves an entry if a strike event occurs."""
+
+        try:
+            file = open(STRIKE_STORAGE_FILE, "a")
+            file.write(f"{data}\n")
+            file.close()
+
+        except Exception as e:
+            _LOGGER.error("Could not save Storage File. Error message: %s", e)
