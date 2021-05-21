@@ -101,27 +101,12 @@ async def main():
     storage = await data_store.read_storage()
     rain_today = storage["rain_today"]
     rain_yesterday = storage.get("rain_yesterday", 0)
-    rain_time = storage['rain_start']
+    rain_time = storage["rain_start"]
     strike_count = storage["lightning_count"]
     strike_count_today = storage.get("lightning_count_today", strike_count)
     strike_distance = storage["last_lightning_distance"]
     strike_energy = storage["last_lightning_energy"]
     strike_time = storage["last_lightning_time"]
-    # Publish Initial Data
-    # data = OrderedDict()
-    # state_topic = 'homeassistant/sensor/{}/{}/state'.format(DOMAIN, EVENT_STRIKE)
-    # data['lightning_strike_distance'] = storage['last_lightning_distance']
-    # data['lightning_strike_energy'] = storage['last_lightning_energy']
-    # data['lightning_strike_time'] = datetime.fromtimestamp(storage['last_lightning_time']).isoformat()
-    # client.publish(state_topic, json.dumps(data))
-
-    # Publish Initial Data for Precipitation Start Event
-    # data = OrderedDict()
-    # state_topic = 'homeassistant/sensor/{}/{}/state'.format(DOMAIN, EVENT_PRECIP_START)
-    # data['rain_start_time'] = storage['rain_start']
-    # client.publish(state_topic, json.dumps(data))
-
-    # Setup variables for x-device calculations
     wind_speed = None
 
     # Watch for message from the UDP socket
@@ -130,44 +115,42 @@ async def main():
         json_response = json.loads(data.decode("utf-8"))
         msg_type = json_response.get("type")
 
-        # Run New day function if it is time
+        # Run New day function if Midnight
         if current_day != datetime.today().weekday():
             rain_yesterday = rain_today
             rain_today = 0
             strike_count_today = 0
             storage["rain_today"] = rain_today
             storage["rain_yesterday"] = rain_yesterday
-            storage['lightning_count_today'] = strike_count_today
+            storage["lightning_count_today"] = strike_count_today
             await data_store.write_storage(storage)
             current_day = datetime.today().weekday()
 
         # Clear Ligtning Data if data older than 3 hours
-        if time.time() - storage['last_lightning_time'] > 10800:
+        if time.time() - storage["last_lightning_time"] > 10800:
             strike_count = 0
 
         #Process the data
         if msg_type is not None:
             data = OrderedDict()
-            state_topic = 'homeassistant/sensor/{}/{}/state'.format(DOMAIN, msg_type)
+            state_topic = "homeassistant/sensor/{}/{}/state".format(DOMAIN, msg_type)
             if msg_type in EVENT_RAPID_WIND:
                 now = datetime.now().timestamp()
                 if (now - rapid_last_run) >= rw_interval:
                     obs = json_response["ob"]
-                    data['wind_speed'] = await cnv.speed(obs[1])
-                    data['wind_bearing'] = obs[2]
-                    data['wind_direction'] = await cnv.direction(obs[2])
+                    data["wind_speed"] = await cnv.speed(obs[1])
+                    data["wind_bearing"] = obs[2]
+                    data["wind_direction"] = await cnv.direction(obs[2])
                     wind_speed = obs[1]
                     client.publish(state_topic, json.dumps(data))
                     rapid_last_run = datetime.now().timestamp()
             if msg_type in EVENT_HUB_STATUS:
-                data['uptime'] = await cnv.humanize_time(json_response.get("uptime"))
+                data["uptime"] = await cnv.humanize_time(json_response.get("uptime"))
                 client.publish(state_topic, json.dumps(data))
             if msg_type in EVENT_PRECIP_START:
                 obs = json_response["evt"]
-                # data['rain_start_time'] = datetime.fromtimestamp(obs[0]).isoformat()
-                # client.publish(state_topic, json.dumps(data))
                 rain_time = datetime.fromtimestamp(obs[0]).isoformat()
-                storage['rain_start'] = rain_time
+                storage["rain_start"] = rain_time
                 await data_store.write_storage(storage)
             if msg_type in EVENT_STRIKE:
                 obs = json_response["evt"]
@@ -176,92 +159,88 @@ async def main():
                 strike_time = time.time()
                 strike_count += 1
                 strike_count_today += 1
-                # data['lightning_strike_distance'] = await cnv.distance(obs[1])
-                # data['lightning_strike_energy'] = obs[2]
-                # data['lightning_strike_time'] = datetime.fromtimestamp(time.time()).isoformat()
-                # client.publish(state_topic, json.dumps(data))
-                storage['last_lightning_distance'] = strike_distance
-                storage['last_lightning_energy'] = strike_energy
-                storage['last_lightning_time'] = strike_time
-                storage['lightning_count'] = strike_count
-                storage['lightning_count_today'] = strike_count_today
+                storage["last_lightning_distance"] = strike_distance
+                storage["last_lightning_energy"] = strike_energy
+                storage["last_lightning_time"] = strike_time
+                storage["lightning_count"] = strike_count
+                storage["lightning_count_today"] = strike_count_today
                 await data_store.write_storage(storage)
             if msg_type in EVENT_AIR_DATA:
                 obs = json_response["obs"][0]
-                data['station_pressure'] = await cnv.pressure(obs[1])
-                data['air_temperature'] = await cnv.temperature(obs[2])
-                data['relative_humidity'] = obs[3]
-                data['lightning_strike_count'] = strike_count
-                data['lightning_strike_count_today'] = strike_count_today
-                data['lightning_strike_distance'] = strike_distance
-                data['lightning_strike_energy'] = strike_distance
-                data['lightning_strike_time'] = datetime.fromtimestamp(strike_time).isoformat()
-                data['battery_air'] = round(obs[6], 2)
-                data['sealevel_pressure'] = await cnv.pressure(obs[1] + (elevation / 9.2))
-                data['air_density'] = await cnv.air_density(obs[2], obs[1])
-                data['dewpoint'] = await cnv.dewpoint(obs[2], obs[3])
-                data['feelslike'] = await cnv.feels_like(obs[2], obs[3], wind_speed)
+                data["station_pressure"] = await cnv.pressure(obs[1])
+                data["air_temperature"] = await cnv.temperature(obs[2])
+                data["relative_humidity"] = obs[3]
+                data["lightning_strike_count"] = strike_count
+                data["lightning_strike_count_today"] = strike_count_today
+                data["lightning_strike_distance"] = strike_distance
+                data["lightning_strike_energy"] = strike_energy
+                data["lightning_strike_time"] = datetime.fromtimestamp(strike_time).isoformat()
+                data["battery_air"] = round(obs[6], 2)
+                data["sealevel_pressure"] = await cnv.pressure(obs[1] + (elevation / 9.2))
+                data["air_density"] = await cnv.air_density(obs[2], obs[1])
+                data["dewpoint"] = await cnv.dewpoint(obs[2], obs[3])
+                data["feelslike"] = await cnv.feels_like(obs[2], obs[3], wind_speed)
                 client.publish(state_topic, json.dumps(data))
             if msg_type in EVENT_SKY_DATA:
                 obs = json_response["obs"][0]
-                data['illuminance'] = obs[1]
-                data['uv'] = obs[2]
+                data["illuminance"] = obs[1]
+                data["uv"] = obs[2]
                 rain_today += obs[3]
-                data['rain_accumulated'] = await cnv.rain(rain_today)
-                data['rain_yesterday'] = await cnv.rain(rain_yesterday)
-                data['rain_start_time'] = rain_time
-                data['wind_lull'] = await cnv.speed(obs[4])
-                data['wind_speed_avg'] = await cnv.speed(obs[5])
-                data['wind_gust'] = await cnv.speed(obs[6])
-                data['wind_bearing_avg'] = obs[7]
-                data['wind_direction_avg'] = await cnv.direction(obs[7])
-                data['battery'] = round(obs[8], 2)
-                data['solar_radiation'] = obs[10]
-                data['precipitation_type'] = await cnv.rain_type(obs[12])
-                data['rain_rate'] = await cnv.rain_rate(obs[3])
+                data["rain_accumulated"] = await cnv.rain(rain_today)
+                data["rain_yesterday"] = await cnv.rain(rain_yesterday)
+                data["rain_start_time"] = rain_time
+                data["wind_lull"] = await cnv.speed(obs[4])
+                data["wind_speed_avg"] = await cnv.speed(obs[5])
+                data["wind_gust"] = await cnv.speed(obs[6])
+                data["wind_bearing_avg"] = obs[7]
+                data["wind_direction_avg"] = await cnv.direction(obs[7])
+                data["battery"] = round(obs[8], 2)
+                data["solar_radiation"] = obs[10]
+                data["precipitation_type"] = await cnv.rain_type(obs[12])
+                data["rain_rate"] = await cnv.rain_rate(obs[3])
                 client.publish(state_topic, json.dumps(data))
                 if obs[3] > 0:
-                    storage['rain_today'] = rain_today
+                    storage["rain_today"] = rain_today
                     await data_store.write_storage(storage)
             if msg_type in EVENT_TEMPEST_DATA:
                 obs = json_response["obs"][0]
 
-                state_topic = 'homeassistant/sensor/{}/obs_sky/state'.format(DOMAIN)
-                data['wind_lull'] = await cnv.speed(obs[1])
-                data['wind_speed_avg'] = await cnv.speed(obs[2])
-                data['wind_gust'] = await cnv.speed(obs[3])
-                data['wind_bearing_avg'] = obs[4]
-                data['wind_direction_avg'] = await cnv.direction(obs[4])
-                data['illuminance'] = obs[9]
-                data['uv'] = obs[10]
-                data['solar_radiation'] = obs[11]
+                state_topic = "homeassistant/sensor/{}/{}/state".format(DOMAIN, EVENT_SKY_DATA)
+                data["wind_lull"] = await cnv.speed(obs[1])
+                data["wind_speed_avg"] = await cnv.speed(obs[2])
+                data["wind_gust"] = await cnv.speed(obs[3])
+                data["wind_bearing_avg"] = obs[4]
+                data["wind_direction_avg"] = await cnv.direction(obs[4])
+                data["illuminance"] = obs[9]
+                data["uv"] = obs[10]
+                data["solar_radiation"] = obs[11]
                 rain_today += obs[12]
-                data['rain_accumulated'] = await cnv.rain(rain_today)
-                data['rain_yesterday'] = await cnv.rain(rain_yesterday)
-                data['rain_start_time'] = rain_time
-                data['precipitation_type'] = await cnv.rain_type(obs[13])
-                data['battery'] = round(obs[16], 2)
-                data['rain_rate'] = await cnv.rain_rate(obs[12])
+                data["rain_accumulated"] = await cnv.rain(rain_today)
+                data["rain_yesterday"] = await cnv.rain(rain_yesterday)
+                data["rain_start_time"] = rain_time
+                data["precipitation_type"] = await cnv.rain_type(obs[13])
+                data["battery"] = round(obs[16], 2)
+                data["rain_rate"] = await cnv.rain_rate(obs[12])
                 client.publish(state_topic, json.dumps(data))
 
-                state_topic = 'homeassistant/sensor/{}/obs_air/state'.format(DOMAIN)
+                state_topic = "homeassistant/sensor/{}/{}/state".format(DOMAIN, EVENT_AIR_DATA)
                 data = OrderedDict()
-                data['station_pressure'] = await cnv.pressure(obs[6])
-                data['air_temperature'] = await cnv.temperature(obs[7])
-                data['relative_humidity'] = obs[8]
-                data['lightning_strike_count'] = strike_count
-                data['lightning_strike_count_today'] = strike_count_today
-                data['lightning_strike_distance'] = strike_distance
-                data['lightning_strike_energy'] = strike_distance
-                data['lightning_strike_time'] = datetime.fromtimestamp(strike_time).isoformat()
-                data['sealevel_pressure'] = await cnv.pressure(obs[6] + (elevation / 9.2), 2)
-                data['air_density'] = await cnv.air_density(obs[7], obs[6])
-                data['dewpoint'] = await cnv.dewpoint(obs[7], obs[8])
-                data['feelslike'] = await cnv.feels_like(obs[7], obs[8], wind_speed)
+                data["station_pressure"] = await cnv.pressure(obs[6])
+                data["air_temperature"] = await cnv.temperature(obs[7])
+                data["relative_humidity"] = obs[8]
+                data["lightning_strike_count"] = strike_count
+                data["lightning_strike_count_today"] = strike_count_today
+                data["lightning_strike_distance"] = strike_distance
+                data["lightning_strike_energy"] = strike_distance
+                data["lightning_strike_time"] = datetime.fromtimestamp(strike_time).isoformat()
+                data["sealevel_pressure"] = await cnv.pressure(obs[6] + (elevation / 9.2), 2)
+                data["air_density"] = await cnv.air_density(obs[7], obs[6])
+                data["dewpoint"] = await cnv.dewpoint(obs[7], obs[8])
+                data["feelslike"] = await cnv.feels_like(obs[7], obs[8], wind_speed)
                 client.publish(state_topic, json.dumps(data))
 
                 if obs[12] > 0:
-                    storage['rain_today'] = rain_today
+                    storage["rain_today"] = rain_today
                     await data_store.write_storage(storage)
 
             if msg_type in EVENT_DEVICE_STATUS:
@@ -272,21 +251,6 @@ async def main():
                     voltage = json_response.get("voltage")
                     _LOGGER.debug("DEVICE STATUS TRIGGERED AT %s\n  -- Device: %s\n -- Firmware Revision: %s\n -- Voltage: %s", str(now), serial_number, firmware_revision, voltage)
 
-async def publish_calculated_values(mqtt_client, storage):
-    """Ensures calculated values get published."""
-    # Publish EVENT_STRIKE data
-    data = OrderedDict()
-    state_topic = 'homeassistant/sensor/{}/{}/state'.format(DOMAIN, EVENT_STRIKE)
-    data['lightning_strike_distance'] = storage['last_lightning_distance']
-    data['lightning_strike_energy'] = storage['last_lightning_energy']
-    data['lightning_strike_time'] = datetime.fromtimestamp(storage['last_lightning_time']).isoformat()
-    mqtt_client.publish(state_topic, json.dumps(data))
-
-    # Publish EVENT_PRECIP_START data
-    data = OrderedDict()
-    state_topic = 'homeassistant/sensor/{}/{}/state'.format(DOMAIN, EVENT_PRECIP_START)
-    data['rain_start_time'] = storage['rain_start']
-    mqtt_client.publish(state_topic, json.dumps(data))
 
 async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest):
     """Setup the Sensors in Home Assistant."""
@@ -311,28 +275,28 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest)
         # Modify name of Battery Device if Tempest Unit
         if is_tempest:
             sensor_name = "Battery TEMPEST"
-        state_topic = 'homeassistant/sensor/{}/{}/state'.format(DOMAIN, sensor[SENSOR_DEVICE])
-        discovery_topic = 'homeassistant/sensor/{}/{}/config'.format(DOMAIN, sensor[SENSOR_ID])
+        state_topic = "homeassistant/sensor/{}/{}/state".format(DOMAIN, sensor[SENSOR_DEVICE])
+        discovery_topic = "homeassistant/sensor/{}/{}/config".format(DOMAIN, sensor[SENSOR_ID])
         payload = OrderedDict()
         if sensors is None or sensor[SENSOR_ID] in sensors:
             _LOGGER.info("SETTING UP %s SENSOR", sensor_name)
-            payload['name'] = "{}".format(sensor_name)
-            payload['unique_id'] = "{}-{}".format(serial_number, sensor[SENSOR_ID])
+            payload["name"] = "{}".format(sensor_name)
+            payload["unique_id"] = "{}-{}".format(serial_number, sensor[SENSOR_ID])
             if sensor[units] is not None:
-                payload['unit_of_measurement'] = sensor[units]
+                payload["unit_of_measurement"] = sensor[units]
             if sensor[SENSOR_CLASS] is not None:
-                payload['device_class'] = sensor[SENSOR_CLASS]
+                payload["device_class"] = sensor[SENSOR_CLASS]
             if sensor[SENSOR_ICON] is not None:
-                payload['icon'] = f"mdi:{sensor[SENSOR_ICON]}"
-            payload['state_topic'] = state_topic
-            payload['value_template'] = "{{{{ value_json.{} }}}}".format(sensor[SENSOR_ID])
-            payload['device'] = {
-                    'identifiers' : ["WeatherFlow_{}".format(serial_number)],
-                    'connections' : [["mac", serial_number]],
-                    'manufacturer' : 'WeatherFlow',
-                    'name' : 'WeatherFlow2MQTT',
-                    'model' : 'WeatherFlow Weather Station',
-                    'sw_version': firmware
+                payload["icon"] = f"mdi:{sensor[SENSOR_ICON]}"
+            payload["state_topic"] = state_topic
+            payload["value_template"] = "{{{{ value_json.{} }}}}".format(sensor[SENSOR_ID])
+            payload["device"] = {
+                    "identifiers" : ["WeatherFlow_{}".format(serial_number)],
+                    "connections" : [["mac", serial_number]],
+                    "manufacturer" : "WeatherFlow",
+                    "name" : "WeatherFlow2MQTT",
+                    "model" : "WeatherFlow Weather Station",
+                    "sw_version": firmware
             }
             
         try:
