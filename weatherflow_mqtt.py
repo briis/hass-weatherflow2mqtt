@@ -45,7 +45,9 @@ async def main():
 
     
     # Read the config file
-    _LOGGER.info("TZ is %s", os.environ["TZ"])
+    _LOGGER.info("Timezone is %s", os.environ["TZ"])
+    _LOGGER.info("Is Tempest %s", os.environ["TEMPEST_DEVICE"])
+    _LOGGER.info("MQTT Username %s", os.environ["MQTT_USERNAME"])
     filepath = f"{EXTERNAL_DIRECTORY}/config.yaml"
     with open(filepath) as json_file:
         data = yaml.load(json_file, Loader=yaml.FullLoader)
