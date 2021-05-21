@@ -1,7 +1,7 @@
 tempest_device: True
 unit_system: "metric"
 rapid_wind_interval: 5
-debug: "off"
+debug: False
 station:
   elevation: 50
   host: "0.0.0.0"
@@ -11,5 +11,5 @@ mqtt:
   port: 1883
   username: "YOUR_MQTT_USERNAME_HERE"
   password: "YOUR_MQTT_PASSWORD_HERE"
-  debug: "off"
+  debug: False
 sensors:

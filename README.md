@@ -33,9 +33,9 @@ The `config.yaml` structure must look like the below:
 
 ```yaml
 tempest_device: True
-unit_system: "metric" #Use metric or imperial
+unit_system: "metric"
 rapid_wind_interval: 0
-debug: "off"
+debug: False
 station:
   elevation: 50
   host: "0.0.0.0"
@@ -45,7 +45,7 @@ mqtt:
   port: 1883
   username: "YOUR_MQTT_USERNAME"
   password: "YOUR_MQTT_PASSWORD"
-  debug: "off" # on or off to enable mqtt debug
+  debug: False
 sensors:
 ```
 
@@ -54,7 +54,7 @@ Normally you would only have to change the Unit System and MQTT settings to supp
 - `tempest_device`: If you have the older AIR and SKY devices, set this setting to `False`.
 - `unit_system`: Enter *imperial* or *metric* to decide what unit the data is delivered in
 - `rapid_wind_interval`: The weather stations delivers wind speed and bearing every 2 seconds. If you don't want to update the HA sensors so often, you can set a number here (in seconds), for how often they are updated. Default is zero, which means the two sensors are updated everytime WeatherFlow sends new data
-- `debug`: Set this to on, to get some more debugging messages in the Container log file
+- `debug`: Set this to True, to get some more debugging messages in the Container log file
 - `station elevation`: The elevation above sea level (in meters) four your weather station. Is used by the program for some of the derived sensors.
 - `station host`: Unless you have a very special IP setup or the Weatherflow hub is on a different network, you should not change this
 - `station port`: Weatherflow always broadcasts on port 50222/udp, so don't change this
@@ -62,7 +62,7 @@ Normally you would only have to change the Unit System and MQTT settings to supp
 - `mqtt port`: The Port for your mqtt server - Standard is 1883
 - `mqtt username`: The username used to connect to the mqtt server. Leave blank to use Anonymous connection
 - `mqtt password`: The password used to connect to the mqtt server. Leave blank to use Anonymous connection
-- `mqtt debug`: Set this to on, to get some more mqtt debugging messages in the Container log file
+- `mqtt debug`: Set this to True, to get some more mqtt debugging messages in the Container log file
 - `sensors`: Leave blank to setup All available sensors, or enter a list of sensor ID's to setup. See [Available Sensors](#available-sensors) for a list of sensors.
 
 ## Docker Setup
@@ -107,7 +107,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | wind_direction | Wind Direction | Current measured Wind bearing as compass symbol | Yes
 | wind_direction_avg | Wind Direction Avg | The average wind direction as a compass string | Yes
 | wind_gust | Wind Gust | Highest wind speed for the last minute | No
-| wind_lull | Wind Lull | Lowest wind | No
+| wind_lull | Wind Lull | Lowest wind for the last minute | No
 | wind_speed | Wind Speed | Current measured Wind Speed | No
 | wind_speed_avg | Wind Speed Avg | Average wind speed for the last minute | No
 
