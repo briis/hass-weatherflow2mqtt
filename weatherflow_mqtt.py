@@ -99,14 +99,6 @@ async def main():
 
     # Read stored Values and set variable values
     storage = await data_store.read_storage()
-    rain_today = storage["rain_today"]
-    rain_yesterday = storage.get("rain_yesterday", 0)
-    rain_time = storage["rain_start"]
-    strike_count = storage["lightning_count"]
-    strike_count_today = storage.get("lightning_count_today", strike_count)
-    strike_distance = storage["last_lightning_distance"]
-    strike_energy = storage["last_lightning_energy"]
-    strike_time = storage["last_lightning_time"]
     wind_speed = None
 
     # Watch for message from the UDP socket
@@ -117,18 +109,16 @@ async def main():
 
         # Run New day function if Midnight
         if current_day != datetime.today().weekday():
-            rain_yesterday = rain_today
-            rain_today = 0
-            strike_count_today = 0
-            storage["rain_today"] = rain_today
-            storage["rain_yesterday"] = rain_yesterday
-            storage["lightning_count_today"] = strike_count_today
+            storage["rain_yesterday"] = storage["rain_today"]
+            storage["rain_today"] = 0
+            storage["lightning_count_today"] = 0
             await data_store.write_storage(storage)
             current_day = datetime.today().weekday()
 
         # Clear Ligtning Data if data older than 3 hours
         if time.time() - storage["last_lightning_time"] > 10800:
-            strike_count = 0
+            storage["lightning_count"] = 0
+            await data_store.write_storage(storage)
 
         #Process the data
         if msg_type is not None:
@@ -149,32 +139,26 @@ async def main():
                 client.publish(state_topic, json.dumps(data))
             if msg_type in EVENT_PRECIP_START:
                 obs = json_response["evt"]
-                rain_time = datetime.fromtimestamp(obs[0]).isoformat()
-                storage["rain_start"] = rain_time
+                storage["rain_start"] = datetime.fromtimestamp(obs[0]).isoformat()
                 await data_store.write_storage(storage)
             if msg_type in EVENT_STRIKE:
                 obs = json_response["evt"]
-                strike_distance = await cnv.distance(obs[1])
-                strike_energy = obs[2]
-                strike_time = time.time()
-                strike_count += 1
-                strike_count_today += 1
-                storage["last_lightning_distance"] = strike_distance
-                storage["last_lightning_energy"] = strike_energy
-                storage["last_lightning_time"] = strike_time
-                storage["lightning_count"] = strike_count
-                storage["lightning_count_today"] = strike_count_today
+                storage["lightning_count"] += 1
+                storage["lightning_count_today"] += 1
+                storage["last_lightning_distance"] = await cnv.distance(obs[1])
+                storage["last_lightning_energy"] = obs[2]
+                storage["last_lightning_time"] = time.time()
                 await data_store.write_storage(storage)
             if msg_type in EVENT_AIR_DATA:
                 obs = json_response["obs"][0]
                 data["station_pressure"] = await cnv.pressure(obs[1])
                 data["air_temperature"] = await cnv.temperature(obs[2])
                 data["relative_humidity"] = obs[3]
-                data["lightning_strike_count"] = strike_count
-                data["lightning_strike_count_today"] = strike_count_today
-                data["lightning_strike_distance"] = strike_distance
-                data["lightning_strike_energy"] = strike_energy
-                data["lightning_strike_time"] = datetime.fromtimestamp(strike_time).isoformat()
+                data["lightning_strike_count"] = storage["lightning_count"]
+                data["lightning_strike_count_today"] = storage["lightning_count_today"]
+                data["lightning_strike_distance"] = storage["last_lightning_distance"]
+                data["lightning_strike_energy"] = storage["last_lightning_energy"]
+                data["lightning_strike_time"] = datetime.fromtimestamp(storage["last_lightning_time"]).isoformat()
                 data["battery_air"] = round(obs[6], 2)
                 data["sealevel_pressure"] = await cnv.pressure(obs[1] + (elevation / 9.2))
                 data["air_density"] = await cnv.air_density(obs[2], obs[1])
@@ -185,10 +169,10 @@ async def main():
                 obs = json_response["obs"][0]
                 data["illuminance"] = obs[1]
                 data["uv"] = obs[2]
-                rain_today += obs[3]
-                data["rain_today"] = await cnv.rain(rain_today)
-                data["rain_yesterday"] = await cnv.rain(rain_yesterday)
-                data["rain_start_time"] = rain_time
+                storage["rain_today"] += obs[3]
+                data["rain_today"] = await cnv.rain(storage["rain_today"])
+                data["rain_yesterday"] = await cnv.rain(storage["rain_yesterday"])
+                data["rain_start_time"] = storage["rain_start"]
                 data["wind_lull"] = await cnv.speed(obs[4])
                 data["wind_speed_avg"] = await cnv.speed(obs[5])
                 data["wind_gust"] = await cnv.speed(obs[6])
@@ -200,7 +184,6 @@ async def main():
                 data["rain_rate"] = await cnv.rain_rate(obs[3])
                 client.publish(state_topic, json.dumps(data))
                 if obs[3] > 0:
-                    storage["rain_today"] = rain_today
                     await data_store.write_storage(storage)
             if msg_type in EVENT_TEMPEST_DATA:
                 obs = json_response["obs"][0]
@@ -214,10 +197,10 @@ async def main():
                 data["illuminance"] = obs[9]
                 data["uv"] = obs[10]
                 data["solar_radiation"] = obs[11]
-                rain_today += obs[12]
-                data["rain_today"] = await cnv.rain(rain_today)
-                data["rain_yesterday"] = await cnv.rain(rain_yesterday)
-                data["rain_start_time"] = rain_time
+                storage["rain_today"] += obs[12]
+                data["rain_today"] = await cnv.rain(storage["rain_today"])
+                data["rain_yesterday"] = await cnv.rain(storage["rain_yesterday"])
+                data["rain_start_time"] = storage["rain_start"]
                 data["precipitation_type"] = await cnv.rain_type(obs[13])
                 data["battery"] = round(obs[16], 2)
                 data["rain_rate"] = await cnv.rain_rate(obs[12])
@@ -228,11 +211,11 @@ async def main():
                 data["station_pressure"] = await cnv.pressure(obs[6])
                 data["air_temperature"] = await cnv.temperature(obs[7])
                 data["relative_humidity"] = obs[8]
-                data["lightning_strike_count"] = strike_count
-                data["lightning_strike_count_today"] = strike_count_today
-                data["lightning_strike_distance"] = strike_distance
-                data["lightning_strike_energy"] = strike_distance
-                data["lightning_strike_time"] = datetime.fromtimestamp(strike_time).isoformat()
+                data["lightning_strike_count"] = storage["lightning_count"]
+                data["lightning_strike_count_today"] = storage["lightning_count_today"]
+                data["lightning_strike_distance"] = storage["last_lightning_distance"]
+                data["lightning_strike_energy"] = storage["last_lightning_energy"]
+                data["lightning_strike_time"] = datetime.fromtimestamp(storage["last_lightning_time"]).isoformat()
                 data["sealevel_pressure"] = await cnv.pressure(obs[6] + (elevation / 9.2), 2)
                 data["air_density"] = await cnv.air_density(obs[7], obs[6])
                 data["dewpoint"] = await cnv.dewpoint(obs[7], obs[8])
@@ -240,7 +223,6 @@ async def main():
                 client.publish(state_topic, json.dumps(data))
 
                 if obs[12] > 0:
-                    storage["rain_today"] = rain_today
                     await data_store.write_storage(storage)
 
             if msg_type in EVENT_DEVICE_STATUS:
