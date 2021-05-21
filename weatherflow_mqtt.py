@@ -48,15 +48,15 @@ async def main():
     _LOGGER.info("Timezone is %s", os.environ["TZ"])
     is_tempest = os.environ["TEMPEST_DEVICE"]
     weatherflow_ip = os.environ["WF_HOST"]
-    weatherflow_port = os.environ["WF_PORT"]
+    weatherflow_port = int(os.environ["WF_PORT"])
     elevation = os.environ["WF_PORT"]
     mqtt_host = os.environ["MQTT_HOST"]
-    mqtt_port = os.environ["MQTT_PORT"]
+    mqtt_port = int(os.environ["MQTT_PORT"])
     mqtt_username = os.environ["MQTT_USERNAME"]
     mqtt_password = os.environ["MQTT_PASSWORD"]
     mqtt_debug = os.environ["MQTT_DEBUG"]
     unit_system = os.environ["UNIT_SYSTEM"]
-    rw_interval = os.environ["RAPID_WIND_INTERVAL"]
+    rw_interval = int(os.environ["RAPID_WIND_INTERVAL"])
     show_debug =os.environ["DEBUG"]
 
 
