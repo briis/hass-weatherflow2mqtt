@@ -1,6 +1,18 @@
 """Constant file for weatherflow2mqtt."""
+import datetime
+
 EXTERNAL_DIRECTORY = "/usr/local/config"
 STORAGE_FILE = f"{EXTERNAL_DIRECTORY}/storage.json"
+STORAGE_FIELDS = [
+    ["rain_today", 0],
+    ["rain_yesterday", 0],
+    ["rain_start", datetime.datetime.fromtimestamp(0).isoformat()],
+    ["lightning_count", 0],
+    ["lightning_count_today", 0],
+    ["last_lightning_time", 0],
+    ["last_lightning_distance", 0],
+    ["last_lightning_energy", 0],
+]
 
 DEVICE_CLASS_HUMIDITY = "humidity"
 DEVICE_CLASS_ILLUMINANCE = "illuminance"

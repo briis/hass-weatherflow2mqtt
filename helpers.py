@@ -6,7 +6,7 @@ import math
 from typing import OrderedDict
 import logging
 
-from const import UNITS_IMPERIAL, STORAGE_FILE
+from const import UNITS_IMPERIAL, STORAGE_FILE, STORAGE_FIELDS
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -108,14 +108,8 @@ class DataStorage:
 
         _LOGGER.info("Creating new Storage file...")
         data = OrderedDict()
-        data['rain_today'] = 0
-        data['rain_yesterday'] = 0
-        data['rain_start'] = datetime.datetime.fromtimestamp(0).isoformat()
-        data['lightning_count'] = 0
-        data['lightning_count_today'] = 0
-        data['last_lightning_time'] = 0
-        data['last_lightning_distance'] = 0
-        data['last_lightning_energy'] = 0
+        for item in STORAGE_FIELDS:
+            data[item[0]] = item[1]
 
         try:
             with open(STORAGE_FILE, "w") as jsonFile:
@@ -129,13 +123,24 @@ class DataStorage:
         """Read the storage file, and return values."""
         try:
             with open(STORAGE_FILE, "r") as jsonFile:
-                data = json.load(jsonFile)
+                tmp_data = json.load(jsonFile)
+                data = await self.data_integrity(tmp_data)
                 return data
         except FileNotFoundError as e:
             data = self._initialize_storage()
             return data
         except Exception as e:
             print(e)
+
+    async def data_integrity(self, data):
+        """Checks the Integrity of the Data File."""
+
+        for item in STORAGE_FIELDS:
+            if item[0] not in data:
+                data[item[0]] = item[1]
+
+        await self.write_storage(data)
+        return data
 
     async def write_storage(self, data: OrderedDict):
         """Saves the last values in the Stotage file."""
@@ -147,21 +152,3 @@ class DataStorage:
             _LOGGER.error("Could not save Storage File. Error message: %s", e)
                 
 
-class ErrorMessages:
-
-    async def mqtt_connect_errors(error_value):
-        """Returns an error string based on error code."""
-        err = "success, connection accepted"
-        if error_value == 1:
-            err = "connection refused, bad protocol"
-        if error_value == 2:
-            err = "refused, client-id error"
-        if error_value == 3:
-            err = "refused, service unavailable"
-        if error_value == 4:
-            err = "refused, bad username or password"
-        if error_value == 5:
-            err = "refused, not authorized"
-        
-        return err
-            
