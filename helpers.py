@@ -182,10 +182,27 @@ class DataStorage:
 
         try:
             file = open(STRIKE_STORAGE_FILE, "a")
-            # data = OrderedDict()
-            # data["strike_time"] = time.time()
             file.write(f"{time.time()}\n")
             file.close()
 
         except Exception as e:
             _LOGGER.error("Could not save Storage File. Error message: %s", e)
+
+    async def housekeeping_strike():
+        """Performs housekeeping tasks on the strike data file."""
+
+        try:
+            with open(STRIKE_STORAGE_FILE, "r") as file:
+                lines = file.readlines()
+            newlines = ""
+            for item in lines:
+                if time.time() - float(item) < 10800:
+                    newlines += item
+            file = open(STRIKE_STORAGE_FILE, "w")
+            file.write(f"{newlines}\n")
+            file.close()
+            
+        except FileNotFoundError as e:
+            return 0
+        except Exception as e:
+            _LOGGER.debug("Could not perform housekeeping on strike storage file. Error message: %s", e)

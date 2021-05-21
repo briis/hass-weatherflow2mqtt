@@ -113,6 +113,7 @@ async def main():
             storage["rain_today"] = 0
             storage["lightning_count_today"] = 0
             await data_store.write_storage(storage)
+            await data_store.housekeeping_strike()
             current_day = datetime.today().weekday()
 
         # Clear Ligtning Data if data older than 3 hours

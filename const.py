@@ -49,7 +49,7 @@ WEATHERFLOW_SENSORS = [
     ["battery_air", "Battery AIR", "V", "V", DEVICE_CLASS_VOLTAGE, None, EVENT_AIR_DATA],
     ["lightning_strike_distance", "Lightning Distance", "Km", "mi", None, "flash", EVENT_AIR_DATA],
     ["lightning_strike_energy", "Lightning Energy", None, None, None, "flash", EVENT_AIR_DATA],
-    ["lightning_strike_time", "Last Lightning Time", None, None, DEVICE_CLASS_TIMESTAMP, "clock-outline", EVENT_AIR_DATA],
+    ["lightning_strike_time", "Last Lightning Today", None, None, DEVICE_CLASS_TIMESTAMP, "clock-outline", EVENT_AIR_DATA],
     ["illuminance", "Illuminance", "lx", "lx", DEVICE_CLASS_ILLUMINANCE, None, EVENT_SKY_DATA],
     ["uv", "UV Index", "UVI", "UVI", None, "weather-sunny-alert", EVENT_SKY_DATA],
     ["rain_today", "Rain Today", "mm", "in", None, "weather-pouring", EVENT_SKY_DATA],
