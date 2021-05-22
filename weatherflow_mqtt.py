@@ -161,9 +161,8 @@ async def main():
                     storage["last_lightning_time"]
                 ).isoformat()
                 data["battery_air"] = round(obs[6], 2)
-                data["sealevel_pressure"] = await cnv.pressure(
-                    obs[1] + (elevation / 9.2)
-                )
+                data["sealevel_pressure"] = await cnv.pressure(obs[1] + (elevation / 9.2))
+                data["sealevel_pressure"] = await cnv.sea_level_pressure(obs[2], obs[1], elevation)
                 data["air_density"] = await cnv.air_density(obs[2], obs[1])
                 data["dewpoint"] = await cnv.dewpoint(obs[2], obs[3])
                 data["feelslike"] = await cnv.feels_like(obs[2], obs[3], wind_speed)
