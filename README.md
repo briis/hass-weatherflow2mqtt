@@ -19,59 +19,57 @@ This project is still very much in Beta, but the things that are there, work. I 
 - Ensure there is a MQTT Server available
 - Open a Terminal on the Machine you want to run the Docker container on.
 - Make a new Directory: `mkdir weatherflow2mqtt` (or some other name) and change to that directory.
-- Copy the `config_example.yaml` file from this repo to that directory, and rename it to `config.yaml`.
-- Edit `config.yaml` as described below in the Configuration section.
-- Pull the docker image with this command: `docker pull ghcr.io/briis/hass-weatherflow2mqtt`
-- Create the docker container. Replace TZ (Timezone) with your Time Zone. `docker create --name weatherflow2mqtt -e TZ=YOUR_TIMEZONE -v $(pwd):/usr/local/config -p 0.0.0.0:50222:50222/udp ghcr.io/briis/hass-weatherflow2mqtt` You might not need the 0.0.0.0 in front of port 50222, but if you run into IPv6 errors you can add this.
-- Then finally start the Container with `docker start weatherflow2mqtt`
+- If you **don't** want all sensors setup, copy the `config_example.yaml` file from this repo to that directory, and rename it to `config.yaml`. Then add the sensors you want from the [available sensors list](#sensor-structure). If you don't do this, all sensors from the [Available Sensors](#available-sensors) will be added.
+- Now start the Docker Container with the parameters described under [docker-setup](#docker-setup)
 
 If everything is setup correctly with MQTT and Home Assistant, you should now start seeing the sensors show up in HA. Please note, it can take up to 1 min after startup, before all sensors are populated with data.
 
-## Configuration
-
-The `config.yaml` structure must look like the below:
-
-```yaml
-tempest_device: True
-unit_system: "metric"
-rapid_wind_interval: 0
-debug: False
-station:
-  elevation: 50
-  host: "0.0.0.0"
-  port: "50222"
-mqtt:
-  host: "YOUR_MQTT_IP_HERE"
-  port: 1883
-  username: "YOUR_MQTT_USERNAME"
-  password: "YOUR_MQTT_PASSWORD"
-  debug: False
-sensors:
-```
-
-Normally you would only have to change the Unit System and MQTT settings to supply the address and credentials for your MQTT Server. But here is the complete walkthrough of the configuration settings:
-
-- `tempest_device`: If you have the older AIR and SKY devices, set this setting to `False`.
-- `unit_system`: Enter *imperial* or *metric* to decide what unit the data is delivered in
-- `rapid_wind_interval`: The weather stations delivers wind speed and bearing every 2 seconds. If you don't want to update the HA sensors so often, you can set a number here (in seconds), for how often they are updated. Default is zero, which means the two sensors are updated everytime WeatherFlow sends new data
-- `debug`: Set this to True, to get some more debugging messages in the Container log file
-- `station elevation`: The elevation above sea level (in meters) four your weather station. Is used by the program for some of the derived sensors.
-- `station host`: Unless you have a very special IP setup or the Weatherflow hub is on a different network, you should not change this
-- `station port`: Weatherflow always broadcasts on port 50222/udp, so don't change this
-- `mqtt host`: The IP address of your mqtt server
-- `mqtt port`: The Port for your mqtt server - Standard is 1883
-- `mqtt username`: The username used to connect to the mqtt server. Leave blank to use Anonymous connection
-- `mqtt password`: The password used to connect to the mqtt server. Leave blank to use Anonymous connection
-- `mqtt debug`: Set this to True, to get some more mqtt debugging messages in the Container log file
-- `sensors`: Leave blank to setup All available sensors, or enter a list of sensor ID's to setup. See [Available Sensors](#available-sensors) for a list of sensors.
-
 ## Docker Setup
 
-There are two important things to notice before you run or create the Docker Container:
+The below command will pull the latest docker image and start WeatherFlow2MQTT for timezone Europe/Copenhagen and save data in the directory you are placed in when you launch the command. Ensure that you have replaced the Environment variables with your specific data. See description below.
 
-`TZ=YOUR_TIMEZONE` make sure that you use the right timezone here, or else some of the calculations done by the container will not be correct. Default Timezone is *Europe/Copenhagen*.
+```bash
+docker run -d \
+--name=weatherflow2mqtt --restart=always \
+-v $(pwd):/usr/local/config \
+-p 0.0.0.0:50222:50222/udp \
+-e TZ=Europe/Copenhagen \
+-e TEMPEST_DEVICE=True \
+-e UNIT_SYSTEM=metric \
+-e RAPID_WIND_INTERVAL=0 \
+-e DEBUG=False \
+-e ELEVATION=0 \
+-e WF_HOST=0.0.0.0 \
+-e WF_PORT=50222 \
+-e MQTT_HOST=127.0.0.1 \
+-e MQTT_PORT=1883 \
+-e MQTT_USERNAME= \
+-e MQTT_PASSWORD= \
+-e MQTT_DEBUG=False \
+ghcr.io/briis/hass-weatherflow2mqtt
+```
 
-`-v YOUR_STORAGE_AREA:/usr/local/config` Please replace YOUR_STORAGE_AREA with a directory where Docker will have read an write access. It is also in this directory that you must place the *config.yaml* file. Once the program runs a hidden file called `.storage.yaml` will be created in this directory. This file is used to save some calculated values, and to ensure that you don't start from 0 if you have to restart Home Assistant or the container.
+### Docker Volume
+
+`-v YOUR_STORAGE_AREA:/usr/local/config` Please replace YOUR_STORAGE_AREA with a directory where Docker will have read an write access. It is also in this directory that you must place the *config.yaml* file if you use this. Once the program runs two hidden files called `.storage.yaml` and `.lightning.data` will be created in this directory. These files are used to save some calculated values, and to ensure that you don't start from 0 if you have to restart Home Assistant or the container.
+
+### Docker Environment Variables
+
+A description of the Environment Variables available for this container. All of them have a default value, so you only need to add the onces where you want to change that.
+
+- `TZ` Set your local Timezone. It is important that you use the right timezone here, or else some of the calculations done by the container will not be correct. Default Timezone is *Europe/Copenhagen*
+- `TEMPEST_DEVICE` If you have a Tempest Weather Station set this to True. If False, the program will assume you have the older AIR and SKY units. Default is *True*
+- `UNIT_SYSTEM` Enter *imperial* or *metric*. This will determine the unit system used when displaying the values. Default is *metric*
+- `RAPID_WIND_INTERVAL` The weather stations delivers wind speed and bearing every 2 seconds. If you don't want to update the HA sensors so often, you can set a number here (in seconds), for how often they are updated. Default is *0*, which means data are updated when received from the station.
+- `ELEVATION` Set the hight above sea level for where the station is placed. This is used when calculating some of the sensor values. The value has to be in meters. Default is *0*
+- `WF_HOST` Unless you have a very special IP setup or the Weatherflow hub is on a different network, you should not change this. Default is *0.0.0.0*
+- `WF_PORT` Weatherflow always broadcasts on port 50222/udp, so don't change this. Default is *50222*
+- `MQTT_HOST` The IP address of your mqtt server. Default value is *127.0.0.1*
+- `MQTT_PORT` The Port for your mqtt server. Default value is *1883*
+- `MQTT_USERNAME` The username used to connect to the mqtt server. Leave blank to use Anonymous connection. Default value is *blank*
+- `MQTT_PASSWORD` The password used to connect to the mqtt server. Leave blank to use Anonymous connection. Default value is *blank*
+- `MQTT_DEBUG` Set this to True, to get some more mqtt debugging messages in the Container log file. Default value is *False*
+- `DEBUG` Set this to True to enable more debug data in the Container Log. Default is *False*
 
 ## Available Sensors
 
@@ -81,10 +79,10 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | --- | --- | --- | --- |
 | air_density | Air Density | The Air density | Yes
 | air_temperature | Temperature | Outside Temperature | No
-| battery | Battery SKY or TEMPEST | If this is a TEMPEST unit this where the Voltage is displayed. Else it will be the Voltage of the SKY unit | No
+| battery | Battery SKY or TEMPEST | If this is a TEMPEST unit this is where the Voltage is displayed. Else it will be the Voltage of the SKY unit | No
 | battery_air | Battery AIR | The voltage on the AIR unit (If present) | No
 | dewpoint | Dew Point | Dewpoint in degrees | Yes
-| feelslike | Feels Like Temperature | The experienced temperature, a mix of Heat Index and Wind Chill | Yes
+| feelslike | Feels Like Temperature | The apparent temperature, a mix of Heat Index and Wind Chill | Yes
 | illuminance | Illuminance | How much the incident light illuminates the surface | No
 | lightning_strike_count | Lightning Count (3 hours) | Number of lightning strikes the last 3 hours | Yes
 | lightning_strike_count_today | Lightning Count (Today) | Number of lightning strikes current day | Yes

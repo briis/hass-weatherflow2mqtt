@@ -6,28 +6,31 @@ import json
 import math
 from typing import OrderedDict
 import logging
+import yaml
 
 from const import (
-    UNITS_IMPERIAL,
+    EXTERNAL_DIRECTORY,
     STORAGE_FILE,
     STORAGE_FIELDS,
     STRIKE_STORAGE_FILE,
+    UNITS_IMPERIAL,
 )
 
 _LOGGER = logging.getLogger(__name__)
+
 
 class ConversionFunctions:
     """Class to help with converting from different units."""
 
     def __init__(self, unit_system):
         self._unit_system = unit_system
-    
+
     async def temperature(self, value) -> float:
         """Convert Temperature Value."""
         if self._unit_system == UNITS_IMPERIAL:
             return round((value * 9 / 5) + 32, 1)
         return round(value, 1)
-    
+
     async def pressure(self, value) -> float:
         """Convert Pressure Value."""
         if self._unit_system == UNITS_IMPERIAL:
@@ -65,25 +68,55 @@ class ConversionFunctions:
         """Returns a directional Wind Direction string."""
         if value is None:
             return "N"
-        direction_array = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW","N"]
+        direction_array = [
+            "N",
+            "NNE",
+            "NE",
+            "ENE",
+            "E",
+            "ESE",
+            "SE",
+            "SSE",
+            "S",
+            "SSW",
+            "SW",
+            "WSW",
+            "W",
+            "WNW",
+            "NW",
+            "NNW",
+            "N",
+        ]
         direction = direction_array[int((value + 11.25) / 22.5)]
         return direction
 
-    async def air_density(self,temperature, station_pressure):
+    async def air_density(self, temperature, station_pressure):
         """Returns the Air Density."""
         kelvin = temperature + 273.15
         pressure = station_pressure
         r_specific = 287.058
 
         if self._unit_system == UNITS_IMPERIAL:
-            pressure = station_pressure *  0.0145037738
+            pressure = station_pressure * 0.0145037738
             r_specific = 53.35
 
         return round((pressure * 100) / (r_specific * kelvin), 4)
 
     async def dewpoint(self, temperature, humidity):
         """Returns Dewpoint."""
-        dewpoint_c = round(243.04*(math.log(humidity/100)+((17.625*temperature)/(243.04+temperature)))/(17.625-math.log(humidity/100)-((17.625*temperature)/(243.04+temperature))),1)
+        dewpoint_c = round(
+            243.04
+            * (
+                math.log(humidity / 100)
+                + ((17.625 * temperature) / (243.04 + temperature))
+            )
+            / (
+                17.625
+                - math.log(humidity / 100)
+                - ((17.625 * temperature) / (243.04 + temperature))
+            ),
+            1,
+        )
         if self._unit_system == UNITS_IMPERIAL:
             return await self.temperature(dewpoint_c)
         return dewpoint_c
@@ -97,7 +130,9 @@ class ConversionFunctions:
         if temperature is None or humidity is None or windspeed is None:
             return 0
 
-        e_value = humidity * 0.06105 * math.exp((17.27 * temperature) / (237.7 + temperature))
+        e_value = (
+            humidity * 0.06105 * math.exp((17.27 * temperature) / (237.7 + temperature))
+        )
         feelslike_c = temperature + 0.348 * e_value - 0.7 * windspeed - 4.25
         if self._unit_system == UNITS_IMPERIAL:
             return await self.temperature(feelslike_c)
@@ -108,6 +143,7 @@ class ConversionFunctions:
         if value is None:
             return "None"
         return str(datetime.timedelta(seconds=value))
+
 
 class DataStorage:
     """Handles reading and writing of the external storage file."""
@@ -126,7 +162,7 @@ class DataStorage:
                 json.dump(data, jsonFile)
         except Exception as e:
             _LOGGER.error("Could not save Storage File. Error message: %s", e)
-        
+
         return data
 
     async def read_storage(self):
@@ -160,7 +196,6 @@ class DataStorage:
                 json.dump(data, jsonFile)
         except Exception as e:
             _LOGGER.error("Could not save Storage File. Error message: %s", e)
-                
 
     async def read_strike_storage(self):
         """Read the strike storage file, and return number of strikes in last three hours."""
@@ -204,15 +239,50 @@ class DataStorage:
             file = open(STRIKE_STORAGE_FILE, "w")
             file.write(f"{newlines}\n")
             file.close()
-            
+
         except FileNotFoundError as e:
             return 0
         except Exception as e:
-            _LOGGER.debug("Could not perform housekeeping on strike storage file. Error message: %s", e)
+            _LOGGER.debug(
+                "Could not perform housekeeping on strike storage file. Error message: %s",
+                e,
+            )
 
+    async def read_config(self):
+        """Reads the config file, to look for sensors."""
+        try:
+            filepath = f"{EXTERNAL_DIRECTORY}/config.yaml"
+            with open(filepath, "r") as file:
+                data = yaml.load(file, Loader=yaml.FullLoader)
+                sensors = data.get("sensors")
+
+                return sensors
+
+        except FileNotFoundError as e:
+            return None
+        except Exception as e:
+            _LOGGER.debug("Could not read config.yaml file. Error message: %s", e)
+            return None
+
+        # filepath = f"{EXTERNAL_DIRECTORY}/config.yaml"
+        # with open(filepath) as json_file:
+        #     data = yaml.load(json_file, Loader=yaml.FullLoader)
+        #     is_tempest = data["tempest_device"]
+        #     weatherflow_ip = data["station"]["host"]
+        #     weatherflow_port = data["station"]["port"]
+        #     elevation = data["station"]["elevation"]
+        #     mqtt_host = data["mqtt"]["host"]
+        #     mqtt_port = data["mqtt"]["port"]
+        #     mqtt_username = data["mqtt"]["username"]
+        #     mqtt_password = data["mqtt"]["password"]
+        #     mqtt_debug = data["mqtt"]["debug"]
+        #     unit_system = data["unit_system"]
+        #     rw_interval = data["rapid_wind_interval"]
+        #     show_debug = data["debug"]
+        #     sensors = data.get("sensors")
 
     async def dummy_strike_storage(self, data):
-        """Saves an entry if a strike event occurs."""
+        """Used for testing purposes only."""
 
         try:
             file = open(STRIKE_STORAGE_FILE, "a")

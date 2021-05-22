@@ -8,9 +8,8 @@ from typing import OrderedDict
 import paho.mqtt.client as mqtt
 import asyncio
 import logging
-import yaml
 import time
-from datetime import datetime, date
+from datetime import datetime
 import sys
 import os
 
@@ -26,7 +25,6 @@ from const import (
     EVENT_SKY_DATA,
     EVENT_STRIKE,
     EVENT_TEMPEST_DATA,
-    EXTERNAL_DIRECTORY,
     SENSOR_CLASS,
     SENSOR_DEVICE,
     SENSOR_ICON,
@@ -40,60 +38,49 @@ from const import (
 
 _LOGGER = logging.getLogger(__name__)
 
+
 async def main():
     logging.basicConfig(level=logging.DEBUG)
 
-    
-    # Read the config file
+    # Read the config Settings
     _LOGGER.info("Timezone is %s", os.environ["TZ"])
-    # is_tempest = bool(os.environ["TEMPEST_DEVICE"])
-    # weatherflow_ip = os.environ["WF_HOST"]
-    # weatherflow_port = int(os.environ["WF_PORT"])
-    # elevation = int(os.environ["WF_PORT"])
-    # mqtt_host = os.environ["MQTT_HOST"]
-    # mqtt_port = int(os.environ["MQTT_PORT"])
-    # mqtt_username = os.environ["MQTT_USERNAME"]
-    # mqtt_password = os.environ["MQTT_PASSWORD"]
-    # mqtt_debug = bool(os.environ["MQTT_DEBUG"])
-    # unit_system = os.environ["UNIT_SYSTEM"]
-    # rw_interval = int(os.environ["RAPID_WIND_INTERVAL"])
-    # show_debug =bool(os.environ["DEBUG"])
+    is_tempest = bool(os.environ["TEMPEST_DEVICE"])
+    weatherflow_ip = os.environ["WF_HOST"]
+    weatherflow_port = int(os.environ["WF_PORT"])
+    elevation = int(os.environ["WF_PORT"])
+    mqtt_host = os.environ["MQTT_HOST"]
+    mqtt_port = int(os.environ["MQTT_PORT"])
+    mqtt_username = os.environ["MQTT_USERNAME"]
+    mqtt_password = os.environ["MQTT_PASSWORD"]
+    mqtt_debug = bool(os.environ["MQTT_DEBUG"])
+    unit_system = os.environ["UNIT_SYSTEM"]
+    rw_interval = int(os.environ["RAPID_WIND_INTERVAL"])
+    show_debug = bool(os.environ["DEBUG"])
 
+    cnv = ConversionFunctions(unit_system)
+    data_store = DataStorage()
 
-    filepath = f"{EXTERNAL_DIRECTORY}/config.yaml"
-    with open(filepath) as json_file:
-        data = yaml.load(json_file, Loader=yaml.FullLoader)
-        is_tempest = data["tempest_device"]
-        weatherflow_ip = data["station"]["host"]
-        weatherflow_port = data["station"]["port"]
-        elevation = data["station"]["elevation"]
-        mqtt_host = data["mqtt"]["host"]
-        mqtt_port = data["mqtt"]["port"]
-        mqtt_username = data["mqtt"]["username"]
-        mqtt_password = data["mqtt"]["password"]
-        mqtt_debug = data["mqtt"]["debug"]
-        unit_system = data["unit_system"]
-        rw_interval = data["rapid_wind_interval"]
-        show_debug = data["debug"]
-        sensors = data.get("sensors")
+    # Read the sensor config
+    sensors = await data_store.read_config()
 
     mqtt_anonymous = False
     if not mqtt_username or not mqtt_password:
         mqtt_anonymous = True
 
-    cnv = ConversionFunctions(unit_system)
-    data_store = DataStorage()
-
     # Setup and connect to MQTT Broker
     try:
-        client =mqtt.Client()
+        client = mqtt.Client()
         client.max_inflight_messages_set(40)
         if not mqtt_anonymous:
-            client.username_pw_set(username=mqtt_username,password=mqtt_password)
+            client.username_pw_set(username=mqtt_username, password=mqtt_password)
         if mqtt_debug:
             client.enable_logger()
         client.connect(mqtt_host, port=mqtt_port)
-        _LOGGER.info("Connected to the MQTT server on address %s and port %s...", mqtt_host, mqtt_port)
+        _LOGGER.info(
+            "Connected to the MQTT server on address %s and port %s...",
+            mqtt_host,
+            mqtt_port,
+        )
     except Exception as e:
         _LOGGER.error("Could not connect to MQTT Server. Error is: %s", e)
         sys.exit(1)
@@ -110,7 +97,7 @@ async def main():
     await setup_sensors(endpoint, client, unit_system, sensors, is_tempest)
 
     # Set timer variables
-    rapid_last_run = 1621229580.583215 # A time in the past
+    rapid_last_run = 1621229580.583215  # A time in the past
     current_day = datetime.today().weekday()
 
     # Read stored Values and set variable values
@@ -132,12 +119,7 @@ async def main():
             await data_store.housekeeping_strike()
             current_day = datetime.today().weekday()
 
-        # Clear Ligtning Data if data older than 3 hours
-        # if time.time() - storage["last_lightning_time"] > 10800:
-        #     storage["lightning_count"] = 0
-        #     await data_store.write_storage(storage)
-
-        #Process the data
+        # Process the data
         if msg_type is not None:
             data = OrderedDict()
             state_topic = "homeassistant/sensor/{}/{}/state".format(DOMAIN, msg_type)
@@ -160,7 +142,6 @@ async def main():
                 await data_store.write_storage(storage)
             if msg_type in EVENT_STRIKE:
                 obs = json_response["evt"]
-                # storage["lightning_count"] += 1
                 await data_store.write_strike_storage()
                 storage["lightning_count_today"] += 1
                 storage["last_lightning_distance"] = await cnv.distance(obs[1])
@@ -172,14 +153,17 @@ async def main():
                 data["station_pressure"] = await cnv.pressure(obs[1])
                 data["air_temperature"] = await cnv.temperature(obs[2])
                 data["relative_humidity"] = obs[3]
-                # data["lightning_strike_count"] = storage["lightning_count"]
                 data["lightning_strike_count"] = await data_store.read_strike_storage()
                 data["lightning_strike_count_today"] = storage["lightning_count_today"]
                 data["lightning_strike_distance"] = storage["last_lightning_distance"]
                 data["lightning_strike_energy"] = storage["last_lightning_energy"]
-                data["lightning_strike_time"] = datetime.fromtimestamp(storage["last_lightning_time"]).isoformat()
+                data["lightning_strike_time"] = datetime.fromtimestamp(
+                    storage["last_lightning_time"]
+                ).isoformat()
                 data["battery_air"] = round(obs[6], 2)
-                data["sealevel_pressure"] = await cnv.pressure(obs[1] + (elevation / 9.2))
+                data["sealevel_pressure"] = await cnv.pressure(
+                    obs[1] + (elevation / 9.2)
+                )
                 data["air_density"] = await cnv.air_density(obs[2], obs[1])
                 data["dewpoint"] = await cnv.dewpoint(obs[2], obs[3])
                 data["feelslike"] = await cnv.feels_like(obs[2], obs[3], wind_speed)
@@ -207,7 +191,9 @@ async def main():
             if msg_type in EVENT_TEMPEST_DATA:
                 obs = json_response["obs"][0]
 
-                state_topic = "homeassistant/sensor/{}/{}/state".format(DOMAIN, EVENT_SKY_DATA)
+                state_topic = "homeassistant/sensor/{}/{}/state".format(
+                    DOMAIN, EVENT_SKY_DATA
+                )
                 data["wind_lull"] = await cnv.speed(obs[1])
                 data["wind_speed_avg"] = await cnv.speed(obs[2])
                 data["wind_gust"] = await cnv.speed(obs[3])
@@ -225,18 +211,23 @@ async def main():
                 data["rain_rate"] = await cnv.rain_rate(obs[12])
                 client.publish(state_topic, json.dumps(data))
 
-                state_topic = "homeassistant/sensor/{}/{}/state".format(DOMAIN, EVENT_AIR_DATA)
+                state_topic = "homeassistant/sensor/{}/{}/state".format(
+                    DOMAIN, EVENT_AIR_DATA
+                )
                 data = OrderedDict()
                 data["station_pressure"] = await cnv.pressure(obs[6])
                 data["air_temperature"] = await cnv.temperature(obs[7])
                 data["relative_humidity"] = obs[8]
                 data["lightning_strike_count"] = await data_store.read_strike_storage()
-                # data["lightning_strike_count"] = storage["lightning_count"]
                 data["lightning_strike_count_today"] = storage["lightning_count_today"]
                 data["lightning_strike_distance"] = storage["last_lightning_distance"]
                 data["lightning_strike_energy"] = storage["last_lightning_energy"]
-                data["lightning_strike_time"] = datetime.fromtimestamp(storage["last_lightning_time"]).isoformat()
-                data["sealevel_pressure"] = await cnv.pressure(obs[6] + (elevation / 9.2), 2)
+                data["lightning_strike_time"] = datetime.fromtimestamp(
+                    storage["last_lightning_time"]
+                ).isoformat()
+                data["sealevel_pressure"] = await cnv.pressure(
+                    obs[6] + (elevation / 9.2), 2
+                )
                 data["air_density"] = await cnv.air_density(obs[7], obs[6])
                 data["dewpoint"] = await cnv.dewpoint(obs[7], obs[8])
                 data["feelslike"] = await cnv.feels_like(obs[7], obs[8], wind_speed)
@@ -251,10 +242,21 @@ async def main():
                     serial_number = json_response.get("serial_number")
                     firmware_revision = json_response.get("firmware_revision")
                     voltage = json_response.get("voltage")
-                    _LOGGER.debug("DEVICE STATUS TRIGGERED AT %s\n  -- Device: %s\n -- Firmware Revision: %s\n -- Voltage: %s", str(now), serial_number, firmware_revision, voltage)
+                    _LOGGER.debug(
+                        "DEVICE STATUS TRIGGERED AT %s\n  -- Device: %s\n -- Firmware Revision: %s\n -- Voltage: %s",
+                        str(now),
+                        serial_number,
+                        firmware_revision,
+                        voltage,
+                    )
 
             if show_debug:
-                _LOGGER.debug("Event type %s has been processed, with payload: %s", msg_type, json.dumps(data))
+                _LOGGER.debug(
+                    "Event type %s has been processed, with payload: %s",
+                    msg_type,
+                    json.dumps(data),
+                )
+
 
 async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest):
     """Setup the Sensors in Home Assistant."""
@@ -279,8 +281,12 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest)
         # Modify name of Battery Device if Tempest Unit
         if is_tempest:
             sensor_name = "Battery TEMPEST"
-        state_topic = "homeassistant/sensor/{}/{}/state".format(DOMAIN, sensor[SENSOR_DEVICE])
-        discovery_topic = "homeassistant/sensor/{}/{}/config".format(DOMAIN, sensor[SENSOR_ID])
+        state_topic = "homeassistant/sensor/{}/{}/state".format(
+            DOMAIN, sensor[SENSOR_DEVICE]
+        )
+        discovery_topic = "homeassistant/sensor/{}/{}/config".format(
+            DOMAIN, sensor[SENSOR_ID]
+        )
         payload = OrderedDict()
         if sensors is None or sensor[SENSOR_ID] in sensors:
             _LOGGER.info("SETTING UP %s SENSOR", sensor_name)
@@ -293,24 +299,29 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest)
             if sensor[SENSOR_ICON] is not None:
                 payload["icon"] = f"mdi:{sensor[SENSOR_ICON]}"
             payload["state_topic"] = state_topic
-            payload["value_template"] = "{{{{ value_json.{} }}}}".format(sensor[SENSOR_ID])
+            payload["value_template"] = "{{{{ value_json.{} }}}}".format(
+                sensor[SENSOR_ID]
+            )
             payload["device"] = {
-                    "identifiers" : ["WeatherFlow_{}".format(serial_number)],
-                    "connections" : [["mac", serial_number]],
-                    "manufacturer" : "WeatherFlow",
-                    "name" : "WeatherFlow2MQTT",
-                    "model" : "WeatherFlow Weather Station",
-                    "sw_version": firmware
+                "identifiers": ["WeatherFlow_{}".format(serial_number)],
+                "connections": [["mac", serial_number]],
+                "manufacturer": "WeatherFlow",
+                "name": "WeatherFlow2MQTT",
+                "model": "WeatherFlow Weather Station",
+                "sw_version": firmware,
             }
-            
+
         try:
-            mqtt_client.publish(discovery_topic, json.dumps(payload), qos=1, retain=True)
+            mqtt_client.publish(
+                discovery_topic, json.dumps(payload), qos=1, retain=True
+            )
             await asyncio.sleep(0.2)
         except Exception as e:
             _LOGGER.error("Could not connect to MQTT Server. Error is: %s", e)
             break
 
-#Main Program starts
+
+# Main Program starts
 if __name__ == "__main__":
     try:
         asyncio.run(main())
