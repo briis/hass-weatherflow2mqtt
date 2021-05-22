@@ -47,7 +47,7 @@ async def main():
     is_tempest = eval(os.environ["TEMPEST_DEVICE"])
     weatherflow_ip = os.environ["WF_HOST"]
     weatherflow_port = int(os.environ["WF_PORT"])
-    elevation = float(os.environ["WF_PORT"])
+    elevation = float(os.environ["ELEVATION"])
     mqtt_host = os.environ["MQTT_HOST"]
     mqtt_port = int(os.environ["MQTT_PORT"])
     mqtt_username = os.environ["MQTT_USERNAME"]
