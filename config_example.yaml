@@ -1,15 +1,33 @@
-tempest_device: True
-unit_system: "metric"
-rapid_wind_interval: 5
-debug: False
-station:
-  elevation: 50
-  host: "0.0.0.0"
-  port: "50222"
-mqtt:
-  host: "YOUR_MQTT_IP_HERE"
-  port: 1883
-  username: "YOUR_MQTT_USERNAME_HERE"
-  password: "YOUR_MQTT_PASSWORD_HERE"
-  debug: False
 sensors:
+  - air_density
+  - air_temperature
+  - battery
+  - battery_air
+  - dewpoint
+  - feelslike
+  - illuminance
+  - lightning_strike_count
+  - lightning_strike_count_today
+  - lightning_strike_distance
+  - lightning_strike_energy
+  - lightning_strike_time
+  - precipitation_type
+  - rain_rate
+  - rain_start_time
+  - rain_today
+  - rain_yesterday
+  - relative_humidity
+  - sealevel_pressure
+  - solar_radiation
+  - station_pressure
+  - uptime
+  - uv
+  - wind_bearing
+  - wind_bearing_avg
+  - wind_direction
+  - wind_direction_avg
+  - wind_gust
+  - wind_lull
+  - wind_speed
+  - wind_speed_avg
+  

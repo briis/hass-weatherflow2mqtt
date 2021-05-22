@@ -19,7 +19,7 @@ This project is still very much in Beta, but the things that are there, work. I 
 - Ensure there is a MQTT Server available
 - Open a Terminal on the Machine you want to run the Docker container on.
 - Make a new Directory: `mkdir weatherflow2mqtt` (or some other name) and change to that directory.
-- If you **don't** want all sensors setup, copy the `config_example.yaml` file from this repo to that directory, and rename it to `config.yaml`. Then add the sensors you want from the [available sensors list](#sensor-structure). If you don't do this, all sensors from the [Available Sensors](#available-sensors) will be added.
+- If you **don't** want all sensors setup, copy the `config_example.yaml` file from this repo to that directory, and rename it to `config.yaml`. Then add or remove the sensors you want from the [available sensors list](#sensor-structure). If you don't do this, all sensors from the [Available Sensors](#available-sensors) will be added.
 - Now start the Docker Container with the parameters described under [docker-setup](#docker-setup)
 
 If everything is setup correctly with MQTT and Home Assistant, you should now start seeing the sensors show up in HA. Please note, it can take up to 1 min after startup, before all sensors are populated with data.
