@@ -131,12 +131,10 @@ async def main():
 
         # Update the Forecast if it is time
         now = datetime.now().timestamp()
+        fcst_state_topic = "homeassistant/sensor/{}/{}/state".format(DOMAIN, EVENT_FORECAST)
+        fcst_attr_topic = "homeassistant/sensor/{}/{}/attributes".format(DOMAIN, EVENT_FORECAST)
         if (now - forecast_last_run) >= forecast_interval:
             condition_data, fcst_data  = await forecast.update_forecast()
-            state_topic = "homeassistant/sensor/{}/{}/state".format(DOMAIN, EVENT_FORECAST)
-            attr_topic = "homeassistant/sensor/{}/{}/attributes".format(DOMAIN, EVENT_FORECAST)
-            client.publish(state_topic, json.dumps(condition_data))
-            client.publish(attr_topic, json.dumps(fcst_data))
             forecast_last_run = now
 
         # Process the data
@@ -267,6 +265,11 @@ async def main():
                         firmware_revision,
                         voltage,
                     )
+            if msg_type != EVENT_RAPID_WIND and msg_type != EVENT_HUB_STATUS:
+                # Update the Forecast State
+                if add_forecast:
+                    client.publish(fcst_state_topic, json.dumps(condition_data))
+                    client.publish(fcst_attr_topic, json.dumps(fcst_data))
 
             if show_debug:
                 _LOGGER.debug(

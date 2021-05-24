@@ -1,6 +1,17 @@
 """Constant file for weatherflow2mqtt."""
 import datetime
 
+ATTR_FORECAST_CONDITION = "condition"
+ATTR_FORECAST_PRECIPITATION = "precipitation"
+ATTR_FORECAST_PRECIPITATION_PROBABILITY = "precipitation_probability"
+ATTR_FORECAST_PRESSURE = "pressure"
+ATTR_FORECAST_TEMP = "temperature"
+ATTR_FORECAST_TEMP_LOW = "templow"
+ATTR_FORECAST_TIME = "datetime"
+ATTR_FORECAST_WIND_BEARING = "wind_bearing"
+ATTR_FORECAST_WIND_SPEED = "wind_speed"
+ATTR_FORECAST_HUMIDITY = "humidity"
+
 EXTERNAL_DIRECTORY = "/usr/local/config"
 STORAGE_FILE = f"{EXTERNAL_DIRECTORY}/.storage.json"
 STORAGE_FIELDS = [
