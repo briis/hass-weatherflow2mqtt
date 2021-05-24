@@ -1,13 +1,14 @@
 FROM python:3
 LABEL org.opencontainers.image.source="https://github.com/briis/hass-weatherflow2mqtt"
 ADD VERSION .
-RUN pip install paho-mqtt asyncio pyyaml
+RUN pip install paho-mqtt asyncio aiohttp pyyaml
 RUN mkdir -p /usr/local/config
 RUN mkdir /app
 WORKDIR /app
 ADD __init__.py /app
 ADD aioudp.py /app
 ADD const.py /app
+ADD forecast.py /app
 ADD weatherflow_mqtt.py /app
 ADD helpers.py /app
 ENV TZ=Europe/Copenhagen
@@ -23,6 +24,10 @@ ENV MQTT_PORT=1883
 ENV MQTT_USERNAME=
 ENV MQTT_PASSWORD=
 ENV MQTT_DEBUG=False
+ENV ADD_FORECAST=False
+ENV STATION_ID=
+ENV STATION_TOKEN=
+ENV FORECAST_INTERVAL=30
 EXPOSE 50222/udp
 EXPOSE 1883
 CMD [ "python", "weatherflow_mqtt.py" ]

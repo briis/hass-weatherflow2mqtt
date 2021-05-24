@@ -30,7 +30,7 @@ The below command will pull the latest docker image and start WeatherFlow2MQTT f
 
 ```bash
 docker run -d \
---name=weatherflow2mqtt --restart=always \
+--name=weatherflow2mqtt --restart=unless-stopped \
 -v $(pwd):/usr/local/config \
 -p 0.0.0.0:50222:50222/udp \
 -e TZ=Europe/Copenhagen \
@@ -46,6 +46,10 @@ docker run -d \
 -e MQTT_USERNAME= \
 -e MQTT_PASSWORD= \
 -e MQTT_DEBUG=False \
+-e ADD_FORECAST=False \
+-e STATION_ID= \
+-e STATION_TOKEN= \
+-e FORECAST_INTERVAL=30 \
 ghcr.io/briis/hass-weatherflow2mqtt
 ```
 
@@ -57,19 +61,23 @@ ghcr.io/briis/hass-weatherflow2mqtt
 
 A description of the Environment Variables available for this container. All of them have a default value, so you only need to add the onces where you want to change that.
 
-- `TZ` Set your local Timezone. It is important that you use the right timezone here, or else some of the calculations done by the container will not be correct. Default Timezone is *Europe/Copenhagen*
-- `TEMPEST_DEVICE` If you have a Tempest Weather Station set this to True. If False, the program will assume you have the older AIR and SKY units. Default is *True*
-- `UNIT_SYSTEM` Enter *imperial* or *metric*. This will determine the unit system used when displaying the values. Default is *metric*
-- `RAPID_WIND_INTERVAL` The weather stations delivers wind speed and bearing every 2 seconds. If you don't want to update the HA sensors so often, you can set a number here (in seconds), for how often they are updated. Default is *0*, which means data are updated when received from the station.
-- `ELEVATION` Set the hight above sea level for where the station is placed. This is used when calculating some of the sensor values. The value has to be in meters. Default is *0*
-- `WF_HOST` Unless you have a very special IP setup or the Weatherflow hub is on a different network, you should not change this. Default is *0.0.0.0*
-- `WF_PORT` Weatherflow always broadcasts on port 50222/udp, so don't change this. Default is *50222*
-- `MQTT_HOST` The IP address of your mqtt server. Default value is *127.0.0.1*
-- `MQTT_PORT` The Port for your mqtt server. Default value is *1883*
-- `MQTT_USERNAME` The username used to connect to the mqtt server. Leave blank to use Anonymous connection. Default value is *blank*
-- `MQTT_PASSWORD` The password used to connect to the mqtt server. Leave blank to use Anonymous connection. Default value is *blank*
-- `MQTT_DEBUG` Set this to True, to get some more mqtt debugging messages in the Container log file. Default value is *False*
-- `DEBUG` Set this to True to enable more debug data in the Container Log. Default is *False*
+- `TZ`: Set your local Timezone. It is important that you use the right timezone here, or else some of the calculations done by the container will not be correct. Default Timezone is *Europe/Copenhagen*
+- `TEMPEST_DEVICE`: If you have a Tempest Weather Station set this to True. If False, the program will assume you have the older AIR and SKY units. Default is *True*
+- `UNIT_SYSTEM`: Enter *imperial* or *metric*. This will determine the unit system used when displaying the values. Default is *metric*
+- `RAPID_WIND_INTERVAL`: The weather stations delivers wind speed and bearing every 2 seconds. If you don't want to update the HA sensors so often, you can set a number here (in seconds), for how often they are updated. Default is *0*, which means data are updated when received from the station.
+- `ELEVATION`: Set the hight above sea level for where the station is placed. This is used when calculating some of the sensor values. The value has to be in meters. Default is *0*
+- `WF_HOST`: Unless you have a very special IP setup or the Weatherflow hub is on a different network, you should not change this. Default is *0.0.0.0*
+- `WF_PORT`: Weatherflow always broadcasts on port 50222/udp, so don't change this. Default is *50222*
+- `MQTT_HOST`: The IP address of your mqtt server. Default value is *127.0.0.1*
+- `MQTT_PORT`: The Port for your mqtt server. Default value is *1883*
+- `MQTT_USERNAME`: The username used to connect to the mqtt server. Leave blank to use Anonymous connection. Default value is *blank*
+- `MQTT_PASSWORD`: The password used to connect to the mqtt server. Leave blank to use Anonymous connection. Default value is *blank*
+- `MQTT_DEBUG`: Set this to True, to get some more mqtt debugging messages in the Container log file. Default value is *False*
+- `DEBUG`: Set this to True to enable more debug data in the Container Log. Default is *False*
+- `ADD_FORECAST`: Set this to True if you want to retrieve Forecast Data from WeatherFlow. If set to True, *STATION_ID* and *STATION_TOKEN* must be filled also. **NOTE** If this is enabled the component will access the Internet to get the Forecast data. Default value is *False*
+- `STATION_ID`: Enter your Station ID for your WeatherFlow Station. Default value is *blank*.
+- `STATION_TOKEN`: Enter your personal access Token to allow retrieval of data. If you don't have the token [login with your account](https://tempestwx.com/settings/tokens) and create the token. **NOTE** You must own a WeatherFlow station to get this token. Default value is *blank*
+- `FORECAST_INTERVAL`: The interval in minutes, between updates of the Forecast data. Default value is *30* minutes.
 
 ## Available Sensors
 
@@ -108,6 +116,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | wind_lull | Wind Lull | Lowest wind for the last minute | No
 | wind_speed | Wind Speed | Current measured Wind Speed | No
 | wind_speed_avg | Wind Speed Avg | Average wind speed for the last minute | No
+| weather | Weather | Only available if Forecast option is enabled. State will be current condition, and forecast data will be in the attributes. | No
 
 ### Sensor Structure
 
@@ -144,4 +153,5 @@ sensors:
   - wind_lull
   - wind_speed
   - wind_speed_avg
+  - weather
 ```

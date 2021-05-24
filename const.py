@@ -15,6 +15,9 @@ STORAGE_FIELDS = [
 ]
 STRIKE_STORAGE_FILE = f"{EXTERNAL_DIRECTORY}/.lightning.data"
 
+BASE_URL = "https://swd.weatherflow.com/swd/rest"
+
+DEFAULT_TIMEOUT = 10
 DEVICE_CLASS_HUMIDITY = "humidity"
 DEVICE_CLASS_ILLUMINANCE = "illuminance"
 DEVICE_CLASS_PRESSURRE = "pressure"
@@ -32,6 +35,11 @@ EVENT_SKY_DATA = "obs_sky"
 EVENT_TEMPEST_DATA = "obs_st"
 EVENT_PRECIP_START = "evt_precip"
 EVENT_STRIKE = "evt_strike"
+EVENT_FORECAST = "forecast"
+
+FORECAST_TYPE_DAILY = "daily"
+FORECAST_TYPE_HOURLY = "hourly"
+FORECAST_HOURLY_HOURS = 48
 
 UNITS_IMPERIAL = "imperial"
 
@@ -244,6 +252,7 @@ WEATHERFLOW_SENSORS = [
         None,
         EVENT_AIR_DATA,
     ],
+    ["weather", "Weather", None, None, None, "weather-partly-cloudy", EVENT_FORECAST],
 ]
 
 SENSOR_ID = 0
@@ -254,4 +263,25 @@ SENSOR_CLASS = 4
 SENSOR_ICON = 5
 SENSOR_DEVICE = 6
 
-TEMPEST_SENSORS = [EVENT_TEMPEST_DATA, EVENT_AIR_DATA, EVENT_SKY_DATA]
+CONDITION_CLASSES = {
+    "clear-night": ["clear-night"],
+    "cloudy": ["cloudy"],
+    "exceptional": ["cloudy"],
+    "fog": ["foggy"],
+    "hail": ["hail"],
+    "lightning": ["thunderstorm"],
+    "lightning-rainy": ["possibly-thunderstorm-day", "possibly-thunderstorm-night"],
+    "partlycloudy": [
+        "partly-cloudy-day",
+        "partly-cloudy-night",
+    ],
+    "rainy": [
+        "rainy",
+        "possibly-rainy-day",
+        "possibly-rainy-night",
+    ],
+    "snowy": ["snow", "possibly-snow-day", "possibly-snow-night"],
+    "snowy-rainy": ["sleet", "possibly-sleet-day", "possibly-sleet-night"],
+    "sunny": ["clear-day"],
+    "windy": ["windy"],
+}

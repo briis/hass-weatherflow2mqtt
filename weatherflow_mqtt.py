@@ -15,10 +15,12 @@ import os
 
 from aioudp import open_local_endpoint
 from helpers import ConversionFunctions, DataStorage
+from forecast import Forecast
 from const import (
     DOMAIN,
     EVENT_AIR_DATA,
     EVENT_DEVICE_STATUS,
+    EVENT_FORECAST,
     EVENT_RAPID_WIND,
     EVENT_HUB_STATUS,
     EVENT_PRECIP_START,
@@ -56,15 +58,22 @@ async def main():
     unit_system = os.environ["UNIT_SYSTEM"]
     rw_interval = int(os.environ["RAPID_WIND_INTERVAL"])
     show_debug = eval(os.environ["DEBUG"])
+    add_forecast = eval(os.environ["ADD_FORECAST"])
+    station_id = os.environ["STATION_ID"]
+    station_token = os.environ["STATION_TOKEN"]
+    forecast_interval = int(os.environ["FORECAST_INTERVAL"])
 
     cnv = ConversionFunctions(unit_system)
     data_store = DataStorage()
-
+    if add_forecast:
+        forecast = Forecast(station_id, unit_system, station_token)
+        forecast_interval = forecast_interval * 60
     # Read the sensor config
     sensors = await data_store.read_config()
 
     mqtt_anonymous = False
     if not mqtt_username or not mqtt_password:
+        _LOGGER.debug("MQTT Credentials not needed")
         mqtt_anonymous = True
 
     # Setup and connect to MQTT Broker
@@ -94,10 +103,11 @@ async def main():
         sys.exit(1)
 
     # Configure Sensors in MQTT
-    await setup_sensors(endpoint, client, unit_system, sensors, is_tempest)
+    await setup_sensors(endpoint, client, unit_system, sensors, is_tempest, add_forecast)
 
     # Set timer variables
     rapid_last_run = 1621229580.583215  # A time in the past
+    forecast_last_run = 1621229580.583215  # A time in the past
     current_day = datetime.today().weekday()
 
     # Read stored Values and set variable values
@@ -118,6 +128,16 @@ async def main():
             await data_store.write_storage(storage)
             await data_store.housekeeping_strike()
             current_day = datetime.today().weekday()
+
+        # Update the Forecast if it is time
+        now = datetime.now().timestamp()
+        if (now - forecast_last_run) >= forecast_interval:
+            condition_data, fcst_data  = await forecast.update_forecast()
+            state_topic = "homeassistant/sensor/{}/{}/state".format(DOMAIN, EVENT_FORECAST)
+            attr_topic = "homeassistant/sensor/{}/{}/attributes".format(DOMAIN, EVENT_FORECAST)
+            client.publish(state_topic, json.dumps(condition_data))
+            client.publish(attr_topic, json.dumps(fcst_data))
+            forecast_last_run = now
 
         # Process the data
         if msg_type is not None:
@@ -256,7 +276,7 @@ async def main():
                 )
 
 
-async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest):
+async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest, add_forecast):
     """Setup the Sensors in Home Assistant."""
 
     # Get Hub Information
@@ -273,6 +293,10 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest)
     units = SENSOR_UNIT_I if unit_system == UNITS_IMPERIAL else SENSOR_UNIT_M
     for sensor in WEATHERFLOW_SENSORS:
         sensor_name = sensor[SENSOR_NAME]
+        # Don't add the Weather Sensor if forecast disabled
+        if not add_forecast and sensor[SENSOR_DEVICE] == EVENT_FORECAST:
+            _LOGGER.debug("Skipping Forecast sensor %s %s", add_forecast, sensor[SENSOR_DEVICE])
+            continue
         # Don't add the AIR Unit Battery if this is a Tempest Device
         if is_tempest and sensor[SENSOR_ID] == "battery_air":
             continue
@@ -280,6 +304,9 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest)
         if is_tempest:
             sensor_name = "Battery TEMPEST"
         state_topic = "homeassistant/sensor/{}/{}/state".format(
+            DOMAIN, sensor[SENSOR_DEVICE]
+        )
+        attr_topic = "homeassistant/sensor/{}/{}/attributes".format(
             DOMAIN, sensor[SENSOR_DEVICE]
         )
         discovery_topic = "homeassistant/sensor/{}/{}/config".format(
@@ -300,6 +327,8 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest)
             payload["value_template"] = "{{{{ value_json.{} }}}}".format(
                 sensor[SENSOR_ID]
             )
+            if sensor[SENSOR_DEVICE] == EVENT_FORECAST:
+                payload["json_attributes_topic"] = attr_topic
             payload["device"] = {
                 "identifiers": ["WeatherFlow_{}".format(serial_number)],
                 "connections": [["mac", serial_number]],
