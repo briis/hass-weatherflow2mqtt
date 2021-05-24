@@ -47,7 +47,7 @@ class Forecast:
             (k for k, v in CONDITION_CLASSES.items() if current_icon in v),
             None,
         )
-        condition_data["condition"] = condition_state
+        condition_data["weather"] = condition_state
 
         forecast_data = json_data.get("forecast")
 
