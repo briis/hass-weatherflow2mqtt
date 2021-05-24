@@ -11,7 +11,6 @@ There is support for both the AIR & SKY devices and the TEMPEST device.
 This project is still very much in Beta, but the things that are there, work. I am currently working on or considering:
 
 - As I don't have Access to a Tempest Unit, I have not tested this with this device type. If anyone does, please report back here in the Discussions or Issue Area.
-- I consider to also integrate the AI based Forecast from WeatherFlow. This will require some calls to their REST API, and as such this program will not be *Local Data* only. But if I do it, I will make it optional.
 
 ## Installation
 
@@ -155,3 +154,24 @@ sensors:
   - wind_speed_avg
   - weather
 ```
+
+## Creating a Weather Entity
+
+If you have enabled the *Forecast*, then there is a possibility to create a Weather Entity, that can be used in all the different Lovelace Cards there is for *Weather*. We will do this by using the [Weather Template](https://www.home-assistant.io/integrations/weather.template/). The naming of the sensors might vary based on your configuration, so check that if it does not work.
+
+Edit `configuration.yaml` and insert the following:
+
+```yaml
+weather:
+  - platform: template
+    name: My Local Weather
+    condition_template: "{{ states('sensor.weather') }}"
+    temperature_template: "{{ states('sensor.temperature') | float}}"
+    humidity_template: "{{ states('sensor.humidity')| int }}"
+    pressure_template: "{{ states('sensor.sea_level_pressure')| float }}"
+    wind_speed_template: "{{ states('sensor.wind_speed_avg')| float }}"
+    wind_bearing_template: "{{ states('sensor.wind_bearing_avg')| int }}"
+    forecast_template: "{{ states.sensor.weather.attributes.hourly_forecast }}"
+```
+
+For the *forecast_template* you can either use `hourly_forecast` or `daily_forecast` to get Hourly or Day based forecast.

@@ -53,10 +53,7 @@ class Forecast:
 
         # Prepare for MQTT
         condition_data = OrderedDict()
-        condition_state = next(
-            (k for k, v in CONDITION_CLASSES.items() if current_icon in v),
-            None,
-        )
+        condition_state = await self.ha_condition_value(current_icon)
         condition_data["weather"] = condition_state
 
         forecast_data = json_data.get("forecast")
@@ -88,7 +85,7 @@ class Forecast:
             item = {
                 ATTR_FORECAST_TIME: forecast_time.isoformat(),
                 "conditions": row["conditions"],
-                ATTR_FORECAST_CONDITION: row["icon"],
+                ATTR_FORECAST_CONDITION: await self.ha_condition_value(row["icon"]),
                 ATTR_FORECAST_TEMP: row["air_temp_high"],
                 ATTR_FORECAST_TEMP_LOW: row["air_temp_low"],
                 ATTR_FORECAST_PRECIPITATION: await cnv.rain(precip),
@@ -114,7 +111,7 @@ class Forecast:
             item = {
                 ATTR_FORECAST_TIME: datetime.fromtimestamp(row["time"]).isoformat(),
                 "conditions": row["conditions"],
-                ATTR_FORECAST_CONDITION: row["icon"],
+                ATTR_FORECAST_CONDITION: await self.ha_condition_value(row["icon"]),
                 ATTR_FORECAST_TEMP: row["air_temperature"],
                 ATTR_FORECAST_PRESSURE: await cnv.pressure(row["sea_level_pressure"]),
                 ATTR_FORECAST_HUMIDITY: row["relative_humidity"],
@@ -137,6 +134,13 @@ class Forecast:
         fcst_data["hourly_forecast"] = items
 
         return condition_data, fcst_data
+
+    async def ha_condition_value(self, value):
+        """Returns the Home Assistant Condition."""
+        return next(
+            (k for k, v in CONDITION_CLASSES.items() if value in v),
+            None,
+        )
 
     async def async_request(self, method: str, endpoint: str) -> dict:
         """Make a request against the SmartWeather API."""
