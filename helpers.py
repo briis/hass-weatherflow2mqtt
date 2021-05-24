@@ -37,10 +37,12 @@ class ConversionFunctions:
             return round(value * 0.02953, 3)
         return round(value, 2)
 
-    async def speed(self, value) -> float:
+    async def speed(self, value, kmh=False) -> float:
         """Convert Wind Speed."""
         if self._unit_system == UNITS_IMPERIAL:
             return round(value * 2.2369362920544, 2)
+        if kmh:
+            return round((value * 18 / 5), 1)
         return round(value, 1)
 
     async def distance(self, value) -> float:

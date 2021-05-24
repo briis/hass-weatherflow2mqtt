@@ -21,7 +21,7 @@ This project is still very much in Beta, but the things that are there, work. I 
 - If you **don't** want all sensors setup, copy the `config_example.yaml` file from this repo to that directory, and rename it to `config.yaml`. Then add or remove the sensors you want from the [available sensors list](#sensor-structure). If you don't do this, all sensors from the [Available Sensors](#available-sensors) will be added.
 - Now start the Docker Container with the parameters described under [docker-setup](#docker-setup)
 
-If everything is setup correctly with MQTT and Home Assistant, you should now start seeing the sensors show up in HA. Please note, it can take up to 1 min after startup, before all sensors are populated with data.
+If everything is setup correctly with MQTT and Home Assistant, you should now start seeing the sensors show up in HA. **NOTE**, it can take up to 1 min after startup, before all sensors are populated with data.
 
 ## Docker Setup
 
@@ -157,7 +157,7 @@ sensors:
 
 ## Creating a Weather Entity
 
-If you have enabled the *Forecast*, then there is a possibility to create a Weather Entity, that can be used in all the different Lovelace Cards there is for *Weather*. We will do this by using the [Weather Template](https://www.home-assistant.io/integrations/weather.template/). The naming of the sensors might vary based on your configuration, so check that if it does not work.
+If you have enabled the *Forecast* option, then there is a possibility to create a Weather Entity, that can be used in all the different Lovelace Cards there is for *Weather*. We will do this by using the [Weather Template](https://www.home-assistant.io/integrations/weather.template/). The naming of the sensors might vary based on your configuration, so check that if it does not work.
 
 Edit `configuration.yaml` and insert the following:
 
@@ -169,9 +169,10 @@ weather:
     temperature_template: "{{ states('sensor.temperature') | float}}"
     humidity_template: "{{ states('sensor.humidity')| int }}"
     pressure_template: "{{ states('sensor.sea_level_pressure')| float }}"
-    wind_speed_template: "{{ states('sensor.wind_speed_avg')| float }}"
+    wind_speed_template: "{{ states('sensor.wind_speed_avg') | float * 18 / 5 | round(2) }}"
     wind_bearing_template: "{{ states('sensor.wind_bearing_avg')| int }}"
     forecast_template: "{{ states.sensor.weather.attributes.hourly_forecast }}"
 ```
 
-For the *forecast_template* you can either use `hourly_forecast` or `daily_forecast` to get Hourly or Day based forecast.
+- The weather entity expects km/h when having metric units, so the above example converts m/s to km/h. If you are unsing *imperial* units, the line should just be `{{ states('sensor.wind_speed_avg') }}`
+- For the *forecast_template* you can either use `hourly_forecast` or `daily_forecast` to get Hourly or Day based forecast.
