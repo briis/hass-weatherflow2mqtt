@@ -129,13 +129,16 @@ async def main():
             await data_store.housekeeping_strike()
             current_day = datetime.today().weekday()
 
-        # Update the Forecast if it is time
-        now = datetime.now().timestamp()
-        fcst_state_topic = "homeassistant/sensor/{}/{}/state".format(DOMAIN, EVENT_FORECAST)
-        fcst_attr_topic = "homeassistant/sensor/{}/{}/attributes".format(DOMAIN, EVENT_FORECAST)
-        if (now - forecast_last_run) >= forecast_interval:
-            condition_data, fcst_data  = await forecast.update_forecast()
-            forecast_last_run = now
+        # Update the Forecast if it is time and enabled
+        if add_forecast:
+            now = datetime.now().timestamp()
+            fcst_state_topic = "homeassistant/sensor/{}/{}/state".format(DOMAIN, EVENT_FORECAST)
+            fcst_attr_topic = "homeassistant/sensor/{}/{}/attributes".format(DOMAIN, EVENT_FORECAST)
+            if (now - forecast_last_run) >= forecast_interval:
+                condition_data, fcst_data  = await forecast.update_forecast()
+                client.publish(fcst_state_topic, json.dumps(condition_data))
+                client.publish(fcst_attr_topic, json.dumps(fcst_data))
+                forecast_last_run = now
 
         # Process the data
         if msg_type is not None:
@@ -266,7 +269,7 @@ async def main():
                         voltage,
                     )
             if msg_type != EVENT_RAPID_WIND and msg_type != EVENT_HUB_STATUS:
-                # Update the Forecast State
+                # Update the Forecast State (Ensure there is data if HA restarts)
                 if add_forecast:
                     client.publish(fcst_state_topic, json.dumps(condition_data))
                     client.publish(fcst_attr_topic, json.dumps(fcst_data))
