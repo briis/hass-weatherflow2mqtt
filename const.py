@@ -263,7 +263,7 @@ WEATHERFLOW_SENSORS = [
         None,
         EVENT_AIR_DATA,
     ],
-    ["weather", "Weather", None, None, None, "weather-partly-cloudy", EVENT_FORECAST],
+    ["weather", "Weather", None, None, None, "chart-box-outline", EVENT_FORECAST],
 ]
 
 SENSOR_ID = 0
