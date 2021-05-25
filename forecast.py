@@ -58,10 +58,6 @@ class Forecast:
 
         forecast_data = json_data.get("forecast")
 
-        # We also need Day hign and low Temp from Today
-        temp_high_today = forecast_data[FORECAST_TYPE_DAILY][0]["air_temp_high"]
-        temp_low_today = forecast_data[FORECAST_TYPE_DAILY][0]["air_temp_low"]
-
         # Process Daily Forecast
         fcst_data = OrderedDict()
         for row in forecast_data[FORECAST_TYPE_DAILY]:
@@ -86,16 +82,14 @@ class Forecast:
                 ATTR_FORECAST_TIME: forecast_time.isoformat(),
                 "conditions": row["conditions"],
                 ATTR_FORECAST_CONDITION: await self.ha_condition_value(row["icon"]),
-                ATTR_FORECAST_TEMP: row["air_temp_high"],
-                ATTR_FORECAST_TEMP_LOW: row["air_temp_low"],
+                ATTR_FORECAST_TEMP: await cnv.temperature(row["air_temp_high"]),
+                ATTR_FORECAST_TEMP_LOW: await cnv.temperature(row["air_temp_low"]),
                 ATTR_FORECAST_PRECIPITATION: await cnv.rain(precip),
                 ATTR_FORECAST_PRECIPITATION_PROBABILITY: row["precip_probability"],
                 "precip_icon": row.get("precip_icon", ""),
                 "precip_type": row.get("precip_type", ""),
                 ATTR_FORECAST_WIND_SPEED: await cnv.speed(sum_wind_avg, True),
                 ATTR_FORECAST_WIND_BEARING: sum_wind_bearing,
-                "temp_high_today": temp_high_today,
-                "temp_low_today": temp_low_today,
             }
             items.append(item)
         fcst_data["daily_forecast"] = items
@@ -112,7 +106,7 @@ class Forecast:
                 ATTR_FORECAST_TIME: datetime.fromtimestamp(row["time"]).isoformat(),
                 "conditions": row["conditions"],
                 ATTR_FORECAST_CONDITION: await self.ha_condition_value(row["icon"]),
-                ATTR_FORECAST_TEMP: row["air_temperature"],
+                ATTR_FORECAST_TEMP: await cnv.temperature(row["air_temperature"]),
                 ATTR_FORECAST_PRESSURE: await cnv.pressure(row["sea_level_pressure"]),
                 ATTR_FORECAST_HUMIDITY: row["relative_humidity"],
                 ATTR_FORECAST_PRECIPITATION: await cnv.rain(row["precip"]),
@@ -124,7 +118,7 @@ class Forecast:
                 ATTR_FORECAST_WIND_BEARING: row["wind_direction"],
                 "wind_direction_cardinal": row["wind_direction_cardinal"],
                 "uv": row["uv"],
-                "feels_like": row["feels_like"],
+                "feels_like": await cnv.temperature(row["feels_like"]),
             }
             items.append(item)
             # Limit number of Hours

@@ -125,9 +125,7 @@ class ConversionFunctions:
             ),
             1,
         )
-        if self._unit_system == UNITS_IMPERIAL:
-            return await self.temperature(dewpoint_c)
-        return dewpoint_c
+        return await self.temperature(dewpoint_c)
 
     async def rain_rate(self, value):
         """Returns rain rate per hour."""
@@ -142,9 +140,7 @@ class ConversionFunctions:
             humidity * 0.06105 * math.exp((17.27 * temperature) / (237.7 + temperature))
         )
         feelslike_c = temperature + 0.348 * e_value - 0.7 * windspeed - 4.25
-        if self._unit_system == UNITS_IMPERIAL:
-            return await self.temperature(feelslike_c)
-        return round(feelslike_c, 1)
+        return await self.temperature(feelslike_c)
 
     async def humanize_time(self, value):
         """Humanize Time in Seconds."""
