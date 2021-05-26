@@ -62,10 +62,16 @@ class Forecast:
 
         forecast_data = json_data.get("forecast")
 
+        # We also need Day hign and low Temp from Today
+        temp_high_today = forecast_data[FORECAST_TYPE_DAILY][0]["air_temp_high"]
+        temp_low_today = forecast_data[FORECAST_TYPE_DAILY][0]["air_temp_low"]
+
         # Process Daily Forecast
         fcst_data = OrderedDict()
         fcst_data[ATTR_ATTRIBUTION] = ATTRIBUTION
         fcst_data[ATTR_BRAND] = BRAND
+        fcst_data["temp_high_today"] = temp_high_today
+        fcst_data["temp_low_today"] = temp_low_today
 
         for row in forecast_data[FORECAST_TYPE_DAILY]:
             # Skip over past forecasts - seems the API sometimes returns old forecasts
