@@ -78,7 +78,7 @@ async def main():
 
     # Setup and connect to MQTT Broker
     try:
-        client = mqtt.Client()
+        client = mqtt.Client("weatherflow2mqtt")
         client.max_inflight_messages_set(40)
         if not mqtt_anonymous:
             client.username_pw_set(username=mqtt_username, password=mqtt_password)
