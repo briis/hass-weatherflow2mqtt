@@ -63,6 +63,7 @@ async def main():
     station_token = os.environ["STATION_TOKEN"]
     forecast_interval = int(os.environ["FORECAST_INTERVAL"])
 
+
     cnv = ConversionFunctions(unit_system)
     data_store = DataStorage()
     if add_forecast:
@@ -78,12 +79,13 @@ async def main():
 
     # Setup and connect to MQTT Broker
     try:
-        client = mqtt.Client("weatherflow2mqtt")
+        client = mqtt.Client(client_id="weatherflow2mqtt")
         client.max_inflight_messages_set(40)
         if not mqtt_anonymous:
             client.username_pw_set(username=mqtt_username, password=mqtt_password)
         if mqtt_debug:
             client.enable_logger()
+            _LOGGER.debug("MQTT Credentials: %s - %s", mqtt_username, mqtt_password)
         client.connect(mqtt_host, port=mqtt_port)
         _LOGGER.info(
             "Connected to the MQTT server on address %s and port %s...",
