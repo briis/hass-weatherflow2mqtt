@@ -17,6 +17,10 @@ from aioudp import open_local_endpoint
 from helpers import ConversionFunctions, DataStorage
 from forecast import Forecast
 from const import (
+    ATTRIBUTION,
+    ATTR_ATTRIBUTION,
+    ATTR_BRAND,
+    BRAND,
     DOMAIN,
     EVENT_AIR_DATA,
     EVENT_DEVICE_STATUS,
@@ -320,6 +324,11 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
         discovery_topic = "homeassistant/sensor/{}/{}/config".format(
             DOMAIN, sensor[SENSOR_ID]
         )
+
+        attribution = OrderedDict()
+        attribution[ATTR_ATTRIBUTION] = ATTRIBUTION
+        attribution[ATTR_BRAND] = BRAND
+
         payload = OrderedDict()
         if sensors is None or sensor[SENSOR_ID] in sensors:
             _LOGGER.info("SETTING UP %s SENSOR", sensor_name)
@@ -335,8 +344,7 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
             payload["value_template"] = "{{{{ value_json.{} }}}}".format(
                 sensor[SENSOR_ID]
             )
-            if sensor[SENSOR_DEVICE] == EVENT_FORECAST:
-                payload["json_attributes_topic"] = attr_topic
+            payload["json_attributes_topic"] = attr_topic
             payload["device"] = {
                 "identifiers": ["WeatherFlow_{}".format(serial_number)],
                 "connections": [["mac", serial_number]],
@@ -350,6 +358,8 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
             mqtt_client.publish(
                 discovery_topic, json.dumps(payload), qos=1, retain=True
             )
+            await asyncio.sleep(0.05)
+            mqtt_client.publish(attr_topic, json.dumps(attribution))
             await asyncio.sleep(0.2)
         except Exception as e:
             _LOGGER.error("Could not connect to MQTT Server. Error is: %s", e)

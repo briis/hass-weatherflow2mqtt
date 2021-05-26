@@ -8,6 +8,10 @@ from typing import Optional, OrderedDict
 import logging
 
 from const import (
+    ATTRIBUTION,
+    ATTR_ATTRIBUTION,
+    ATTR_BRAND,
+    BRAND,
     ATTR_FORECAST_CONDITION,
     ATTR_FORECAST_HUMIDITY,
     ATTR_FORECAST_PRECIPITATION,
@@ -60,6 +64,9 @@ class Forecast:
 
         # Process Daily Forecast
         fcst_data = OrderedDict()
+        fcst_data[ATTR_ATTRIBUTION] = ATTRIBUTION
+        fcst_data[ATTR_BRAND] = BRAND
+
         for row in forecast_data[FORECAST_TYPE_DAILY]:
             # Skip over past forecasts - seems the API sometimes returns old forecasts
             forecast_time = datetime.date(datetime.fromtimestamp(row["day_start_local"]))

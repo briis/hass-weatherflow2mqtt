@@ -1,6 +1,11 @@
 """Constant file for weatherflow2mqtt."""
 import datetime
 
+ATTRIBUTION = "Powered by WeatherFlow2MQTT"
+BRAND = "WeatherFlow"
+
+ATTR_ATTRIBUTION = "attribution"
+ATTR_BRAND = "brand"
 ATTR_FORECAST_CONDITION = "condition"
 ATTR_FORECAST_PRECIPITATION = "precipitation"
 ATTR_FORECAST_PRECIPITATION_PROBABILITY = "precipitation_probability"
