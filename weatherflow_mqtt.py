@@ -359,7 +359,7 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
                 discovery_topic, json.dumps(payload), qos=1, retain=True
             )
             await asyncio.sleep(0.05)
-            mqtt_client.publish(attr_topic, json.dumps(attribution))
+            mqtt_client.publish(attr_topic, json.dumps(attribution), qos=1, retain=True)
             await asyncio.sleep(0.2)
         except Exception as e:
             _LOGGER.error("Could not connect to MQTT Server. Error is: %s", e)
