@@ -67,7 +67,7 @@ A description of the Environment Variables available for this container. All of 
 - `ELEVATION`: Set the hight above sea level for where the station is placed. This is used when calculating some of the sensor values. The value has to be in meters. Default is *0*
 - `WF_HOST`: Unless you have a very special IP setup or the Weatherflow hub is on a different network, you should not change this. Default is *0.0.0.0*
 - `WF_PORT`: Weatherflow always broadcasts on port 50222/udp, so don't change this. Default is *50222*
-- `MQTT_HOST`: The IP address of your mqtt server. Default value is *127.0.0.1*
+- `MQTT_HOST`: The IP address of your mqtt server. Even though you have the MQTT Server on the same machine as this Container, don't use `127.0.0.1` as this will resolve to an IP Address inside your container. Use the external IP Address. Default value is *127.0.0.1*
 - `MQTT_PORT`: The Port for your mqtt server. Default value is *1883*
 - `MQTT_USERNAME`: The username used to connect to the mqtt server. Leave blank to use Anonymous connection. Default value is *blank*
 - `MQTT_PASSWORD`: The password used to connect to the mqtt server. Leave blank to use Anonymous connection. Default value is *blank*
