@@ -163,6 +163,8 @@ async def main():
             if msg_type in EVENT_HUB_STATUS:
                 data["uptime"] = await cnv.humanize_time(json_response.get("uptime"))
                 client.publish(state_topic, json.dumps(data))
+                if show_debug:
+                    _LOGGER.debug("HUB Reset Flags: %s", json_response.get("reset_flags"))
             if msg_type in EVENT_PRECIP_START:
                 obs = json_response["evt"]
                 storage["rain_start"] = datetime.fromtimestamp(obs[0]).isoformat()
@@ -265,6 +267,7 @@ async def main():
                     serial_number = json_response.get("serial_number")
                     firmware_revision = json_response.get("firmware_revision")
                     voltage = json_response.get("voltage")
+                    sensor_status = json_response.get("sensor_status")
                     _LOGGER.debug(
                         "DEVICE STATUS TRIGGERED AT %s\n  -- Device: %s\n -- Firmware Revision: %s\n -- Voltage: %s",
                         str(now),
@@ -272,6 +275,9 @@ async def main():
                         firmware_revision,
                         voltage,
                     )
+                if sensor_status != 0:
+                    _LOGGER.debug("Device %s has reported a sensor fault. Reason: %s", serial_number, sensor_status)
+
             if msg_type != EVENT_RAPID_WIND and msg_type != EVENT_HUB_STATUS:
                 # Update the Forecast State (Ensure there is data if HA restarts)
                 if add_forecast:
