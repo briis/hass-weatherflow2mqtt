@@ -6,11 +6,6 @@ Everything runs in a pre-build Docker Container, so installation is very simple,
 
 There is support for both the AIR & SKY devices and the TEMPEST device.
 
-## TODO
-
-This project is still very much in Beta, but the things that are there, work. I am currently working on or considering:
-
-- As I don't have Access to a Tempest Unit, I have not tested this with this device type. If anyone does, please report back here in the Discussions or Issue Area.
 
 ## Installation
 
