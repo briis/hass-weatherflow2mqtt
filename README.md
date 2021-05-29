@@ -12,10 +12,10 @@ There is support for both the AIR & SKY devices and the TEMPEST device.
 
 1. [Installation](#installation)
 2. [Docker Setup](#docker-setup)
-  a. [Docker Volume](#docker-volume)
-  b. [Docker Environment Variables](#docker-environment-variables)
+    1. [Docker Volume](#docker-volume)
+    2. [Docker Environment Variables](#docker-environment-variables)
 3. [Available Sensors](#available-sensors)
-  a. [Sensor Structure](#sensor-structure)
+    1. [Sensor Structure](#sensor-structure)
 4. [Creating a Home Assistant Weather Entity](#creating-a-home-assistant-weather-entity)
 
 ## Installation
