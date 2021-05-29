@@ -8,6 +8,15 @@ Everything runs in a pre-build Docker Container, so installation is very simple,
 
 There is support for both the AIR & SKY devices and the TEMPEST device.
 
+## Table of Contents
+
+1. [Installation](#installation)
+2. [Docker Setup](#docker-setup)
+  a. [Docker Volume](#docker-volume)
+  b. [Docker Environment Variables](#docker-environment-variables)
+3. [Available Sensors](#available-sensors)
+  a. [Sensor Structure](#sensor-structure)
+4. [Creating a Home Assistant Weather Entity](#creating-a-home-assistant-weather-entity)
 
 ## Installation
 
@@ -57,14 +66,14 @@ ghcr.io/briis/hass-weatherflow2mqtt
 
 A description of the Environment Variables available for this container. All of them have a default value, so you only need to add the onces where you want to change that.
 
-- `TZ`: Set your local Timezone. It is important that you use the right timezone here, or else some of the calculations done by the container will not be correct. Default Timezone is *Europe/Copenhagen*
+- `TZ`: Set your local Timezone. It is important that you use the right timezone here, or else some of the calculations done by the container will not be correct. Default Timezone is *Europe/Copenhagen* (**Required**)
 - `TEMPEST_DEVICE`: If you have a Tempest Weather Station set this to True. If False, the program will assume you have the older AIR and SKY units. Default is *True*
 - `UNIT_SYSTEM`: Enter *imperial* or *metric*. This will determine the unit system used when displaying the values. Default is *metric*
 - `RAPID_WIND_INTERVAL`: The weather stations delivers wind speed and bearing every 2 seconds. If you don't want to update the HA sensors so often, you can set a number here (in seconds), for how often they are updated. Default is *0*, which means data are updated when received from the station.
 - `ELEVATION`: Set the hight above sea level for where the station is placed. This is used when calculating some of the sensor values. The value has to be in meters. Default is *0*
 - `WF_HOST`: Unless you have a very special IP setup or the Weatherflow hub is on a different network, you should not change this. Default is *0.0.0.0*
 - `WF_PORT`: Weatherflow always broadcasts on port 50222/udp, so don't change this. Default is *50222*
-- `MQTT_HOST`: The IP address of your mqtt server. Even though you have the MQTT Server on the same machine as this Container, don't use `127.0.0.1` as this will resolve to an IP Address inside your container. Use the external IP Address. Default value is *127.0.0.1*
+- `MQTT_HOST`: The IP address of your mqtt server. Even though you have the MQTT Server on the same machine as this Container, don't use `127.0.0.1` as this will resolve to an IP Address inside your container. Use the external IP Address. Default value is *127.0.0.1* (**Required**)
 - `MQTT_PORT`: The Port for your mqtt server. Default value is *1883*
 - `MQTT_USERNAME`: The username used to connect to the mqtt server. Leave blank to use Anonymous connection. Default value is *blank*
 - `MQTT_PASSWORD`: The password used to connect to the mqtt server. Leave blank to use Anonymous connection. Default value is *blank*
@@ -152,7 +161,7 @@ sensors:
   - weather
 ```
 
-## Creating a Weather Entity
+## Creating a Home Assistant Weather Entity
 
 If you have enabled the *Forecast* option, then there is a possibility to create a Weather Entity, that can be used in all the different Lovelace Cards there is for *Weather*. We will do this by using the [Weather Template](https://www.home-assistant.io/integrations/weather.template/). The naming of the sensors might vary based on your configuration, so check that if it does not work.
 
