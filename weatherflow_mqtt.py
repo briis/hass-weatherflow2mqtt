@@ -339,10 +339,8 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
         )
 
         attribution = OrderedDict()
-        attribution[ATTR_ATTRIBUTION] = ATTRIBUTION
-        attribution[ATTR_BRAND] = BRAND
-
         payload = OrderedDict()
+
         if sensors is None or sensor[SENSOR_ID] in sensors:
             _LOGGER.info("SETTING UP %s SENSOR", sensor_name)
             payload["name"] = "{}".format(sensor_name)
@@ -366,6 +364,8 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
                 "model": "WeatherFlow Weather Station",
                 "sw_version": firmware,
             }
+            attribution[ATTR_ATTRIBUTION] = ATTRIBUTION
+            attribution[ATTR_BRAND] = BRAND
 
         try:
             mqtt_client.publish(
