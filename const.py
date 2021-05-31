@@ -43,6 +43,19 @@ DEVICE_CLASS_TEMPERATURE = "temperature"
 DEVICE_CLASS_TIMESTAMP = "timestamp"
 DEVICE_CLASS_VOLTAGE = "voltage"
 
+DEVICE_STATUS = [
+    "Sensors OK",
+    "lightning failed",
+    "lightning noise",
+    "lightning disturber",
+    "pressure failed",
+    "temperature failed",
+    "rh failed",
+    "wind failed",
+    "precip failed",
+    "light/uv failed",
+]
+
 DOMAIN = "weatherflow2mqtt"
 
 EVENT_RAPID_WIND = "rapid_wind"

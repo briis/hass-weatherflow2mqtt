@@ -284,7 +284,8 @@ async def main():
                         voltage,
                     )
                 if sensor_status is not None and sensor_status != 0:
-                    _LOGGER.debug("Device %s has reported a sensor fault. Reason: %s", serial_number, sensor_status)
+                    device_status = await cnv.device_status(sensor_status)
+                    _LOGGER.debug("Device %s has reported a sensor fault. Reason: %s", serial_number, device_status)
 
             if msg_type != EVENT_RAPID_WIND and msg_type != EVENT_HUB_STATUS:
                 # Update the Forecast State (Ensure there is data if HA restarts)

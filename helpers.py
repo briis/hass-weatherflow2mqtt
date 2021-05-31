@@ -9,6 +9,7 @@ import logging
 import yaml
 
 from const import (
+    DEVICE_STATUS,
     EXTERNAL_DIRECTORY,
     STORAGE_FILE,
     STORAGE_FIELDS,
@@ -148,6 +149,17 @@ class ConversionFunctions:
             return "None"
         return str(datetime.timedelta(seconds=value))
 
+    async def device_status(self, value: int):
+        """Return device status as string."""
+
+        binvalue = str(bin(value))
+        binarr = binvalue[2:]
+        return_value = []
+        for x in range(len(binarr)):
+            if binarr[x:x+1] == "1":
+                return_value.append(DEVICE_STATUS[len(binarr)-x])
+
+        return return_value
 
 class DataStorage:
     """Handles reading and writing of the external storage file."""
