@@ -107,6 +107,8 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | rain_start_time | Last Rain | When was the last time it rained | No
 | rain_today | Rain Today | Total rain for the current day. (Reset at midnight) | Yes
 | rain_yesterday | Rain Yesterday | Total rain for yesterday | Yes
+| rain_duration_today | Rain Duration (Today) | Total rain minutes for the current day. (Reset at midnight) | Yes
+| rain_duration_yesterday | Rain Duration (Yesterday) | Total rain minutes yesterday | Yes
 | relative_humidity | Humidity | Relative Humidity | No
 | sealevel_pressure | Station Pressure | Preasure measurement at Sea Level | Yes
 | solar_radiation | Solar Radiation | Electromagnetic radiation emitted by the sun | No
@@ -144,6 +146,8 @@ sensors:
   - rain_start_time
   - rain_today
   - rain_yesterday
+  - rain_duration_today
+  - rain_duration_yesterday
   - relative_humidity
   - sealevel_pressure
   - solar_radiation

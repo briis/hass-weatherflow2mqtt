@@ -23,6 +23,8 @@ STORAGE_FIELDS = [
     ["rain_today", 0],
     ["rain_yesterday", 0],
     ["rain_start", datetime.datetime.fromtimestamp(0).isoformat()],
+    ["rain_duration_today", 0],
+    ["rain_duration_yesterday", 0],
     ["lightning_count", 0],
     ["lightning_count_today", 0],
     ["last_lightning_time", 0],
@@ -182,6 +184,8 @@ WEATHERFLOW_SENSORS = [
         "weather-pouring",
         EVENT_SKY_DATA,
     ],
+    ["rain_duration_today", "Rain Duration (Today)", "min", "min", None, "timeline-clock-outline", EVENT_SKY_DATA],
+    ["rain_duration_yesterday", "Rain Duration (Yesterday)", "min", "min", None, "timeline-clock-outline", EVENT_SKY_DATA],
     [
         "wind_lull",
         "Wind Lull",

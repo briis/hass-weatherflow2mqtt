@@ -102,7 +102,7 @@ class ConversionFunctions:
             pressure = station_pressure * 0.0145037738
             r_specific = 53.35
 
-        return round((pressure * 100) / (r_specific * kelvin), 4)
+        return round((pressure * 100) / (r_specific * kelvin), 2)
 
     async def sea_level_pressure(self, temperature, station_press, elevation):
         """Returns Sea Level pressure."""
@@ -267,23 +267,6 @@ class DataStorage:
         except Exception as e:
             _LOGGER.debug("Could not read config.yaml file. Error message: %s", e)
             return None
-
-        # filepath = f"{EXTERNAL_DIRECTORY}/config.yaml"
-        # with open(filepath) as json_file:
-        #     data = yaml.load(json_file, Loader=yaml.FullLoader)
-        #     is_tempest = data["tempest_device"]
-        #     weatherflow_ip = data["station"]["host"]
-        #     weatherflow_port = data["station"]["port"]
-        #     elevation = data["station"]["elevation"]
-        #     mqtt_host = data["mqtt"]["host"]
-        #     mqtt_port = data["mqtt"]["port"]
-        #     mqtt_username = data["mqtt"]["username"]
-        #     mqtt_password = data["mqtt"]["password"]
-        #     mqtt_debug = data["mqtt"]["debug"]
-        #     unit_system = data["unit_system"]
-        #     rw_interval = data["rapid_wind_interval"]
-        #     show_debug = data["debug"]
-        #     sensors = data.get("sensors")
 
     async def dummy_strike_storage(self, data):
         """Used for testing purposes only."""

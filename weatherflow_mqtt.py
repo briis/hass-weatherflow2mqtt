@@ -129,7 +129,9 @@ async def main():
         # Run New day function if Midnight
         if current_day != datetime.today().weekday():
             storage["rain_yesterday"] = storage["rain_today"]
+            storage["rain_duration_yesterday"] = storage["rain_duration_today"]
             storage["rain_today"] = 0
+            storage["rain_duration_today"] = 0
             storage["lightning_count_today"] = 0
             await data_store.write_storage(storage)
             await data_store.housekeeping_strike()
@@ -202,6 +204,8 @@ async def main():
                 storage["rain_today"] += obs[3]
                 data["rain_today"] = await cnv.rain(storage["rain_today"])
                 data["rain_yesterday"] = await cnv.rain(storage["rain_yesterday"])
+                data["rain_duration_today"] = storage["rain_duration_today"]
+                data["rain_duration_yesterday"] = storage["rain_duration_yesterday"]
                 data["rain_start_time"] = storage["rain_start"]
                 data["wind_lull"] = await cnv.speed(obs[4])
                 data["wind_speed_avg"] = await cnv.speed(obs[5])
@@ -214,6 +218,7 @@ async def main():
                 data["rain_rate"] = await cnv.rain_rate(obs[3])
                 client.publish(state_topic, json.dumps(data))
                 if obs[3] > 0:
+                    storage["rain_duration_today"] += 1
                     await data_store.write_storage(storage)
             if msg_type in EVENT_TEMPEST_DATA:
                 obs = json_response["obs"][0]
@@ -232,6 +237,8 @@ async def main():
                 storage["rain_today"] += obs[12]
                 data["rain_today"] = await cnv.rain(storage["rain_today"])
                 data["rain_yesterday"] = await cnv.rain(storage["rain_yesterday"])
+                data["rain_duration_today"] = storage["rain_duration_today"]
+                data["rain_duration_yesterday"] = storage["rain_duration_yesterday"]
                 data["rain_start_time"] = storage["rain_start"]
                 data["precipitation_type"] = await cnv.rain_type(obs[13])
                 data["battery"] = round(obs[16], 2)
@@ -259,15 +266,16 @@ async def main():
                 client.publish(state_topic, json.dumps(data))
 
                 if obs[12] > 0:
+                    storage["rain_duration_today"] += 1
                     await data_store.write_storage(storage)
 
             if msg_type in EVENT_DEVICE_STATUS:
+                now = datetime.now()
+                serial_number = json_response.get("serial_number")
+                firmware_revision = json_response.get("firmware_revision")
+                voltage = json_response.get("voltage")
+                sensor_status = json_response.get("sensor_status")
                 if show_debug:
-                    now = datetime.now()
-                    serial_number = json_response.get("serial_number")
-                    firmware_revision = json_response.get("firmware_revision")
-                    voltage = json_response.get("voltage")
-                    sensor_status = json_response.get("sensor_status")
                     _LOGGER.debug(
                         "DEVICE STATUS TRIGGERED AT %s\n  -- Device: %s\n -- Firmware Revision: %s\n -- Voltage: %s",
                         str(now),
@@ -275,7 +283,7 @@ async def main():
                         firmware_revision,
                         voltage,
                     )
-                if sensor_status != 0:
+                if sensor_status is not None and sensor_status != 0:
                     _LOGGER.debug("Device %s has reported a sensor fault. Reason: %s", serial_number, sensor_status)
 
             if msg_type != EVENT_RAPID_WIND and msg_type != EVENT_HUB_STATUS:
