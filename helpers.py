@@ -149,9 +149,11 @@ class ConversionFunctions:
             return "None"
         return str(datetime.timedelta(seconds=value))
 
-    async def device_status(self, value: int):
+    async def device_status(self, value):
         """Return device status as string."""
-
+        if value is None:
+            return
+            
         binvalue = str(bin(value))
         binarr = binvalue[2:]
         return_value = []
