@@ -60,7 +60,7 @@ ghcr.io/briis/hass-weatherflow2mqtt
 
 ### Docker Volume
 
-`-v YOUR_STORAGE_AREA:/usr/local/config` Please replace YOUR_STORAGE_AREA with a directory where Docker will have read an write access. It is also in this directory that you must place the *config.yaml* file if you use this. Once the program runs two hidden files called `.storage.yaml` and `.lightning.data` will be created in this directory. These files are used to save some calculated values, and to ensure that you don't start from 0 if you have to restart Home Assistant or the container.
+`-v YOUR_STORAGE_AREA:/usr/local/config` Please replace YOUR_STORAGE_AREA with a directory where Docker will have read and write access. It is also in this directory that you must place the *config.yaml* file if you use this. Once the program runs two hidden files called `.storage.yaml` and `.lightning.data` will be created in this directory. These files are used to save some calculated values, and to ensure that you don't start from 0 if you have to restart Home Assistant or the container.
 
 ### Docker Environment Variables
 
