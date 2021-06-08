@@ -101,7 +101,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | lightning_strike_count_today | Lightning Count (Today) | Number of lightning strikes current day | Yes
 | lightning_strike_distance | Lightning Distance | Distance of the last strike | No
 | lightning_strike_energy | Lightning Energy | Energy of the last strike | No
-| lightning_strike_time | Last Lightning Time | When the last lightning strike occurred | Yes
+| lightning_strike_time | Last Lightning Today | When the last lightning strike occurred | Yes
 | precipitation_type | Precipitation Type | Can be one of None, Rain or Hail | No
 | rain_rate | Rain Rate | How much is it raining right now | Yes
 | rain_start_time | Last Rain | When was the last time it rained | No
@@ -112,7 +112,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | relative_humidity | Humidity | Relative Humidity | No
 | sealevel_pressure | Station Pressure | Preasure measurement at Sea Level | Yes
 | solar_radiation | Solar Radiation | Electromagnetic radiation emitted by the sun | No
-| station_pressure | Wind Direction | Pressure measurement where the station is located | No
+| station_pressure | Station Pressure | Pressure measurement where the station is located | No
 | uptime | Uptime | How long has the HUB been running | No
 | uv | UV Index | The UV index | No
 | wind_bearing | Wind Bearing | Current measured Wind bearing in degrees | No
