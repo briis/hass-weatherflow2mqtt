@@ -146,7 +146,9 @@ async def main():
             if (now - forecast_last_run) >= forecast_interval:
                 condition_data, fcst_data  = await forecast.update_forecast()
                 client.publish(fcst_state_topic, json.dumps(condition_data))
+                await asyncio.sleep(0.01)
                 client.publish(fcst_attr_topic, json.dumps(fcst_data))
+                await asyncio.sleep(0.01)
                 forecast_last_run = now
 
         # Process the data
@@ -162,10 +164,12 @@ async def main():
                     data["wind_direction"] = await cnv.direction(obs[2])
                     wind_speed = obs[1]
                     client.publish(state_topic, json.dumps(data))
+                    await asyncio.sleep(0.01)
                     rapid_last_run = datetime.now().timestamp()
             if msg_type in EVENT_HUB_STATUS:
                 data["uptime"] = await cnv.humanize_time(json_response.get("uptime"))
                 client.publish(state_topic, json.dumps(data))
+                await asyncio.sleep(0.01)
                 if show_debug:
                     _LOGGER.debug("HUB Reset Flags: %s", json_response.get("reset_flags"))
             if msg_type in EVENT_PRECIP_START:
@@ -198,6 +202,7 @@ async def main():
                 data["dewpoint"] = await cnv.dewpoint(obs[2], obs[3])
                 data["feelslike"] = await cnv.feels_like(obs[2], obs[3], wind_speed)
                 client.publish(state_topic, json.dumps(data))
+                await asyncio.sleep(0.01)
             if msg_type in EVENT_SKY_DATA:
                 obs = json_response["obs"][0]
                 data["illuminance"] = obs[1]
@@ -218,6 +223,7 @@ async def main():
                 data["precipitation_type"] = await cnv.rain_type(obs[12])
                 data["rain_rate"] = await cnv.rain_rate(obs[3])
                 client.publish(state_topic, json.dumps(data))
+                await asyncio.sleep(0.01)
                 if obs[3] > 0:
                     storage["rain_duration_today"] += 1
                     await data_store.write_storage(storage)
@@ -245,6 +251,7 @@ async def main():
                 data["battery"] = round(obs[16], 2)
                 data["rain_rate"] = await cnv.rain_rate(obs[12])
                 client.publish(state_topic, json.dumps(data))
+                await asyncio.sleep(0.01)
 
                 state_topic = "homeassistant/sensor/{}/{}/state".format(
                     DOMAIN, EVENT_AIR_DATA
@@ -265,6 +272,7 @@ async def main():
                 data["dewpoint"] = await cnv.dewpoint(obs[7], obs[8])
                 data["feelslike"] = await cnv.feels_like(obs[7], obs[8], wind_speed)
                 client.publish(state_topic, json.dumps(data))
+                await asyncio.sleep(0.01)
 
                 if obs[12] > 0:
                     storage["rain_duration_today"] += 1
@@ -292,7 +300,10 @@ async def main():
                 # Update the Forecast State (Ensure there is data if HA restarts)
                 if add_forecast:
                     client.publish(fcst_state_topic, json.dumps(condition_data))
+                    await asyncio.sleep(0.01)
+
                     client.publish(fcst_attr_topic, json.dumps(fcst_data))
+                    await asyncio.sleep(0.01)
 
             if show_debug:
                 _LOGGER.debug(
@@ -372,9 +383,9 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
             mqtt_client.publish(
                 discovery_topic, json.dumps(payload), qos=1, retain=True
             )
-            await asyncio.sleep(0.05)
+            await asyncio.sleep(0.01)
             mqtt_client.publish(attr_topic, json.dumps(attribution), qos=1, retain=True)
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(0.01)
         except Exception as e:
             _LOGGER.error("Could not connect to MQTT Server. Error is: %s", e)
             break
