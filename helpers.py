@@ -28,35 +28,50 @@ class ConversionFunctions:
 
     async def temperature(self, value) -> float:
         """Convert Temperature Value."""
-        if self._unit_system == UNITS_IMPERIAL:
-            return round((value * 9 / 5) + 32, 1)
-        return round(value, 1)
+        if value is not None:
+            if self._unit_system == UNITS_IMPERIAL:
+                return round((value * 9 / 5) + 32, 1)
+            return round(value, 1)
+
+        _LOGGER.error("FUNC: temperature ERROR: Temperature value was reported as NoneType. Check the sensor")
 
     async def pressure(self, value) -> float:
         """Convert Pressure Value."""
-        if self._unit_system == UNITS_IMPERIAL:
-            return round(value * 0.02953, 3)
-        return round(value, 2)
+        if value is not None:
+            if self._unit_system == UNITS_IMPERIAL:
+                return round(value * 0.02953, 3)
+            return round(value, 2)
+
+        _LOGGER.error("FUNC: pressure ERROR: Pressure value was reported as NoneType. Check the sensor")
 
     async def speed(self, value, kmh=False) -> float:
         """Convert Wind Speed."""
-        if self._unit_system == UNITS_IMPERIAL:
-            return round(value * 2.2369362920544, 2)
-        if kmh:
-            return round((value * 18 / 5), 1)
-        return round(value, 1)
+        if value is not None:
+            if self._unit_system == UNITS_IMPERIAL:
+                return round(value * 2.2369362920544, 2)
+            if kmh:
+                return round((value * 18 / 5), 1)
+            return round(value, 1)
+
+        _LOGGER.error("FUNC: speed ERROR: Wind value value was reported as NoneType. Check the sensor")
 
     async def distance(self, value) -> float:
         """Convert distance."""
-        if self._unit_system == UNITS_IMPERIAL:
-            return round(value / 1.609344, 2)
-        return value
+        if value is not None:
+            if self._unit_system == UNITS_IMPERIAL:
+                return round(value / 1.609344, 2)
+            return value
+
+        _LOGGER.error("FUNC: distance ERROR: Lightning Distance value was reported as NoneType. Check the sensor")
 
     async def rain(self, value) -> float:
         """Convert rain."""
-        if self._unit_system == UNITS_IMPERIAL:
-            return round(value * 0.0393700787, 2)
-        return round(value, 2)
+        if value is not None:
+            if self._unit_system == UNITS_IMPERIAL:
+                return round(value * 0.0393700787, 2)
+            return round(value, 2)
+
+        _LOGGER.error("FUNC: rain ERROR: Rain value was reported as NoneType. Check the sensor")
 
     async def rain_type(self, value) -> str:
         """Convert rain type."""
@@ -95,38 +110,47 @@ class ConversionFunctions:
 
     async def air_density(self, temperature, station_pressure):
         """Returns the Air Density."""
-        kelvin = temperature + 273.15
-        pressure = station_pressure
-        r_specific = 287.058
+        if temperature is not None and station_pressure is not None:
+            kelvin = temperature + 273.15
+            pressure = station_pressure
+            r_specific = 287.058
 
-        if self._unit_system == UNITS_IMPERIAL:
-            pressure = station_pressure * 0.0145037738
-            r_specific = 53.35
+            if self._unit_system == UNITS_IMPERIAL:
+                pressure = station_pressure * 0.0145037738
+                r_specific = 53.35
 
-        return round((pressure * 100) / (r_specific * kelvin), 2)
+            return round((pressure * 100) / (r_specific * kelvin), 2)
+
+        _LOGGER.error("FUNC: air_density ERROR: Temperature or Pressure value was reported as NoneType. Check the sensor")
 
     async def sea_level_pressure(self, temperature, station_press, elevation):
         """Returns Sea Level pressure."""
-        slp = station_press +((station_press * 9.80665 * elevation) / (287 * (273 + temperature + (elevation / 400))))
+        if temperature is not None and station_press is not None:
+            slp = station_press +((station_press * 9.80665 * elevation) / (287 * (273 + temperature + (elevation / 400))))
 
-        return await self.pressure(slp)
+            return await self.pressure(slp)
+
+        _LOGGER.error("FUNC: sea_level_pressure ERROR: Temperature or Pressure value was reported as NoneType. Check the sensor")
 
     async def dewpoint(self, temperature, humidity):
         """Returns Dewpoint."""
-        dewpoint_c = round(
-            243.04
-            * (
-                math.log(humidity / 100)
-                + ((17.625 * temperature) / (243.04 + temperature))
+        if temperature is not None and humidity is not None:
+            dewpoint_c = round(
+                243.04
+                * (
+                    math.log(humidity / 100)
+                    + ((17.625 * temperature) / (243.04 + temperature))
+                )
+                / (
+                    17.625
+                    - math.log(humidity / 100)
+                    - ((17.625 * temperature) / (243.04 + temperature))
+                ),
+                1,
             )
-            / (
-                17.625
-                - math.log(humidity / 100)
-                - ((17.625 * temperature) / (243.04 + temperature))
-            ),
-            1,
-        )
-        return await self.temperature(dewpoint_c)
+            return await self.temperature(dewpoint_c)
+
+        _LOGGER.error("FUNC: dewpoint ERROR: Temperature and/or Humidity value was reported as NoneType. Check the sensor")
 
     async def rain_rate(self, value):
         """Returns rain rate per hour."""
