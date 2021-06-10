@@ -7,6 +7,8 @@ import math
 from typing import OrderedDict
 import logging
 import yaml
+from cmath import rect, phase
+from math import radians, degrees
 
 from const import (
     DEVICE_STATUS,
@@ -166,6 +168,11 @@ class ConversionFunctions:
         )
         feelslike_c = temperature + 0.348 * e_value - 0.7 * windspeed - 4.25
         return await self.temperature(feelslike_c)
+
+    async def average_bearing(self, bearing_arr) -> int:
+        """Returns the average Wind Bearing from an array of bearings."""
+        mean_angle = degrees(phase(sum(rect(1, radians(d)) for d in bearing_arr)/len(bearing_arr)))
+        return int(abs(mean_angle))
 
     async def humanize_time(self, value):
         """Humanize Time in Seconds."""
