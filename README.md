@@ -91,38 +91,38 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | Sensor ID   | Name   | Description   | Calculated Sensor   | UDP Event/Index (Tempest)  | Default Units   | MQTT Topic   |
 | --- | --- | --- | --- | --- | --- | --- |
 | air_density | Air Density | The Air density | Yes |  |  |  |
-| air_temperature | Temperature | Outside Temperature | No |  |  |  |
-| battery | Battery SKY or TEMPEST | If this is a TEMPEST unit this is where the Voltage is displayed. Else it will be the Voltage of the SKY unit | No | obs_st 16 |  |  |
-| battery_air | Battery AIR | The voltage on the AIR unit (If present) | No |  |  |  |
+| air_temperature | Temperature | Outside Temperature | No | obs_st/7 | C |  |
+| battery | Battery SKY or TEMPEST | If this is a TEMPEST unit this is where the Voltage is displayed. Else it will be the Voltage of the SKY unit | No | obs_st/16 | Volts |  |
+| battery_air | Battery AIR | The voltage on the AIR unit (If present) | No |  | Volts |  |
 | dewpoint | Dew Point | Dewpoint in degrees | Yes |  |  |  |
 | feelslike | Feels Like Temperature | The apparent temperature, a mix of Heat Index and Wind Chill | Yes |  |  |  |
-| illuminance | Illuminance | How much the incident light illuminates the surface | No |  |  |  |
+| illuminance | Illuminance | How much the incident light illuminates the surface | No | obs_st/9 | Lux |  |
 | lightning_strike_count | Lightning Count (3 hours) | Number of lightning strikes the last 3 hours | Yes |  |  |  |
 | lightning_strike_count_today | Lightning Count (Today) | Number of lightning strikes current day | Yes |  |  |  |
-| lightning_strike_distance | Lightning Distance | Distance of the last strike | No | evt_strike 1 |  |  |
-| lightning_strike_energy | Lightning Energy | Energy of the last strike | No | evt_strike 2 |  |  |
-| lightning_strike_time | Last Lightning Today | When the last lightning strike occurred | Yes | evt_strike 0 |  |  |
-| precipitation_type | Precipitation Type | Can be one of None, Rain or Hail | No |  |  |  |
+| lightning_strike_distance | Lightning Distance | Distance of the last strike | No | obs_st/14 or evt_strike/1 | km |  |
+| lightning_strike_energy | Lightning Energy | Energy of the last strike | No | evt_strike/2 |  |  |
+| lightning_strike_time | Last Lightning Today | When the last lightning strike occurred | Yes | evt_strike/0 | seconds |  |
+| precipitation_type | Precipitation Type | Can be one of None, Rain or Hail | No | obs_st/13 | 0 = none, 1 = rain, 2 = hail, 3 = rain + hail (heavy rain) |  |
 | rain_rate | Rain Rate | How much is it raining right now | Yes |  |  |  |
-| rain_start_time | Last Rain | When was the last time it rained | No | evt_precip |  |  |
+| rain_start_time | Last Rain | When was the last time it rained | No | evt_precip/0 | seconds |  |
 | rain_today | Rain Today | Total rain for the current day. (Reset at midnight) | Yes |  |  |  |
 | rain_yesterday | Rain Yesterday | Total rain for yesterday | Yes |  |  |  |
 | rain_duration_today | Rain Duration (Today) | Total rain minutes for the current day. (Reset at midnight) | Yes |  |  |  |
 | rain_duration_yesterday | Rain Duration (Yesterday) | Total rain minutes yesterday | Yes |  |  |  |
-| relative_humidity | Humidity | Relative Humidity | No |  |  |  |
-| sealevel_pressure | Station Pressure | Preasure measurement at Sea Level | Yes |  |  |  |
-| solar_radiation | Solar Radiation | Electromagnetic radiation emitted by the sun | No |  |  |  |
-| station_pressure | Station Pressure | Pressure measurement where the station is located | No |  |  |  |
-| uptime | Uptime | How long has the HUB been running | No |  |  |  |
-| uv | UV Index | The UV index | No |  |  |  |
-| wind_bearing | Wind Bearing | Current measured Wind bearing in degrees | No |  |  |  |
-| wind_bearing_avg | Wind Bearing Avg | The average wind bearing in degrees | No |  |  |  |
-| wind_direction | Wind Direction | Current measured Wind bearing as compass symbol | Yes |  |  |  |
-| wind_direction_avg | Wind Direction Avg | The average wind direction as a compass string | Yes |  |  |  |
-| wind_gust | Wind Gust | Highest wind speed for the last minute | No | obs_st 3 | m/s |  |
-| wind_lull | Wind Lull | Lowest wind for the last minute | No | obs_st 1 | m/s |  |
-| wind_speed | Wind Speed | Current measured Wind Speed | No |  |  |  |
-| wind_speed_avg | Wind Speed Avg | Average wind speed for the last minute | No | obs_st 2 |  |  |
+| relative_humidity | Humidity | Relative Humidity | No | obs_st/8 | % |  |
+| sealevel_pressure | Station Pressure | Preasure measurement at Sea Level | Yes |  | MB |  |
+| solar_radiation | Solar Radiation | Electromagnetic radiation emitted by the sun | No | obs_st/11 | W/m^2 |  |
+| station_pressure | Station Pressure | Pressure measurement where the station is located | No | obs_st/6 | MB |  |
+| uptime | Uptime | How long has the HUB been running | No | hub_status/uptime |  |  |
+| uv | UV Index | The UV index | No | obs_st/10 | Index |  |
+| wind_bearing | Wind Bearing | Current measured Wind bearing in degrees | No | rapid_wind/2 | Degrees |  |
+| wind_bearing_avg | Wind Bearing Avg | The average wind bearing in degrees | No | obs_st/4 | Degrees |  |
+| wind_direction | Wind Direction | Current measured Wind bearing as compass symbol | Yes |  | Cardinal |  |
+| wind_direction_avg | Wind Direction Avg | The average wind direction as a compass string | Yes |  | Cardinal |  |
+| wind_gust | Wind Gust | Highest wind speed for the last minute | No | obs_st/3 | m/s |  |
+| wind_lull | Wind Lull | Lowest wind for the last minute | No | obs_st/1 | m/s |  |
+| wind_speed | Wind Speed | Current measured Wind Speed | No | rapid_wind/1 | m/s |  |
+| wind_speed_avg | Wind Speed Avg | Average wind speed for the last minute | No | obs_st/2 | m/s |  |
 | weather | Weather | Only available if Forecast option is enabled. State will be current condition, and forecast data will be in the attributes. | No |  |  |  |
 
 ### Sensor Structure
