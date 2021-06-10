@@ -55,7 +55,7 @@ class ConversionFunctions:
                 return round((value * 18 / 5), 1)
             return round(value, 1)
 
-        _LOGGER.error("FUNC: speed ERROR: Wind value value was reported as NoneType. Check the sensor")
+        _LOGGER.error("FUNC: speed ERROR: Wind value was reported as NoneType. Check the sensor")
 
     async def distance(self, value) -> float:
         """Convert distance."""
