@@ -55,7 +55,7 @@ docker run -d \
 -e STATION_ID= \
 -e STATION_TOKEN= \
 -e FORECAST_INTERVAL=30 \
-ghcr.io/briis/hass-weatherflow2mqtt
+ghcr.io/briis/hass-weatherflow2mqtt:latest
 ```
 
 ### Docker Volume
@@ -70,7 +70,7 @@ A description of the Environment Variables available for this container. All of 
 - `TEMPEST_DEVICE`: If you have a Tempest Weather Station set this to True. If False, the program will assume you have the older AIR and SKY units. Default is *True*
 - `UNIT_SYSTEM`: Enter *imperial* or *metric*. This will determine the unit system used when displaying the values. Default is *metric*
 - `RAPID_WIND_INTERVAL`: The weather stations delivers wind speed and bearing every 2 seconds. If you don't want to update the HA sensors so often, you can set a number here (in seconds), for how often they are updated. Default is *0*, which means data are updated when received from the station.
-- `ELEVATION`: Set the hight above sea level for where the station is placed. This is used when calculating some of the sensor values. The value has to be in meters. Default is *0*
+- `ELEVATION`: Set the hight above sea level for where the station is placed. This is used when calculating some of the sensor values. Station elevation plus Device height above ground. The value has to be in meters. Default is *0*
 - `WF_HOST`: Unless you have a very special IP setup or the Weatherflow hub is on a different network, you should not change this. Default is *0.0.0.0*
 - `WF_PORT`: Weatherflow always broadcasts on port 50222/udp, so don't change this. Default is *50222*
 - `MQTT_HOST`: The IP address of your mqtt server. Even though you have the MQTT Server on the same machine as this Container, don't use `127.0.0.1` as this will resolve to an IP Address inside your container. Use the external IP Address. Default value is *127.0.0.1* (**Required**)
@@ -88,42 +88,42 @@ A description of the Environment Variables available for this container. All of 
 
 Here is the list of sensors that the program generates. Calculated Sensor means, if No, then data comes directly from the Weather Station, if yes, it is a sensor that is derived from some of the other sensors. For a *copy ready* list se [further below](#sensor-structure)
 
-| Sensor ID   | Name   | Description   | Calculated Sensor   |
-| --- | --- | --- | --- |
-| air_density | Air Density | The Air density | Yes
-| air_temperature | Temperature | Outside Temperature | No
-| battery | Battery SKY or TEMPEST | If this is a TEMPEST unit this is where the Voltage is displayed. Else it will be the Voltage of the SKY unit | No
-| battery_air | Battery AIR | The voltage on the AIR unit (If present) | No
-| dewpoint | Dew Point | Dewpoint in degrees | Yes
-| feelslike | Feels Like Temperature | The apparent temperature, a mix of Heat Index and Wind Chill | Yes
-| illuminance | Illuminance | How much the incident light illuminates the surface | No
-| lightning_strike_count | Lightning Count (3 hours) | Number of lightning strikes the last 3 hours | Yes
-| lightning_strike_count_today | Lightning Count (Today) | Number of lightning strikes current day | Yes
-| lightning_strike_distance | Lightning Distance | Distance of the last strike | No
-| lightning_strike_energy | Lightning Energy | Energy of the last strike | No
-| lightning_strike_time | Last Lightning Today | When the last lightning strike occurred | Yes
-| precipitation_type | Precipitation Type | Can be one of None, Rain or Hail | No
-| rain_rate | Rain Rate | How much is it raining right now | Yes
-| rain_start_time | Last Rain | When was the last time it rained | No
-| rain_today | Rain Today | Total rain for the current day. (Reset at midnight) | Yes
-| rain_yesterday | Rain Yesterday | Total rain for yesterday | Yes
-| rain_duration_today | Rain Duration (Today) | Total rain minutes for the current day. (Reset at midnight) | Yes
-| rain_duration_yesterday | Rain Duration (Yesterday) | Total rain minutes yesterday | Yes
-| relative_humidity | Humidity | Relative Humidity | No
-| sealevel_pressure | Station Pressure | Preasure measurement at Sea Level | Yes
-| solar_radiation | Solar Radiation | Electromagnetic radiation emitted by the sun | No
-| station_pressure | Station Pressure | Pressure measurement where the station is located | No
-| uptime | Uptime | How long has the HUB been running | No
-| uv | UV Index | The UV index | No
-| wind_bearing | Wind Bearing | Current measured Wind bearing in degrees | No
-| wind_bearing_avg | Wind Bearing Avg | The average wind bearing in degrees | No
-| wind_direction | Wind Direction | Current measured Wind bearing as compass symbol | Yes
-| wind_direction_avg | Wind Direction Avg | The average wind direction as a compass string | Yes
-| wind_gust | Wind Gust | Highest wind speed for the last minute | No
-| wind_lull | Wind Lull | Lowest wind for the last minute | No
-| wind_speed | Wind Speed | Current measured Wind Speed | No
-| wind_speed_avg | Wind Speed Avg | Average wind speed for the last minute | No
-| weather | Weather | Only available if Forecast option is enabled. State will be current condition, and forecast data will be in the attributes. | No
+| Sensor ID   | Name   | Description   | Calculated Sensor   | Air   | Sky   | Tempest   |
+| --- | --- | --- | --- | --- | --- | --- |
+| air_density | Air Density | The Air density | Yes |  |  |  |
+| air_temperature | Temperature | Outside Temperature | No |  |  |  |
+| battery | Battery SKY or TEMPEST | If this is a TEMPEST unit this is where the Voltage is displayed. Else it will be the Voltage of the SKY unit | No |  |  |  |
+| battery_air | Battery AIR | The voltage on the AIR unit (If present) | No |  |  |  |
+| dewpoint | Dew Point | Dewpoint in degrees | Yes |  |  |  |
+| feelslike | Feels Like Temperature | The apparent temperature, a mix of Heat Index and Wind Chill | Yes |  |  |  |
+| illuminance | Illuminance | How much the incident light illuminates the surface | No |  |  |  |
+| lightning_strike_count | Lightning Count (3 hours) | Number of lightning strikes the last 3 hours | Yes |  |  |  |
+| lightning_strike_count_today | Lightning Count (Today) | Number of lightning strikes current day | Yes |  |  |  |
+| lightning_strike_distance | Lightning Distance | Distance of the last strike | No |  |  |  |
+| lightning_strike_energy | Lightning Energy | Energy of the last strike | No |  |  |  |
+| lightning_strike_time | Last Lightning Today | When the last lightning strike occurred | Yes |  |  |  |
+| precipitation_type | Precipitation Type | Can be one of None, Rain or Hail | No |  |  |  |
+| rain_rate | Rain Rate | How much is it raining right now | Yes |  |  |  |
+| rain_start_time | Last Rain | When was the last time it rained | No |  |  |  |
+| rain_today | Rain Today | Total rain for the current day. (Reset at midnight) | Yes |  |  |  |
+| rain_yesterday | Rain Yesterday | Total rain for yesterday | Yes |  |  |  |
+| rain_duration_today | Rain Duration (Today) | Total rain minutes for the current day. (Reset at midnight) | Yes |  |  |  |
+| rain_duration_yesterday | Rain Duration (Yesterday) | Total rain minutes yesterday | Yes |  |  |  |
+| relative_humidity | Humidity | Relative Humidity | No |  |  |  |
+| sealevel_pressure | Station Pressure | Preasure measurement at Sea Level | Yes |  |  |  |
+| solar_radiation | Solar Radiation | Electromagnetic radiation emitted by the sun | No |  |  |  |
+| station_pressure | Station Pressure | Pressure measurement where the station is located | No |  |  |  |
+| uptime | Uptime | How long has the HUB been running | No |  |  |  |
+| uv | UV Index | The UV index | No |  |  |  |
+| wind_bearing | Wind Bearing | Current measured Wind bearing in degrees | No |  |  |  |
+| wind_bearing_avg | Wind Bearing Avg | The average wind bearing in degrees | No |  |  |  |
+| wind_direction | Wind Direction | Current measured Wind bearing as compass symbol | Yes |  |  |  |
+| wind_direction_avg | Wind Direction Avg | The average wind direction as a compass string | Yes |  |  |  |
+| wind_gust | Wind Gust | Highest wind speed for the last minute | No |  |  |  |
+| wind_lull | Wind Lull | Lowest wind for the last minute | No |  |  |  |
+| wind_speed | Wind Speed | Current measured Wind Speed | No |  |  |  |
+| wind_speed_avg | Wind Speed Avg | Average wind speed for the last minute | No |  |  |  |
+| weather | Weather | Only available if Forecast option is enabled. State will be current condition, and forecast data will be in the attributes. | No |  |  |  |
 
 ### Sensor Structure
 
