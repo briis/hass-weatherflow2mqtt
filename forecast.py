@@ -63,8 +63,8 @@ class Forecast:
         forecast_data = json_data.get("forecast")
 
         # We also need Day hign and low Temp from Today
-        temp_high_today = forecast_data[FORECAST_TYPE_DAILY][0]["air_temp_high"]
-        temp_low_today = forecast_data[FORECAST_TYPE_DAILY][0]["air_temp_low"]
+        temp_high_today = await cnv.temperature(forecast_data[FORECAST_TYPE_DAILY][0]["air_temp_high"])
+        temp_low_today = await cnv.temperature(forecast_data[FORECAST_TYPE_DAILY][0]["air_temp_low"])
 
         # Process Daily Forecast
         fcst_data = OrderedDict()
@@ -89,7 +89,7 @@ class Forecast:
                     wind_avg.append(hourly["wind_avg"])
                     wind_bearing.append(hourly["wind_direction"])
             sum_wind_avg = sum(wind_avg) / len(wind_avg)
-            sum_wind_bearing = sum(wind_bearing) / len(wind_bearing)
+            sum_wind_bearing = sum(wind_bearing) / len(wind_bearing) % 360
 
             item = {
                 ATTR_FORECAST_TIME: forecast_time.isoformat(),
@@ -102,7 +102,8 @@ class Forecast:
                 "precip_icon": row.get("precip_icon", ""),
                 "precip_type": row.get("precip_type", ""),
                 ATTR_FORECAST_WIND_SPEED: await cnv.speed(sum_wind_avg, True),
-                ATTR_FORECAST_WIND_BEARING: sum_wind_bearing,
+                ATTR_FORECAST_WIND_BEARING: int(sum_wind_bearing),
+                "wind_direction_cardinal": await cnv.direction(int(sum_wind_bearing)),
             }
             items.append(item)
         fcst_data["daily_forecast"] = items

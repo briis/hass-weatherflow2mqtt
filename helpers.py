@@ -7,6 +7,8 @@ import math
 from typing import OrderedDict
 import logging
 import yaml
+from cmath import rect, phase
+from math import gamma, radians, degrees
 
 from const import (
     DEVICE_STATUS,
@@ -123,12 +125,24 @@ class ConversionFunctions:
 
         _LOGGER.error("FUNC: air_density ERROR: Temperature or Pressure value was reported as NoneType. Check the sensor")
 
-    async def sea_level_pressure(self, temperature, station_press, elevation):
+    async def sea_level_pressure(self, station_press, elevation):
         """Returns Sea Level pressure."""
-        if temperature is not None and station_press is not None:
-            slp = station_press +((station_press * 9.80665 * elevation) / (287 * (273 + temperature + (elevation / 400))))
+        if station_press is not None:
+            elev = float(elevation)
+            press = float(station_press)
+            # Constants
+            gravity = 9.80665
+            gas_constant = 287.05
+            atm_rate = 0.0065
+            std_pressure = 1013.25
+            std_temp = 288.15
+            # Sub Calculation
+            l = gravity / (gas_constant * atm_rate)
+            c = gas_constant * atm_rate / gravity
+            u = math.pow(1 + math.pow(std_pressure / press, c) * (atm_rate * elev / std_temp), l)
+            sea_pressure = (press * u)
 
-            return await self.pressure(slp)
+            return await self.pressure(sea_pressure)
 
         _LOGGER.error("FUNC: sea_level_pressure ERROR: Temperature or Pressure value was reported as NoneType. Check the sensor")
 
@@ -166,6 +180,11 @@ class ConversionFunctions:
         )
         feelslike_c = temperature + 0.348 * e_value - 0.7 * windspeed - 4.25
         return await self.temperature(feelslike_c)
+
+    async def average_bearing(self, bearing_arr) -> int:
+        """Returns the average Wind Bearing from an array of bearings."""
+        mean_angle = degrees(phase(sum(rect(1, radians(d)) for d in bearing_arr)/len(bearing_arr)))
+        return int(abs(mean_angle))
 
     async def humanize_time(self, value):
         """Humanize Time in Seconds."""

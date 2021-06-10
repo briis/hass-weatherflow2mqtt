@@ -153,7 +153,7 @@ WEATHERFLOW_SENSORS = [
     [
         "lightning_strike_distance",
         "Lightning Distance",
-        "Km",
+        "km",
         "mi",
         None,
         "flash",
@@ -170,7 +170,7 @@ WEATHERFLOW_SENSORS = [
     ],
     [
         "lightning_strike_time",
-        "Last Lightning Today",
+        "Last Lightning Strike",
         None,
         None,
         DEVICE_CLASS_TIMESTAMP,
