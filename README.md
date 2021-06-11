@@ -101,12 +101,12 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | lightning_strike_count_today | Lightning Count (Today) | Number of lightning strikes current day | Yes |  |  |  |
 | lightning_strike_distance | Lightning Distance | Distance of the last strike | No | obs_st/14 or evt_strike/1 | km |  |
 | lightning_strike_energy | Lightning Energy | Energy of the last strike | No | evt_strike/2 |  |  |
-| lightning_strike_time | Last Lightning Today | When the last lightning strike occurred | Yes | evt_strike/0 | seconds |  |
+| lightning_strike_time | Last Lightning Strike | When the last lightning strike occurred | Yes | evt_strike/0 | seconds |  |
 | precipitation_type | Precipitation Type | Can be one of None, Rain or Hail | No | obs_st/13 | 0 = none, 1 = rain, 2 = hail, 3 = rain + hail (heavy rain) |  |
 | rain_rate | Rain Rate | How much is it raining right now | Yes |  |  |  |
 | rain_start_time | Last Rain | When was the last time it rained | No | evt_precip/0 | seconds |  |
 | rain_today | Rain Today | Total rain for the current day. (Reset at midnight) | Yes |  |  |  |
-| rain_yesterday | Rain Yesterday | Total rain for yesterday | Yes |  |  |  |
+| rain_yesterday | Rain Yesterday | Total rain for yesterday (Reset at midnight) | Yes |  |  |  |
 | rain_duration_today | Rain Duration (Today) | Total rain minutes for the current day. (Reset at midnight) | Yes |  |  |  |
 | rain_duration_yesterday | Rain Duration (Yesterday) | Total rain minutes yesterday | Yes |  |  |  |
 | relative_humidity | Humidity | Relative Humidity | No | obs_st/8 | % |  |
