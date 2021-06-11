@@ -179,7 +179,7 @@ weather:
     temperature_template: "{{ states('sensor.temperature') | float}}"
     humidity_template: "{{ states('sensor.humidity')| int }}"
     pressure_template: "{{ states('sensor.sea_level_pressure')| float }}"
-    wind_speed_template: "{{ states('sensor.wind_speed_avg') | float * 18 / 5 | round(2) }}"
+    wind_speed_template: "{{ ( states('sensor.wind_speed_avg') | float * 18 / 5 ) | round(2) }}"
     wind_bearing_template: "{{ states('sensor.wind_bearing_avg')| int }}"
     forecast_template: "{{ state_attr('sensor.weather', 'hourly_forecast') }}"
 ```
