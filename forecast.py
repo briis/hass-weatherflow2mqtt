@@ -3,6 +3,7 @@ import asyncio
 from aiohttp import ClientSession, ClientTimeout
 from aiohttp.client_exceptions import ClientError
 from datetime import datetime
+import pytz
 from typing import Optional, OrderedDict
 
 import logging
@@ -54,6 +55,7 @@ class Forecast:
         current_condition = current_cond["conditions"]
         current_icon = current_cond["icon"]
         today = datetime.date(datetime.now())
+        tz = pytz.timezone(json_data["timezone"])
 
         # Prepare for MQTT
         condition_data = OrderedDict()
@@ -117,7 +119,7 @@ class Forecast:
                 continue
 
             item = {
-                ATTR_FORECAST_TIME: datetime.fromtimestamp(row["time"]).isoformat(),
+                ATTR_FORECAST_TIME: datetime.utcfromtimestamp(row["time"]).astimezone(tz),
                 "conditions": row["conditions"],
                 ATTR_FORECAST_CONDITION: await self.ha_condition_value(row["icon"]),
                 ATTR_FORECAST_TEMP: await cnv.temperature(row["air_temperature"]),
