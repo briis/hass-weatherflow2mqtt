@@ -3,7 +3,6 @@ import asyncio
 from aiohttp import ClientSession, ClientTimeout
 from aiohttp.client_exceptions import ClientError
 from datetime import datetime
-import pytz
 from typing import Optional, OrderedDict
 
 import logging
@@ -29,6 +28,7 @@ from const import (
     FORECAST_HOURLY_HOURS,
     FORECAST_TYPE_DAILY,
     FORECAST_TYPE_HOURLY,
+    UTC,
 )
 from helpers import ConversionFunctions
 
@@ -55,7 +55,6 @@ class Forecast:
         current_condition = current_cond["conditions"]
         current_icon = current_cond["icon"]
         today = datetime.date(datetime.now())
-        tz = pytz.timezone(json_data["timezone"])
 
         # Prepare for MQTT
         condition_data = OrderedDict()
@@ -94,7 +93,7 @@ class Forecast:
             sum_wind_bearing = sum(wind_bearing) / len(wind_bearing) % 360
 
             item = {
-                ATTR_FORECAST_TIME: datetime.utcfromtimestamp(row["day_start_local"]).astimezone(tz).isoformat(),
+                ATTR_FORECAST_TIME: datetime.utcfromtimestamp(row["day_start_local"]).replace(tzinfo=UTC).isoformat(),
                 "conditions": row["conditions"],
                 ATTR_FORECAST_CONDITION: await self.ha_condition_value(row["icon"]),
                 ATTR_FORECAST_TEMP: await cnv.temperature(row["air_temp_high"]),
@@ -119,7 +118,7 @@ class Forecast:
                 continue
 
             item = {
-                ATTR_FORECAST_TIME: datetime.utcfromtimestamp(row["time"]).astimezone(tz).isoformat(),
+                ATTR_FORECAST_TIME: datetime.utcfromtimestamp(row["time"]).replace(tzinfo=UTC).isoformat(),
                 "conditions": row["conditions"],
                 ATTR_FORECAST_CONDITION: await self.ha_condition_value(row["icon"]),
                 ATTR_FORECAST_TEMP: await cnv.temperature(row["air_temperature"]),

@@ -74,6 +74,8 @@ FORECAST_HOURLY_HOURS = 36
 
 UNITS_IMPERIAL = "imperial"
 
+UTC = datetime.timezone.utc
+
 # Sensor ID, Sensor Name, Unit Metric, Unit Imperial, Device Class, Icon, Update Event
 WEATHERFLOW_SENSORS = [
     ["wind_speed", "Wind Speed", "m/s", "mph", None, "weather-windy", EVENT_RAPID_WIND],
