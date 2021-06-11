@@ -94,7 +94,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | air_temperature | Temperature | Outside Temperature | No | obs_st/7 | C |  |
 | battery | Battery SKY or TEMPEST | If this is a TEMPEST unit this is where the Voltage is displayed. Else it will be the Voltage of the SKY unit | No | obs_st/16 | Volts |  |
 | battery_air | Battery AIR | The voltage on the AIR unit (If present) | No |  | Volts |  |
-| dewpoint | Dew Point | Dewpoint in degrees | Yes |  |  |  |
+| dewpoint | Dew Point | Dewpoint in degrees | Yes |  | C |  |
 | feelslike | Feels Like Temperature | The apparent temperature, a mix of Heat Index and Wind Chill | Yes |  |  |  |
 | illuminance | Illuminance | How much the incident light illuminates the surface | No | obs_st/9 | Lux |  |
 | lightning_strike_count | Lightning Count (3 hours) | Number of lightning strikes the last 3 hours | Yes |  |  |  |
@@ -179,7 +179,7 @@ weather:
     temperature_template: "{{ states('sensor.temperature') | float}}"
     humidity_template: "{{ states('sensor.humidity')| int }}"
     pressure_template: "{{ states('sensor.sea_level_pressure')| float }}"
-    wind_speed_template: "{{ states('sensor.wind_speed_avg') | float * 18 / 5 | round(2) }}"
+    wind_speed_template: "{{ ( states('sensor.wind_speed_avg') | float * 18 / 5 ) | round(2) }}"
     wind_bearing_template: "{{ states('sensor.wind_bearing_avg')| int }}"
     forecast_template: "{{ state_attr('sensor.weather', 'hourly_forecast') }}"
 ```
