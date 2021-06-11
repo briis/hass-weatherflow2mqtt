@@ -28,6 +28,7 @@ from const import (
     FORECAST_HOURLY_HOURS,
     FORECAST_TYPE_DAILY,
     FORECAST_TYPE_HOURLY,
+    UTC,
 )
 from helpers import ConversionFunctions
 
@@ -92,7 +93,7 @@ class Forecast:
             sum_wind_bearing = sum(wind_bearing) / len(wind_bearing) % 360
 
             item = {
-                ATTR_FORECAST_TIME: forecast_time.isoformat(),
+                ATTR_FORECAST_TIME: datetime.utcfromtimestamp(row["day_start_local"]).replace(tzinfo=UTC).isoformat(),
                 "conditions": row["conditions"],
                 ATTR_FORECAST_CONDITION: await self.ha_condition_value(row["icon"]),
                 ATTR_FORECAST_TEMP: await cnv.temperature(row["air_temp_high"]),
@@ -117,7 +118,7 @@ class Forecast:
                 continue
 
             item = {
-                ATTR_FORECAST_TIME: datetime.fromtimestamp(row["time"]).isoformat(),
+                ATTR_FORECAST_TIME: datetime.utcfromtimestamp(row["time"]).replace(tzinfo=UTC).isoformat(),
                 "conditions": row["conditions"],
                 ATTR_FORECAST_CONDITION: await self.ha_condition_value(row["icon"]),
                 ATTR_FORECAST_TEMP: await cnv.temperature(row["air_temperature"]),
