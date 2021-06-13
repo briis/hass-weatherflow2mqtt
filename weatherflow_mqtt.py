@@ -137,6 +137,7 @@ async def main():
             storage["lightning_count_today"] = 0
             await data_store.write_storage(storage)
             await data_store.housekeeping_strike()
+            await data_store.housekeeping_pressure_storage()
             current_day = datetime.today().weekday()
 
         # Update the Forecast if it is time and enabled

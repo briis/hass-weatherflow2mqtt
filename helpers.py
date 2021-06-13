@@ -14,6 +14,7 @@ from const import (
     DEVICE_STATUS,
     EXTERNAL_DIRECTORY,
     PRESSURE_STORAGE_FILE,
+    PRESSURE_TREND_TIMER,
     STORAGE_FILE,
     STORAGE_FIELDS,
     STRIKE_STORAGE_FILE,
@@ -321,6 +322,28 @@ class DataStorage:
         except Exception as e:
             _LOGGER.error("Could not save Pressure Storage File. Error message: %s", e)
 
+    async def housekeeping_pressure_storage(self):
+        """Performs housekeeping tasks on the pressure data file."""
+
+        try:
+            with open(PRESSURE_STORAGE_FILE, "r") as file:
+                lines = file.readlines()
+            newlines = ""
+            for item in lines:
+                if item != "\n":
+                    if time.time() - float(item) < PRESSURE_TREND_TIMER:
+                        newlines += item
+            file = open(PRESSURE_STORAGE_FILE, "w")
+            file.write(f"{newlines}\n")
+            file.close()
+
+        except FileNotFoundError as e:
+            return 0
+        except Exception as e:
+            _LOGGER.debug(
+                "Could not perform housekeeping on pressure storage file. Error message: %s",
+                e,
+            )
 
     async def read_config(self):
         """Reads the config file, to look for sensors."""
