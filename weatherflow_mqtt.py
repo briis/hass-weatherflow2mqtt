@@ -31,6 +31,7 @@ from const import (
     EVENT_SKY_DATA,
     EVENT_STRIKE,
     EVENT_TEMPEST_DATA,
+    PRESSURE_TREND_TIMER,
     SENSOR_CLASS,
     SENSOR_DEVICE,
     SENSOR_ICON,
@@ -202,6 +203,7 @@ async def main():
                 data["dewpoint"] = await cnv.dewpoint(obs[2], obs[3])
                 data["feelslike"] = await cnv.feels_like(obs[2], obs[3], wind_speed)
                 client.publish(state_topic, json.dumps(data))
+                await data_store.write_pressure_storage(data["sealevel_pressure"])
                 await asyncio.sleep(0.01)
             if msg_type in EVENT_SKY_DATA:
                 obs = json_response["obs"][0]
@@ -272,6 +274,7 @@ async def main():
                 data["dewpoint"] = await cnv.dewpoint(obs[7], obs[8])
                 data["feelslike"] = await cnv.feels_like(obs[7], obs[8], wind_speed)
                 client.publish(state_topic, json.dumps(data))
+                await data_store.write_pressure_storage(data["sealevel_pressure"])
                 await asyncio.sleep(0.01)
 
                 if obs[12] > 0:

@@ -136,3 +136,4 @@ storage.json
 .lightning.data
 forecast.json
 weatherfunctions.js
+.pressure.data

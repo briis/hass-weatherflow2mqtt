@@ -32,6 +32,7 @@ STORAGE_FIELDS = [
     ["last_lightning_energy", 0],
 ]
 STRIKE_STORAGE_FILE = f"{EXTERNAL_DIRECTORY}/.lightning.data"
+PRESSURE_STORAGE_FILE = f"{EXTERNAL_DIRECTORY}/.pressure.data"
 
 BASE_URL = "https://swd.weatherflow.com/swd/rest"
 
@@ -71,6 +72,8 @@ EVENT_FORECAST = "forecast"
 FORECAST_TYPE_DAILY = "daily"
 FORECAST_TYPE_HOURLY = "hourly"
 FORECAST_HOURLY_HOURS = 36
+
+PRESSURE_TREND_TIMER = 3 * 60 * 60
 
 UNITS_IMPERIAL = "imperial"
 

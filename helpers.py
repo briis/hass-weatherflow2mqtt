@@ -13,6 +13,7 @@ from math import gamma, radians, degrees
 from const import (
     DEVICE_STATUS,
     EXTERNAL_DIRECTORY,
+    PRESSURE_STORAGE_FILE,
     STORAGE_FILE,
     STORAGE_FIELDS,
     STRIKE_STORAGE_FILE,
@@ -284,7 +285,7 @@ class DataStorage:
             file.close()
 
         except Exception as e:
-            _LOGGER.error("Could not save Storage File. Error message: %s", e)
+            _LOGGER.error("Could not save Lightning Storage File. Error message: %s", e)
 
     async def housekeeping_strike(self):
         """Performs housekeeping tasks on the strike data file."""
@@ -308,6 +309,18 @@ class DataStorage:
                 "Could not perform housekeeping on strike storage file. Error message: %s",
                 e,
             )
+
+    async def write_pressure_storage(self, value):
+        """Saves a pressure entry."""
+
+        try:
+            file = open(PRESSURE_STORAGE_FILE, "a")
+            file.write(f"[{time.time()}, {value}]\n")
+            file.close()
+
+        except Exception as e:
+            _LOGGER.error("Could not save Pressure Storage File. Error message: %s", e)
+
 
     async def read_config(self):
         """Reads the config file, to look for sensors."""
