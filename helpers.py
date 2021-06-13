@@ -311,6 +311,24 @@ class DataStorage:
                 e,
             )
 
+    async def read_pressure_storage(self):
+        """Read the pressure storage file, and return pressure value 3 hours ago."""
+        try:
+            with open(PRESSURE_STORAGE_FILE, "r") as file:
+                lines = file.readlines()
+            val_available = False
+            for item in lines:
+                if item != "\n":
+                    if time.time() - PRESSURE_TREND_TIMER < float(item[0]):
+                        pressure = item[1]
+                        break
+            return pressure
+        except FileNotFoundError as e:
+            return 0
+        except Exception as e:
+            _LOGGER.debug("Could not read strike storage file. Error message: %s", e)
+            return 0
+
     async def write_pressure_storage(self, value):
         """Saves a pressure entry."""
 
