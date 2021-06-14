@@ -369,6 +369,8 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
 
         if sensors is None or sensor[SENSOR_ID] in sensors:
             _LOGGER.info("SETTING UP %s SENSOR", sensor_name)
+            
+            # Payload
             payload["name"] = "{}".format(sensor_name)
             payload["unique_id"] = "{}-{}".format(serial_number, sensor[SENSOR_ID])
             if sensor[units] is not None:
@@ -390,6 +392,8 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
                 "model": "WeatherFlow Weather Station",
                 "sw_version": firmware,
             }
+
+            # Attributes
             attribution[ATTR_ATTRIBUTION] = ATTRIBUTION
             attribution[ATTR_BRAND] = BRAND
 
