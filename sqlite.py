@@ -259,4 +259,23 @@ class SQLFunctions:
     async def dailyHousekeeping(self):
         """This function is called once a day, to clean up old data."""
 
-        
+        try:
+            # Cleanup the Pressure Table
+            pres_time_point = time.time() - PRESSURE_TREND_TIMER - 60
+            cursor = self.connection.cursor()
+            cursor.execute(f"DELETE FROM pressure WHERE timestamp < {pres_time_point};")
+
+            # Cleanup the Lightning Table
+            strike_time_point = time.time() - STRIKE_COUNT_TIMER - 60
+            cursor = self.connection.cursor()
+            cursor.execute(f"DELETE FROM lightning WHERE timestamp < {strike_time_point};")
+
+            return True
+
+        except SQLError as e:
+            _LOGGER.error("Could not perform daily housekeeping. Error: %s", e)
+            return False
+        except Exception as e:
+            _LOGGER.debug("Could not perform daily housekeeping. Error message: %s", e)
+            return False
+      

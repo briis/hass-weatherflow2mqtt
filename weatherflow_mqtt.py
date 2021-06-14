@@ -146,7 +146,7 @@ async def main():
             storage["rain_duration_today"] = 0
             storage["lightning_count_today"] = 0
             await sql.writeStorage(storage)
-            await data_store.housekeeping_strike()
+            await sql.dailyHousekeeping()
             current_day = datetime.today().weekday()
 
         # Update the Forecast if it is time and enabled
@@ -369,7 +369,7 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
 
         if sensors is None or sensor[SENSOR_ID] in sensors:
             _LOGGER.info("SETTING UP %s SENSOR", sensor_name)
-            
+
             # Payload
             payload["name"] = "{}".format(sensor_name)
             payload["unique_id"] = "{}-{}".format(serial_number, sensor[SENSOR_ID])
