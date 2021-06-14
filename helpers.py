@@ -10,6 +10,7 @@ import yaml
 from cmath import rect, phase
 from math import gamma, radians, degrees
 
+from sqlite import SQLFunctions
 from const import (
     DEVICE_STATUS,
     EXTERNAL_DIRECTORY,

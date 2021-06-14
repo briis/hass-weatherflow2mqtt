@@ -122,7 +122,7 @@ async def main():
     current_day = datetime.today().weekday()
 
     # Connect to SQLite DB
-    sql = SQLFunctions()
+    sql = SQLFunctions(unit_system)
     database_exist = os.path.isfile(DATABASE)
     await sql.create_connection(DATABASE)
     if not database_exist:
@@ -211,6 +211,7 @@ async def main():
                 ).isoformat()
                 data["battery_air"] = round(obs[6], 2)
                 data["sealevel_pressure"] = await cnv.sea_level_pressure(obs[1], elevation)
+                data["pressure_trend"] = await sql.readPressureTrend(data["sealevel_pressure"])
                 data["air_density"] = await cnv.air_density(obs[2], obs[1])
                 data["dewpoint"] = await cnv.dewpoint(obs[2], obs[3])
                 data["feelslike"] = await cnv.feels_like(obs[2], obs[3], wind_speed)
@@ -282,6 +283,7 @@ async def main():
                     storage["last_lightning_time"]
                 ).isoformat()
                 data["sealevel_pressure"] = await cnv.sea_level_pressure(obs[6], elevation)
+                data["pressure_trend"] = await sql.readPressureTrend(data["sealevel_pressure"])
                 data["air_density"] = await cnv.air_density(obs[7], obs[6])
                 data["dewpoint"] = await cnv.dewpoint(obs[7], obs[8])
                 data["feelslike"] = await cnv.feels_like(obs[7], obs[8], wind_speed)

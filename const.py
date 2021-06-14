@@ -138,6 +138,15 @@ WEATHERFLOW_SENSORS = [
         EVENT_AIR_DATA,
     ],
     [
+        "pressure_trend",
+        "Pressure Trend",
+        None,
+        None,
+        None,
+        "trending-up",
+        EVENT_AIR_DATA,
+    ],
+    [
         "air_temperature",
         "Temperature",
         "˚C",

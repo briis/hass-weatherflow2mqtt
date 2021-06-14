@@ -24,8 +24,9 @@ _LOGGER = logging.getLogger(__name__)
 class SQLFunctions:
     """Class to handle SQLLite functions."""
 
-    def __init__(self):
+    def __init__(self, unit_system):
         self.connection = None
+        self._unit_system = unit_system
 
     async def create_connection(self, db_file):
         """ create a database connection to a SQLite database """
@@ -136,11 +137,17 @@ class SQLFunctions:
                 old_pressure = float(old_pressure[0])
             pressure_delta = new_pressure - old_pressure
 
-            if pressure_delta > -1 and pressure_delta < 1:
+            min_value = -1
+            max_value = 1
+            if self._unit_system == "imperial":
+                min_value = -0.0295
+                max_value = 0.0295
+
+            if pressure_delta > min_value and pressure_delta < max_value:
                 return "Steady"
-            if pressure_delta <= -1:
+            if pressure_delta <= min_value:
                 return "Falling"
-            if pressure_delta >= 1:
+            if pressure_delta >= max_value:
                 return "Rising"
 
         except SQLError as e:
