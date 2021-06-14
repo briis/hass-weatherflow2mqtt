@@ -390,9 +390,8 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
                 "connections": [["mac", serial_number]],
                 "manufacturer": "WeatherFlow",
                 "name": "WeatherFlow2MQTT",
-                "model": "WeatherFlow Weather Station",
-                "firmware": firmware,
-                "sw_version": PROGRAM_VERSION,
+                "model": f"WeatherFlow Weather Station V{PROGRAM_VERSION}",
+                "sw_version": firmware,
             }
 
             # Attributes

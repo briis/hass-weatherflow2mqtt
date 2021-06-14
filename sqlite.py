@@ -136,11 +136,11 @@ class SQLFunctions:
                 old_pressure = float(old_pressure[0])
             pressure_delta = new_pressure - old_pressure
 
-            if pressure_delta >= -1 and pressure_delta <= 1:
+            if pressure_delta > -1 and pressure_delta < 1:
                 return "Steady"
-            if pressure_delta < -1:
+            if pressure_delta <= -1:
                 return "Falling"
-            if pressure_delta > 1:
+            if pressure_delta >= 1:
                 return "Rising"
 
         except SQLError as e:
