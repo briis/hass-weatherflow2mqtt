@@ -16,11 +16,13 @@ import os
 from aioudp import open_local_endpoint
 from helpers import ConversionFunctions, DataStorage
 from forecast import Forecast
+from sqlite import SQLFunctions
 from const import (
     ATTRIBUTION,
     ATTR_ATTRIBUTION,
     ATTR_BRAND,
     BRAND,
+    DATABASE,
     DOMAIN,
     EVENT_AIR_DATA,
     EVENT_DEVICE_STATUS,
@@ -118,8 +120,16 @@ async def main():
     forecast_last_run = 1621229580.583215  # A time in the past
     current_day = datetime.today().weekday()
 
+    # Connect to SQLite DB
+    sql = SQLFunctions()
+    database_exist = os.path.isfile(DATABASE)
+    sql_connection = await sql.create_connection(DATABASE)
+    if not database_exist:
+        # Create Tables and Migrate Data
+        await sql.createInitialDataset(sql_connection)
+
     # Read stored Values and set variable values
-    storage = await data_store.read_storage()
+    storage = await sql.readStorage(sql_connection)
     wind_speed = None
 
     # Watch for message from the UDP socket
@@ -135,9 +145,8 @@ async def main():
             storage["rain_today"] = 0
             storage["rain_duration_today"] = 0
             storage["lightning_count_today"] = 0
-            await data_store.write_storage(storage)
+            await sql.writeStorage(sql_connection, storage)
             await data_store.housekeeping_strike()
-            await data_store.housekeeping_pressure_storage()
             current_day = datetime.today().weekday()
 
         # Update the Forecast if it is time and enabled
@@ -176,8 +185,9 @@ async def main():
                     _LOGGER.debug("HUB Reset Flags: %s", json_response.get("reset_flags"))
             if msg_type in EVENT_PRECIP_START:
                 obs = json_response["evt"]
-                storage["rain_start"] = datetime.fromtimestamp(obs[0]).isoformat()
-                await data_store.write_storage(storage)
+                storage["rain_start"] = obs[0]
+                await sql.writeStorage(sql_connection, storage)
+
             if msg_type in EVENT_STRIKE:
                 obs = json_response["evt"]
                 await data_store.write_strike_storage()
@@ -185,7 +195,7 @@ async def main():
                 storage["last_lightning_distance"] = await cnv.distance(obs[1])
                 storage["last_lightning_energy"] = obs[2]
                 storage["last_lightning_time"] = time.time()
-                await data_store.write_storage(storage)
+                await sql.writeStorage(sql_connection, storage)
             if msg_type in EVENT_AIR_DATA:
                 obs = json_response["obs"][0]
                 data["station_pressure"] = await cnv.pressure(obs[1])
@@ -204,7 +214,7 @@ async def main():
                 data["dewpoint"] = await cnv.dewpoint(obs[2], obs[3])
                 data["feelslike"] = await cnv.feels_like(obs[2], obs[3], wind_speed)
                 client.publish(state_topic, json.dumps(data))
-                await data_store.write_pressure_storage(data["sealevel_pressure"])
+                await sql.writePressure(sql_connection, data["sealevel_pressure"])
                 await asyncio.sleep(0.01)
             if msg_type in EVENT_SKY_DATA:
                 obs = json_response["obs"][0]
@@ -215,7 +225,7 @@ async def main():
                 data["rain_yesterday"] = await cnv.rain(storage["rain_yesterday"])
                 data["rain_duration_today"] = storage["rain_duration_today"]
                 data["rain_duration_yesterday"] = storage["rain_duration_yesterday"]
-                data["rain_start_time"] = storage["rain_start"]
+                data["rain_start_time"] = datetime.fromtimestamp(storage["rain_start"]).isoformat()
                 data["wind_lull"] = await cnv.speed(obs[4])
                 data["wind_speed_avg"] = await cnv.speed(obs[5])
                 data["wind_gust"] = await cnv.speed(obs[6])
@@ -229,7 +239,7 @@ async def main():
                 await asyncio.sleep(0.01)
                 if obs[3] > 0:
                     storage["rain_duration_today"] += 1
-                    await data_store.write_storage(storage)
+                    await sql.writeStorage(sql_connection, storage)
             if msg_type in EVENT_TEMPEST_DATA:
                 obs = json_response["obs"][0]
 
@@ -249,7 +259,7 @@ async def main():
                 data["rain_yesterday"] = await cnv.rain(storage["rain_yesterday"])
                 data["rain_duration_today"] = storage["rain_duration_today"]
                 data["rain_duration_yesterday"] = storage["rain_duration_yesterday"]
-                data["rain_start_time"] = storage["rain_start"]
+                data["rain_start_time"] = datetime.fromtimestamp(storage["rain_start"]).isoformat()
                 data["precipitation_type"] = await cnv.rain_type(obs[13])
                 data["battery"] = round(obs[16], 2)
                 data["rain_rate"] = await cnv.rain_rate(obs[12])
@@ -275,12 +285,12 @@ async def main():
                 data["dewpoint"] = await cnv.dewpoint(obs[7], obs[8])
                 data["feelslike"] = await cnv.feels_like(obs[7], obs[8], wind_speed)
                 client.publish(state_topic, json.dumps(data))
-                await data_store.write_pressure_storage(data["sealevel_pressure"])
+                await sql.writePressure(sql_connection, data["sealevel_pressure"])
                 await asyncio.sleep(0.01)
 
                 if obs[12] > 0:
                     storage["rain_duration_today"] += 1
-                    await data_store.write_storage(storage)
+                    await sql.writeStorage(sql_connection, storage)
 
             if msg_type in EVENT_DEVICE_STATUS:
                 now = datetime.now()
