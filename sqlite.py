@@ -9,7 +9,6 @@ from typing import OrderedDict
 import logging
 
 from const import (
-    DATABASE,
     PRESSURE_TREND_TIMER,
     STORAGE_ID,
     STORAGE_FILE,
@@ -148,7 +147,7 @@ class SQLFunctions:
             _LOGGER.error("Could not access storage data. Error: %s", e)
 
     async def readPressureData(self):
-        """Returns the formatted pressure data."""
+        """Returns the formatted pressure data - USED FOR TESTING ONLY."""
         try:
             cursor = self.connection.cursor()
             cursor.execute(f"SELECT * FROM pressure;")
@@ -173,7 +172,7 @@ class SQLFunctions:
             _LOGGER.error("Could not Insert data in table Pressure. Error: %s", e)
             return False
         except Exception as e:
-            _LOGGER.debug("Could write to Pressure Table. Error message: %s", e)
+            _LOGGER.error("Could write to Pressure Table. Error message: %s", e)
             return False
 
     async def readLightningCount(self):
@@ -201,7 +200,7 @@ class SQLFunctions:
             _LOGGER.error("Could not Insert data in table Lightning. Error: %s", e)
             return False
         except Exception as e:
-            _LOGGER.debug("Could write to Lightning Table. Error message: %s", e)
+            _LOGGER.error("Could write to Lightning Table. Error message: %s", e)
             return False
 
     async def migrateStorageFile(self):
@@ -231,9 +230,9 @@ class SQLFunctions:
                 await self.writeStorage(storage_json)
 
         except FileNotFoundError as e:
-            _LOGGER.debug("Could not find old storage file. Error message: %s", e)
+            _LOGGER.error("Could not find old storage file. Error message: %s", e)
         except Exception as e:
-            _LOGGER.debug("Could not Read storage file. Error message: %s", e)
+            _LOGGER.error("Could not Read storage file. Error message: %s", e)
 
     async def createInitialDataset(self):
         """Setup the Initial database, and migrate data if needed."""
@@ -276,6 +275,6 @@ class SQLFunctions:
             _LOGGER.error("Could not perform daily housekeeping. Error: %s", e)
             return False
         except Exception as e:
-            _LOGGER.debug("Could not perform daily housekeeping. Error message: %s", e)
+            _LOGGER.error("Could not perform daily housekeeping. Error message: %s", e)
             return False
       
