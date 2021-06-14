@@ -11,6 +11,7 @@ import logging
 from const import (
     STORAGE_ID,
     STORAGE_FILE,
+    STRIKE_COUNT_TIMER,
     TABLE_LIGHTNING,
     TABLE_PRESSURE,
     TABLE_STORAGE,
@@ -135,6 +136,20 @@ class SQLFunctions:
         except Exception as e:
             _LOGGER.debug("Could write to Pressure Table. Error message: %s", e)
             return False
+
+    async def readLightningCount(self, conn):
+        """Returns the number of Lightning Strikes in the last 3 hours."""
+        try:
+            time_point = time.time() - STRIKE_COUNT_TIMER
+            _LOGGER.info(time_point)
+            cursor = conn.cursor()
+            cursor.execute(f"SELECT COUNT(*) FROM lightning WHERE timestamp > {time_point};")
+            data = cursor.fetchone()[0]
+            
+            return data
+
+        except SQLError as e:
+            _LOGGER.error("Could not access storage data. Error: %s", e)
 
     async def writeLightning(self, conn):
         """Adds an entry to the Lightning Table."""
