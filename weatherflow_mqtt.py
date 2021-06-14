@@ -33,7 +33,6 @@ from const import (
     EVENT_SKY_DATA,
     EVENT_STRIKE,
     EVENT_TEMPEST_DATA,
-    PRESSURE_TREND_TIMER,
     SENSOR_CLASS,
     SENSOR_DEVICE,
     SENSOR_ICON,
@@ -44,6 +43,9 @@ from const import (
     UNITS_IMPERIAL,
     WEATHERFLOW_SENSORS,
 )
+
+data_store = DataStorage()
+PROGRAM_VERSION = data_store.getVersion()
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -72,7 +74,6 @@ async def main():
 
 
     cnv = ConversionFunctions(unit_system)
-    data_store = DataStorage()
     if add_forecast:
         forecast = Forecast(station_id, unit_system, station_token)
         forecast_interval = forecast_interval * 60
@@ -390,7 +391,8 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
                 "manufacturer": "WeatherFlow",
                 "name": "WeatherFlow2MQTT",
                 "model": "WeatherFlow Weather Station",
-                "sw_version": firmware,
+                "firmware": firmware,
+                "sw_version": PROGRAM_VERSION,
             }
 
             # Attributes

@@ -379,13 +379,20 @@ class DataStorage:
             _LOGGER.debug("Could not read config.yaml file. Error message: %s", e)
             return None
 
-    async def dummy_strike_storage(self, data):
-        """Used for testing purposes only."""
-
+    def getVersion(self):
+        """Returns the version number stored in the VERSION file."""
         try:
-            file = open(STRIKE_STORAGE_FILE, "a")
-            file.write(f"{data}\n")
-            file.close()
+            filepath = f"{EXTERNAL_DIRECTORY}/VERSION"
+            with open(filepath, "r") as file:
+                lines = file.readlines()
+                for line in lines:
+                    if line != "\n":
+                        return line.replace("\n", "")
 
+
+        except FileNotFoundError as e:
+            return None
         except Exception as e:
-            _LOGGER.error("Could not save Storage File. Error message: %s", e)
+            _LOGGER.debug("Could not read config.yaml file. Error message: %s", e)
+            return None
+
