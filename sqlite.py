@@ -136,7 +136,13 @@ class SQLFunctions:
             else:
                 old_pressure = float(old_pressure[0])
             pressure_delta = new_pressure - old_pressure
-            return pressure_delta
+
+            if pressure_delta >= -1 and pressure_delta <= 1:
+                return "Steady"
+            if pressure_delta < -1:
+                return "Falling"
+            if pressure_delta > 1:
+                return "Rising"
 
         except SQLError as e:
             _LOGGER.error("Could not access storage data. Error: %s", e)
@@ -249,3 +255,8 @@ class SQLFunctions:
 
         except Exception as e:
             _LOGGER.debug("Could not Read storage file. Error message: %s", e)
+
+    async def dailyHousekeeping(self):
+        """This function is called once a day, to clean up old data."""
+
+        
