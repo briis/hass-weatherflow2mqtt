@@ -19,6 +19,32 @@ ATTR_FORECAST_HUMIDITY = "humidity"
 
 EXTERNAL_DIRECTORY = "/usr/local/config"
 STORAGE_FILE = f"{EXTERNAL_DIRECTORY}/.storage.json"
+DATABASE = f"{EXTERNAL_DIRECTORY}/weatherflow2mqtt.db"
+STORAGE_ID = 1
+
+TABLE_STORAGE = """ CREATE TABLE IF NOT EXISTS storage (
+                    id integer PRIMARY KEY,
+                    rain_today real,
+                    rain_yesterday real,
+                    rain_start real,
+                    rain_duration_today integer,
+                    rain_duration_yesterday integer,
+                    lightning_count integer,
+                    lightning_count_today integer,
+                    last_lightning_time real,
+                    last_lightning_distance integer,
+                    last_lightning_energy
+                );"""
+
+TABLE_PRESSURE = """ CREATE TABLE IF NOT EXISTS pressure (
+                    timestamp real PRIMARY KEY,
+                    pressure real
+                );"""
+
+TABLE_LIGHTNING = """ CREATE TABLE IF NOT EXISTS lightning (
+                    timestamp real PRIMARY KEY
+                );"""
+
 STORAGE_FIELDS = [
     ["rain_today", 0],
     ["rain_yesterday", 0],
