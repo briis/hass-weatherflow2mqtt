@@ -123,13 +123,13 @@ async def main():
     # Connect to SQLite DB
     sql = SQLFunctions()
     database_exist = os.path.isfile(DATABASE)
-    sql_connection = await sql.create_connection(DATABASE)
+    await sql.create_connection(DATABASE)
     if not database_exist:
         # Create Tables and Migrate Data
-        await sql.createInitialDataset(sql_connection)
+        await sql.createInitialDataset()
 
     # Read stored Values and set variable values
-    storage = await sql.readStorage(sql_connection)
+    storage = await sql.readStorage()
     wind_speed = None
 
     # Watch for message from the UDP socket
@@ -145,7 +145,7 @@ async def main():
             storage["rain_today"] = 0
             storage["rain_duration_today"] = 0
             storage["lightning_count_today"] = 0
-            await sql.writeStorage(sql_connection, storage)
+            await sql.writeStorage(storage)
             await data_store.housekeeping_strike()
             current_day = datetime.today().weekday()
 
@@ -186,22 +186,22 @@ async def main():
             if msg_type in EVENT_PRECIP_START:
                 obs = json_response["evt"]
                 storage["rain_start"] = obs[0]
-                await sql.writeStorage(sql_connection, storage)
+                await sql.writeStorage(storage)
 
             if msg_type in EVENT_STRIKE:
                 obs = json_response["evt"]
-                await sql.writeLightning(sql_connection)
+                await sql.writeLightning()
                 storage["lightning_count_today"] += 1
                 storage["last_lightning_distance"] = await cnv.distance(obs[1])
                 storage["last_lightning_energy"] = obs[2]
                 storage["last_lightning_time"] = time.time()
-                await sql.writeStorage(sql_connection, storage)
+                await sql.writeStorage(storage)
             if msg_type in EVENT_AIR_DATA:
                 obs = json_response["obs"][0]
                 data["station_pressure"] = await cnv.pressure(obs[1])
                 data["air_temperature"] = await cnv.temperature(obs[2])
                 data["relative_humidity"] = obs[3]
-                data["lightning_strike_count"] = await sql.readLightningCount(sql_connection)
+                data["lightning_strike_count"] = await sql.readLightningCount()
                 data["lightning_strike_count_today"] = storage["lightning_count_today"]
                 data["lightning_strike_distance"] = storage["last_lightning_distance"]
                 data["lightning_strike_energy"] = storage["last_lightning_energy"]
@@ -214,7 +214,7 @@ async def main():
                 data["dewpoint"] = await cnv.dewpoint(obs[2], obs[3])
                 data["feelslike"] = await cnv.feels_like(obs[2], obs[3], wind_speed)
                 client.publish(state_topic, json.dumps(data))
-                await sql.writePressure(sql_connection, data["sealevel_pressure"])
+                await sql.writePressure(data["sealevel_pressure"])
                 await asyncio.sleep(0.01)
             if msg_type in EVENT_SKY_DATA:
                 obs = json_response["obs"][0]
@@ -239,7 +239,7 @@ async def main():
                 await asyncio.sleep(0.01)
                 if obs[3] > 0:
                     storage["rain_duration_today"] += 1
-                    await sql.writeStorage(sql_connection, storage)
+                    await sql.writeStorage(storage)
             if msg_type in EVENT_TEMPEST_DATA:
                 obs = json_response["obs"][0]
 
@@ -273,7 +273,7 @@ async def main():
                 data["station_pressure"] = await cnv.pressure(obs[6])
                 data["air_temperature"] = await cnv.temperature(obs[7])
                 data["relative_humidity"] = obs[8]
-                data["lightning_strike_count"] = await sql.readLightningCount(sql_connection)
+                data["lightning_strike_count"] = await sql.readLightningCount()
                 data["lightning_strike_count_today"] = storage["lightning_count_today"]
                 data["lightning_strike_distance"] = storage["last_lightning_distance"]
                 data["lightning_strike_energy"] = storage["last_lightning_energy"]
@@ -285,12 +285,12 @@ async def main():
                 data["dewpoint"] = await cnv.dewpoint(obs[7], obs[8])
                 data["feelslike"] = await cnv.feels_like(obs[7], obs[8], wind_speed)
                 client.publish(state_topic, json.dumps(data))
-                await sql.writePressure(sql_connection, data["sealevel_pressure"])
+                await sql.writePressure(data["sealevel_pressure"])
                 await asyncio.sleep(0.01)
 
                 if obs[12] > 0:
                     storage["rain_duration_today"] += 1
-                    await sql.writeStorage(sql_connection, storage)
+                    await sql.writeStorage(storage)
 
             if msg_type in EVENT_DEVICE_STATUS:
                 now = datetime.now()
