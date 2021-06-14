@@ -190,7 +190,7 @@ async def main():
 
             if msg_type in EVENT_STRIKE:
                 obs = json_response["evt"]
-                await data_store.write_strike_storage()
+                await sql.writeLightning(sql_connection)
                 storage["lightning_count_today"] += 1
                 storage["last_lightning_distance"] = await cnv.distance(obs[1])
                 storage["last_lightning_energy"] = obs[2]
