@@ -86,7 +86,7 @@ A description of the Environment Variables available for this container. All of 
 
 ## Available Sensors
 
-Here is the list of sensors that the program generates. Calculated Sensor means, if No, then data comes directly from the Weather Station, if yes, it is a sensor that is derived from some of the other sensors. For a *copy ready* list se [further below](#sensor-structure)
+Here is the list of sensors that the program generates. Calculated Sensor means, if No, then data comes directly from the Weather Station, if yes, it is a sensor that is derived from some of the other sensors. For a *copy ready* list see [further below](#sensor-structure)
 
 | Sensor ID   | Name   | Description   | Calculated Sensor   | UDP Event/Index (Tempest)  | Default Units   | MQTT Topic   |
 | --- | --- | --- | --- | --- | --- | --- |
