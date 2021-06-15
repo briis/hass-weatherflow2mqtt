@@ -119,12 +119,15 @@ class ConversionFunctions:
             kelvin = temperature + 273.15
             pressure = station_pressure
             r_specific = 287.058
+            decimals = 2
+
+            air_dens = (pressure * 100) / (r_specific * kelvin)
 
             if self._unit_system == UNITS_IMPERIAL:
-                pressure = station_pressure * 0.0145037738
-                r_specific = 53.35
+                air_dens = air_dens * 0.06243
+                decimals = 4
 
-            return round((pressure * 100) / (r_specific * kelvin), 2)
+            return round(air_dens, decimals)
 
         _LOGGER.error("FUNC: air_density ERROR: Temperature or Pressure value was reported as NoneType. Check the sensor")
 
