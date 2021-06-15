@@ -137,3 +137,4 @@ storage.json
 forecast.json
 weatherfunctions.js
 .pressure.data
+weatherflow2mqtt.db

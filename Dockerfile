@@ -11,6 +11,7 @@ ADD const.py /app
 ADD forecast.py /app
 ADD weatherflow_mqtt.py /app
 ADD helpers.py /app
+ADD sqlite.py /app
 ENV TZ=Europe/Copenhagen
 ENV TEMPEST_DEVICE=True
 ENV UNIT_SYSTEM=metric

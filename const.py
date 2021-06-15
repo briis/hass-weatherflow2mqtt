@@ -19,6 +19,32 @@ ATTR_FORECAST_HUMIDITY = "humidity"
 
 EXTERNAL_DIRECTORY = "/usr/local/config"
 STORAGE_FILE = f"{EXTERNAL_DIRECTORY}/.storage.json"
+DATABASE = f"{EXTERNAL_DIRECTORY}/weatherflow2mqtt.db"
+STORAGE_ID = 1
+
+TABLE_STORAGE = """ CREATE TABLE IF NOT EXISTS storage (
+                    id integer PRIMARY KEY,
+                    rain_today real,
+                    rain_yesterday real,
+                    rain_start real,
+                    rain_duration_today integer,
+                    rain_duration_yesterday integer,
+                    lightning_count integer,
+                    lightning_count_today integer,
+                    last_lightning_time real,
+                    last_lightning_distance integer,
+                    last_lightning_energy
+                );"""
+
+TABLE_PRESSURE = """ CREATE TABLE IF NOT EXISTS pressure (
+                    timestamp real PRIMARY KEY,
+                    pressure real
+                );"""
+
+TABLE_LIGHTNING = """ CREATE TABLE IF NOT EXISTS lightning (
+                    timestamp real PRIMARY KEY
+                );"""
+
 STORAGE_FIELDS = [
     ["rain_today", 0],
     ["rain_yesterday", 0],
@@ -73,6 +99,7 @@ FORECAST_TYPE_DAILY = "daily"
 FORECAST_TYPE_HOURLY = "hourly"
 FORECAST_HOURLY_HOURS = 36
 
+STRIKE_COUNT_TIMER = 3 * 60 * 60
 PRESSURE_TREND_TIMER = 3 * 60 * 60
 
 UNITS_IMPERIAL = "imperial"
@@ -108,6 +135,15 @@ WEATHERFLOW_SENSORS = [
         "inHg",
         DEVICE_CLASS_PRESSURRE,
         None,
+        EVENT_AIR_DATA,
+    ],
+    [
+        "pressure_trend",
+        "Pressure Trend",
+        None,
+        None,
+        None,
+        "trending-up",
         EVENT_AIR_DATA,
     ],
     [

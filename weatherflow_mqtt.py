@@ -16,11 +16,13 @@ import os
 from aioudp import open_local_endpoint
 from helpers import ConversionFunctions, DataStorage
 from forecast import Forecast
+from sqlite import SQLFunctions
 from const import (
     ATTRIBUTION,
     ATTR_ATTRIBUTION,
     ATTR_BRAND,
     BRAND,
+    DATABASE,
     DOMAIN,
     EVENT_AIR_DATA,
     EVENT_DEVICE_STATUS,
@@ -31,7 +33,6 @@ from const import (
     EVENT_SKY_DATA,
     EVENT_STRIKE,
     EVENT_TEMPEST_DATA,
-    PRESSURE_TREND_TIMER,
     SENSOR_CLASS,
     SENSOR_DEVICE,
     SENSOR_ICON,
@@ -42,6 +43,9 @@ from const import (
     UNITS_IMPERIAL,
     WEATHERFLOW_SENSORS,
 )
+
+data_store = DataStorage()
+PROGRAM_VERSION = data_store.getVersion()
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -70,7 +74,6 @@ async def main():
 
 
     cnv = ConversionFunctions(unit_system)
-    data_store = DataStorage()
     if add_forecast:
         forecast = Forecast(station_id, unit_system, station_token)
         forecast_interval = forecast_interval * 60
@@ -118,8 +121,16 @@ async def main():
     forecast_last_run = 1621229580.583215  # A time in the past
     current_day = datetime.today().weekday()
 
+    # Connect to SQLite DB
+    sql = SQLFunctions(unit_system)
+    database_exist = os.path.isfile(DATABASE)
+    await sql.create_connection(DATABASE)
+    if not database_exist:
+        # Create Tables and Migrate Data
+        await sql.createInitialDataset()
+
     # Read stored Values and set variable values
-    storage = await data_store.read_storage()
+    storage = await sql.readStorage()
     wind_speed = None
 
     # Watch for message from the UDP socket
@@ -135,9 +146,8 @@ async def main():
             storage["rain_today"] = 0
             storage["rain_duration_today"] = 0
             storage["lightning_count_today"] = 0
-            await data_store.write_storage(storage)
-            await data_store.housekeeping_strike()
-            await data_store.housekeeping_pressure_storage()
+            await sql.writeStorage(storage)
+            await sql.dailyHousekeeping()
             current_day = datetime.today().weekday()
 
         # Update the Forecast if it is time and enabled
@@ -176,22 +186,23 @@ async def main():
                     _LOGGER.debug("HUB Reset Flags: %s", json_response.get("reset_flags"))
             if msg_type in EVENT_PRECIP_START:
                 obs = json_response["evt"]
-                storage["rain_start"] = datetime.fromtimestamp(obs[0]).isoformat()
-                await data_store.write_storage(storage)
+                storage["rain_start"] = obs[0]
+                await sql.writeStorage(storage)
+
             if msg_type in EVENT_STRIKE:
                 obs = json_response["evt"]
-                await data_store.write_strike_storage()
+                await sql.writeLightning()
                 storage["lightning_count_today"] += 1
                 storage["last_lightning_distance"] = await cnv.distance(obs[1])
                 storage["last_lightning_energy"] = obs[2]
                 storage["last_lightning_time"] = time.time()
-                await data_store.write_storage(storage)
+                await sql.writeStorage(storage)
             if msg_type in EVENT_AIR_DATA:
                 obs = json_response["obs"][0]
                 data["station_pressure"] = await cnv.pressure(obs[1])
                 data["air_temperature"] = await cnv.temperature(obs[2])
                 data["relative_humidity"] = obs[3]
-                data["lightning_strike_count"] = await data_store.read_strike_storage()
+                data["lightning_strike_count"] = await sql.readLightningCount()
                 data["lightning_strike_count_today"] = storage["lightning_count_today"]
                 data["lightning_strike_distance"] = storage["last_lightning_distance"]
                 data["lightning_strike_energy"] = storage["last_lightning_energy"]
@@ -200,11 +211,12 @@ async def main():
                 ).isoformat()
                 data["battery_air"] = round(obs[6], 2)
                 data["sealevel_pressure"] = await cnv.sea_level_pressure(obs[1], elevation)
+                data["pressure_trend"] = await sql.readPressureTrend(data["sealevel_pressure"])
                 data["air_density"] = await cnv.air_density(obs[2], obs[1])
                 data["dewpoint"] = await cnv.dewpoint(obs[2], obs[3])
                 data["feelslike"] = await cnv.feels_like(obs[2], obs[3], wind_speed)
                 client.publish(state_topic, json.dumps(data))
-                await data_store.write_pressure_storage(data["sealevel_pressure"])
+                await sql.writePressure(data["sealevel_pressure"])
                 await asyncio.sleep(0.01)
             if msg_type in EVENT_SKY_DATA:
                 obs = json_response["obs"][0]
@@ -215,7 +227,7 @@ async def main():
                 data["rain_yesterday"] = await cnv.rain(storage["rain_yesterday"])
                 data["rain_duration_today"] = storage["rain_duration_today"]
                 data["rain_duration_yesterday"] = storage["rain_duration_yesterday"]
-                data["rain_start_time"] = storage["rain_start"]
+                data["rain_start_time"] = datetime.fromtimestamp(storage["rain_start"]).isoformat()
                 data["wind_lull"] = await cnv.speed(obs[4])
                 data["wind_speed_avg"] = await cnv.speed(obs[5])
                 data["wind_gust"] = await cnv.speed(obs[6])
@@ -229,7 +241,7 @@ async def main():
                 await asyncio.sleep(0.01)
                 if obs[3] > 0:
                     storage["rain_duration_today"] += 1
-                    await data_store.write_storage(storage)
+                    await sql.writeStorage(storage)
             if msg_type in EVENT_TEMPEST_DATA:
                 obs = json_response["obs"][0]
 
@@ -249,7 +261,7 @@ async def main():
                 data["rain_yesterday"] = await cnv.rain(storage["rain_yesterday"])
                 data["rain_duration_today"] = storage["rain_duration_today"]
                 data["rain_duration_yesterday"] = storage["rain_duration_yesterday"]
-                data["rain_start_time"] = storage["rain_start"]
+                data["rain_start_time"] = datetime.fromtimestamp(storage["rain_start"]).isoformat()
                 data["precipitation_type"] = await cnv.rain_type(obs[13])
                 data["battery"] = round(obs[16], 2)
                 data["rain_rate"] = await cnv.rain_rate(obs[12])
@@ -263,7 +275,7 @@ async def main():
                 data["station_pressure"] = await cnv.pressure(obs[6])
                 data["air_temperature"] = await cnv.temperature(obs[7])
                 data["relative_humidity"] = obs[8]
-                data["lightning_strike_count"] = await data_store.read_strike_storage()
+                data["lightning_strike_count"] = await sql.readLightningCount()
                 data["lightning_strike_count_today"] = storage["lightning_count_today"]
                 data["lightning_strike_distance"] = storage["last_lightning_distance"]
                 data["lightning_strike_energy"] = storage["last_lightning_energy"]
@@ -271,16 +283,17 @@ async def main():
                     storage["last_lightning_time"]
                 ).isoformat()
                 data["sealevel_pressure"] = await cnv.sea_level_pressure(obs[6], elevation)
+                data["pressure_trend"] = await sql.readPressureTrend(data["sealevel_pressure"])
                 data["air_density"] = await cnv.air_density(obs[7], obs[6])
                 data["dewpoint"] = await cnv.dewpoint(obs[7], obs[8])
                 data["feelslike"] = await cnv.feels_like(obs[7], obs[8], wind_speed)
                 client.publish(state_topic, json.dumps(data))
-                await data_store.write_pressure_storage(data["sealevel_pressure"])
+                await sql.writePressure(data["sealevel_pressure"])
                 await asyncio.sleep(0.01)
 
                 if obs[12] > 0:
                     storage["rain_duration_today"] += 1
-                    await data_store.write_storage(storage)
+                    await sql.writeStorage(storage)
 
             if msg_type in EVENT_DEVICE_STATUS:
                 now = datetime.now()
@@ -359,7 +372,9 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
 
         if sensors is None or sensor[SENSOR_ID] in sensors:
             _LOGGER.info("SETTING UP %s SENSOR", sensor_name)
-            payload["name"] = "{}".format(sensor_name)
+
+            # Payload
+            payload["name"] = "{}".format(f"WF {sensor_name}")
             payload["unique_id"] = "{}-{}".format(serial_number, sensor[SENSOR_ID])
             if sensor[units] is not None:
                 payload["unit_of_measurement"] = sensor[units]
@@ -377,9 +392,11 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
                 "connections": [["mac", serial_number]],
                 "manufacturer": "WeatherFlow",
                 "name": "WeatherFlow2MQTT",
-                "model": "WeatherFlow Weather Station",
+                "model": f"WeatherFlow Weather Station V{PROGRAM_VERSION}",
                 "sw_version": firmware,
             }
+
+            # Attributes
             attribution[ATTR_ATTRIBUTION] = ATTRIBUTION
             attribution[ATTR_BRAND] = BRAND
 
