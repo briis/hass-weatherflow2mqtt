@@ -111,6 +111,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | rain_duration_yesterday | Rain Duration (Yesterday) | Total rain minutes yesterday | Yes |  |  |  |
 | relative_humidity | Humidity | Relative Humidity | No | obs_st/8 | % |  |
 | sealevel_pressure | Station Pressure | Preasure measurement at Sea Level | Yes |  | MB |  |
+| pressure_trend | Pressure Trend | Returns Steady, Falling or Rising determined by the rate of change over the past 3 hours| Yes |  |  |  |
 | solar_radiation | Solar Radiation | Electromagnetic radiation emitted by the sun | No | obs_st/11 | W/m^2 |  |
 | station_pressure | Station Pressure | Pressure measurement where the station is located | No | obs_st/6 | MB |  |
 | uptime | Uptime | How long has the HUB been running | No | hub_status/uptime |  |  |
@@ -142,6 +143,7 @@ sensors:
   - lightning_strike_energy
   - lightning_strike_time
   - precipitation_type
+  - pressure_trend
   - rain_rate
   - rain_start_time
   - rain_today

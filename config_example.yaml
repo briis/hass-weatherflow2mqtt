@@ -12,6 +12,7 @@ sensors:
   - lightning_strike_energy
   - lightning_strike_time
   - precipitation_type
+  - pressure_trend
   - rain_rate
   - rain_start_time
   - rain_today
