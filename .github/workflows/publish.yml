@@ -6,6 +6,8 @@ on:
       - main
     paths-ignore:
       - '**/README.md'
+      - '**/CHANGELOG.md'
+      - '**/config_example.yaml'
 
 
 jobs:
