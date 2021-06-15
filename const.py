@@ -45,6 +45,33 @@ TABLE_LIGHTNING = """ CREATE TABLE IF NOT EXISTS lightning (
                     timestamp real PRIMARY KEY
                 );"""
 
+TABLE_DAILY_LOG = """
+                    CREATE TABLE IF NOT EXISTS daily_log (
+                        timestamp INTEGER PRIMARY KEY,
+                        temperature REAL,
+                        pressure REAL,
+                        windspeed REAL
+                    );
+                  """
+
+TABLE_DAY_HI_LOW = """
+                    CREATE TABLE IF NOT EXISTS day_hi_low (
+                        timestamp INTEGER PRIMARY KEY,
+                        max_temp REAL,
+                        max_temp_time TEXT,
+                        min_temp REAL,
+                        min_temp_time TEXT,
+                        max_press REAL,
+                        max_press_time TEXT,
+                        min_press REAL,
+                        min_press_time TEXT,
+                        max_wspeed REAL,
+                        max_wspeed_time TEXT,
+                        min_wspeed REAL,
+                        min_wspeed_time TEXT
+                    );
+                  """
+                  
 STORAGE_FIELDS = [
     ["rain_today", 0],
     ["rain_yesterday", 0],

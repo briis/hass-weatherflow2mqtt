@@ -13,6 +13,8 @@ from const import (
     STORAGE_ID,
     STORAGE_FILE,
     STRIKE_COUNT_TIMER,
+    TABLE_DAILY_LOG,
+    TABLE_DAY_HI_LOW,
     TABLE_LIGHTNING,
     TABLE_PRESSURE,
     TABLE_STORAGE,
@@ -250,6 +252,8 @@ class SQLFunctions:
                 await self.create_table(TABLE_STORAGE)
                 await self.create_table(TABLE_LIGHTNING)
                 await self.create_table(TABLE_PRESSURE)
+                await self.create_table(TABLE_DAY_HI_LOW)
+                await self.create_table(TABLE_DAILY_LOG)
 
                 # Store Initial Data
                 storage = (STORAGE_ID,0,0,0,0,0,0,0,0,0,0)
@@ -261,6 +265,20 @@ class SQLFunctions:
 
         except Exception as e:
             _LOGGER.debug("Could not Read storage file. Error message: %s", e)
+
+    async def upgradeDatabase(self):
+        """Upgrade the Database to ensure tables and columns are correct."""
+
+        try:
+            _LOGGER.info("Upgrading the database....")
+            with self.connection:
+                # Create Empty Tables
+                await self.create_table(TABLE_DAY_HI_LOW)
+                await self.create_table(TABLE_DAILY_LOG)
+
+
+        except Exception as e:
+            _LOGGER.debug("An undefined error occured. Error message: %s", e)
 
     async def dailyHousekeeping(self):
         """This function is called once a day, to clean up old data."""
