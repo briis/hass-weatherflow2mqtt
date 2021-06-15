@@ -374,7 +374,7 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
             _LOGGER.info("SETTING UP %s SENSOR", sensor_name)
 
             # Payload
-            payload["name"] = "{}".format(sensor_name)
+            payload["name"] = "{}".format(f"WF {sensor_name}")
             payload["unique_id"] = "{}-{}".format(serial_number, sensor[SENSOR_ID])
             if sensor[units] is not None:
                 payload["unit_of_measurement"] = sensor[units]
