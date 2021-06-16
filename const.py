@@ -48,7 +48,7 @@ TABLE_LIGHTNING = """ CREATE TABLE IF NOT EXISTS lightning (
 
 TABLE_DAILY_LOG = """
                     CREATE TABLE IF NOT EXISTS daily_log (
-                        timestamp INTEGER PRIMARY KEY,
+                        timestamp REAL PRIMARY KEY,
                         temperature REAL,
                         pressure REAL,
                         windspeed REAL
@@ -57,7 +57,7 @@ TABLE_DAILY_LOG = """
 
 TABLE_DAY_HI_LOW = """
                     CREATE TABLE IF NOT EXISTS day_hi_low (
-                        timestamp INTEGER PRIMARY KEY,
+                        timestamp REAL PRIMARY KEY,
                         max_temp REAL,
                         max_temp_time TEXT,
                         min_temp REAL,

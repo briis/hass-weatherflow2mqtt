@@ -213,25 +213,23 @@ class SQLFunctions:
             _LOGGER.error("Could write to Lightning Table. Error message: %s", e)
             return False
 
-    async def writeDailyLog(self, data: OrderedDict):
+    async def writeDailyLog(self, sensor_data):
         """Adds an entry to the Daily Log Table."""
 
         try:
-            temp = 0 if data["air_temperature"] is None else data["air_temperature"]
-            pres = 0 if data["sealevel_pressure"] is None else data["sealevel_pressure"]
-            wspeed = 0 if data["wind_speed_avg"] is None else data["wind_speed_avg"]
+            data = json.loads(json.dumps(sensor_data))
+            temp = data.get("air_temperature")
+            pres = data.get("sealevel_pressure")
+            wspeed = data.get("wind_speed_avg")
 
-            cur = self.connection.cursor()
-            cur.execute(f"INSERT INTO daily_log(timestamp, temperature, pressure, windspeed) VALUES({time.time()}, {temp}, {pres}, {wspeed});")
+            cursor = self.connection.cursor()
+            cursor.execute(f"INSERT INTO daily_log(timestamp, temperature, pressure, windspeed) VALUES({time.time()}, ?, ?, ?)", (temp, pres, wspeed))
             self.connection.commit()
-            return True
 
         except SQLError as e:
             _LOGGER.error("Could not Insert data in table daily_log. Error: %s", e)
-            return False
         except Exception as e:
-            _LOGGER.error("Could write to daily_log Table. Error message: %s", e)
-            return False
+            _LOGGER.error("Could not write to daily_log Table. Error message: %s", e)
 
     async def migrateStorageFile(self):
         """Migrates the old .storage.json file to the database."""
@@ -323,8 +321,10 @@ class SQLFunctions:
 
             # Cleanup the Lightning Table
             strike_time_point = time.time() - STRIKE_COUNT_TIMER - 60
-            cursor = self.connection.cursor()
             cursor.execute(f"DELETE FROM lightning WHERE timestamp < {strike_time_point};")
+
+            #Cleanup the Daily Log Table
+            cursor.execute(f"DELETE FROM daily_log WHERE date(timestamp, 'unixepoch', 'localtime') = DATE('now', '-1 day');")
 
             return True
 

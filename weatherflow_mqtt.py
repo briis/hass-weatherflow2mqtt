@@ -219,7 +219,7 @@ async def main():
                 data["feelslike"] = await cnv.feels_like(obs[2], obs[3], wind_speed)
                 client.publish(state_topic, json.dumps(data))
                 await sql.writePressure(data["sealevel_pressure"])
-                await sql.writeDailyLog()
+                await sql.writeDailyLog(data)
                 await asyncio.sleep(0.01)
             if msg_type in EVENT_SKY_DATA:
                 obs = json_response["obs"][0]
@@ -241,7 +241,7 @@ async def main():
                 data["precipitation_type"] = await cnv.rain_type(obs[12])
                 data["rain_rate"] = await cnv.rain_rate(obs[3])
                 client.publish(state_topic, json.dumps(data))
-                await sql.writeDailyLog()
+                await sql.writeDailyLog(data)
                 await asyncio.sleep(0.01)
                 if obs[3] > 0:
                     storage["rain_duration_today"] += 1
@@ -270,7 +270,7 @@ async def main():
                 data["battery"] = round(obs[16], 2)
                 data["rain_rate"] = await cnv.rain_rate(obs[12])
                 client.publish(state_topic, json.dumps(data))
-                await sql.writeDailyLog()
+                await sql.writeDailyLog(data)
                 await asyncio.sleep(0.01)
 
                 state_topic = "homeassistant/sensor/{}/{}/state".format(
@@ -294,7 +294,7 @@ async def main():
                 data["feelslike"] = await cnv.feels_like(obs[7], obs[8], wind_speed)
                 client.publish(state_topic, json.dumps(data))
                 await sql.writePressure(data["sealevel_pressure"])
-                await sql.writeDailyLog()
+                await sql.writeDailyLog(data)
                 await asyncio.sleep(0.01)
 
                 if obs[12] > 0:
