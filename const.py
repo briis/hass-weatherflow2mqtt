@@ -50,26 +50,61 @@ TABLE_DAILY_LOG = """
                     CREATE TABLE IF NOT EXISTS daily_log (
                         timestamp REAL PRIMARY KEY,
                         temperature REAL,
+                        dewpoint REAL,
                         pressure REAL,
-                        windspeed REAL
+                        windspeed REAL,
+                        windgust REAL,
+                        windlull REAL,
+                        humidity INTEGER,
+                        illuminance INTEGER,
+                        rain_rate REAL,
+                        rain_duration INTEGER,
+                        uv REAL,
+                        solarrad INTEGER,
+                        lightning_count INTEGER,
+                        lightning_energy INTEGER
                     );
                   """
 
 TABLE_DAY_HI_LOW = """
-                    CREATE TABLE IF NOT EXISTS day_hi_low (
+                    CREATE TABLE IF NOT EXISTS day_hi_lo (
                         timestamp REAL PRIMARY KEY,
                         max_temp REAL,
                         max_temp_time TEXT,
                         min_temp REAL,
                         min_temp_time TEXT,
+                        max_dew REAL,
+                        max_dew_time TEXT,
+                        min_dew REAL,
+                        min_dew_time TEXT,
                         max_press REAL,
                         max_press_time TEXT,
                         min_press REAL,
                         min_press_time TEXT,
                         max_wspeed REAL,
                         max_wspeed_time TEXT,
-                        min_wspeed REAL,
-                        min_wspeed_time TEXT
+                        max_wgust REAL,
+                        max_wgust_time TEXT,
+                        max_wlull REAL,
+                        max_wlull_time TEXT,
+                        max_hum INTEGER,
+                        max_hum_time TEXT,
+                        min_hum INTEGER,
+                        min_hum_time TEXT,
+                        max_illum INTEGER,
+                        max_illum_time TEXT,
+                        max_rrate REAL,
+                        max_rrate_time TEXT,
+                        max_rdura INTEGER,
+                        max_rduar_time TEXT,
+                        max_uv REAL,
+                        max_uv_time TEXT,
+                        max_srad INTEGER,
+                        max_srad_time TEXT,
+                        max_lightcount INTEGER,
+                        max_lightcount_time TEXT,
+                        max_lightenergy INTEGER,
+                        max_lightenergy_time TEXT
                     );
                   """
                   
