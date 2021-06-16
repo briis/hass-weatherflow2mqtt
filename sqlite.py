@@ -326,12 +326,14 @@ class SQLFunctions:
                     if self._debug:
                         _LOGGER.debug("SQL: %s", sql)
                     cursor.execute(sql)
+                    self.connection.commit()
                 else:
-                    sql = f" latest = {sensor_value} WHERE sensorid = '{row['sensorid']}'"
-                    if self._debug:
-                        _LOGGER.debug("SQL: %s", sql)
-                    cursor.execute(sql)
-                self.connection.commit()
+                    if sensor_value:
+                        sql = f"{sql} latest = {sensor_value} WHERE sensorid = '{row['sensorid']}'"
+                        if self._debug:
+                            _LOGGER.debug("SQL: %s", sql)
+                        cursor.execute(sql)
+                        self.connection.commit()
 
         except SQLError as e:
             _LOGGER.error("Could not update High and Low data. Error: %s", e)
