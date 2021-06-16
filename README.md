@@ -177,14 +177,14 @@ Edit `configuration.yaml` and insert the following:
 weather:
   - platform: template
     name: My Local Weather
-    condition_template: "{{ states('sensor.weather') }}"
-    temperature_template: "{{ states('sensor.temperature') | float}}"
-    humidity_template: "{{ states('sensor.humidity')| int }}"
-    pressure_template: "{{ states('sensor.sea_level_pressure')| float }}"
-    wind_speed_template: "{{ ( states('sensor.wind_speed_avg') | float * 18 / 5 ) | round(2) }}"
-    wind_bearing_template: "{{ states('sensor.wind_bearing_avg')| int }}"
-    forecast_template: "{{ state_attr('sensor.weather', 'hourly_forecast') }}"
+    condition_template: "{{ states('sensor.wf_weather') }}"
+    temperature_template: "{{ states('sensor.wf_temperature') | float}}"
+    humidity_template: "{{ states('sensor.wf_humidity')| int }}"
+    pressure_template: "{{ states('sensor.wf_sea_level_pressure')| float }}"
+    wind_speed_template: "{{ ( states('sensor.wf_wind_speed_avg') | float * 18 / 5 ) | round(2) }}"
+    wind_bearing_template: "{{ states('sensor.wf_wind_bearing_avg')| int }}"
+    forecast_template: "{{ state_attr('sensor.wf_weather', 'hourly_forecast') }}"
 ```
 
-- The weather entity expects km/h when having metric units, so the above example converts m/s to km/h. If you are using *imperial* units, the line should just be `{{ states('sensor.wind_speed_avg') }}`
+- The weather entity expects km/h when having metric units, so the above example converts m/s to km/h. If you are using *imperial* units, the line should just be `{{ states('sensor.wf_wind_speed_avg') }}`
 - For the *forecast_template* you can either use `hourly_forecast` or `daily_forecast` to get Hourly or Day based forecast.
