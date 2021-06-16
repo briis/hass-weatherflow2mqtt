@@ -46,68 +46,46 @@ TABLE_LIGHTNING = """ CREATE TABLE IF NOT EXISTS lightning (
                     timestamp real PRIMARY KEY
                 );"""
 
-TABLE_DAILY_LOG = """
-                    CREATE TABLE IF NOT EXISTS daily_log (
-                        timestamp REAL PRIMARY KEY,
-                        temperature REAL,
-                        dewpoint REAL,
-                        pressure REAL,
-                        windspeed REAL,
-                        windgust REAL,
-                        windlull REAL,
-                        humidity INTEGER,
-                        illuminance INTEGER,
-                        rain_rate REAL,
-                        rain_duration INTEGER,
-                        uv REAL,
-                        solarrad INTEGER,
-                        lightning_count INTEGER,
-                        lightning_energy INTEGER
+TABLE_HIGH_LOW = """
+                    CREATE TABLE IF NOT EXISTS high_low (
+                        sensorid TEXT PRIMARY KEY,
+                        max_day REAL,
+                        max_day_time REAL,
+                        min_day REAL,
+                        min_day_time REAL,
+                        max_week REAL,
+                        max_week_time REAL,
+                        min_week REAL,
+                        min_week_time REAL,
+                        max_month REAL,
+                        max_month_time REAL,
+                        min_month REAL,
+                        min_month_time REAL,
+                        max_year REAL,
+                        max_year_time REAL,
+                        min_year REAL,
+                        min_year_time REAL,
+                        max_all REAL,
+                        max_all_time REAL,
+                        min_all REAL,
+                        min_all_time REAL
                     );
                   """
+COL_TEMPERATURE = "air_temperature"
+COL_HUMIDITY = "relative_humidity"
+COL_DEWPOINT = "dewpoint"
+COL_ILLUMINANCE = "illuminance"
+COL_RAINDURATION = "rain_duration"
+COL_RAINRATE = "rain_rate"
+COL_WINDGUST = "wind_gust"
+COL_WINDLULL = "wind_lull"
+COL_WINDSPEED = "wind_speed"
+COL_STRIKEENERGY = "strike_energy"
+COL_STRIKECOUNT = "strike_count"
+COL_PRESSURE= "sealevel_pressure"
+COL_UV = "uv"
+COL_SOLARRAD = "solar_rad"
 
-TABLE_DAY_HI_LOW = """
-                    CREATE TABLE IF NOT EXISTS day_hi_lo (
-                        timestamp REAL PRIMARY KEY,
-                        max_temp REAL,
-                        max_temp_time TEXT,
-                        min_temp REAL,
-                        min_temp_time TEXT,
-                        max_dew REAL,
-                        max_dew_time TEXT,
-                        min_dew REAL,
-                        min_dew_time TEXT,
-                        max_press REAL,
-                        max_press_time TEXT,
-                        min_press REAL,
-                        min_press_time TEXT,
-                        max_wspeed REAL,
-                        max_wspeed_time TEXT,
-                        max_wgust REAL,
-                        max_wgust_time TEXT,
-                        max_wlull REAL,
-                        max_wlull_time TEXT,
-                        max_hum INTEGER,
-                        max_hum_time TEXT,
-                        min_hum INTEGER,
-                        min_hum_time TEXT,
-                        max_illum INTEGER,
-                        max_illum_time TEXT,
-                        max_rrate REAL,
-                        max_rrate_time TEXT,
-                        max_rdura INTEGER,
-                        max_rduar_time TEXT,
-                        max_uv REAL,
-                        max_uv_time TEXT,
-                        max_srad INTEGER,
-                        max_srad_time TEXT,
-                        max_lightcount INTEGER,
-                        max_lightcount_time TEXT,
-                        max_lightenergy INTEGER,
-                        max_lightenergy_time TEXT
-                    );
-                  """
-                  
 STORAGE_FIELDS = [
     ["rain_today", 0],
     ["rain_yesterday", 0],

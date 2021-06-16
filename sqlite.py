@@ -9,13 +9,26 @@ from typing import OrderedDict
 import logging
 
 from const import (
+    COL_DEWPOINT,
+    COL_HUMIDITY,
+    COL_ILLUMINANCE,
+    COL_PRESSURE,
+    COL_RAINDURATION,
+    COL_RAINRATE,
+    COL_SOLARRAD,
+    COL_STRIKECOUNT,
+    COL_STRIKEENERGY,
+    COL_TEMPERATURE,
+    COL_UV,
+    COL_WINDGUST,
+    COL_WINDLULL,
+    COL_WINDSPEED,
     DATABASE_VERSION,
     PRESSURE_TREND_TIMER,
     STORAGE_ID,
     STORAGE_FILE,
     STRIKE_COUNT_TIMER,
-    TABLE_DAILY_LOG,
-    TABLE_DAY_HI_LOW,
+    TABLE_HIGH_LOW,
     TABLE_LIGHTNING,
     TABLE_PRESSURE,
     TABLE_STORAGE,
@@ -231,6 +244,94 @@ class SQLFunctions:
         except Exception as e:
             _LOGGER.error("Could not write to daily_log Table. Error message: %s", e)
 
+    async def updateHighLow(self, sensor_data):
+        """Updates the High and Low Values."""
+        try:
+            self.connection.row_factory = sqlite3.Row
+            cursor = self.connection.cursor()
+            cursor.execute(f"SELECT * FROM high_low;")
+            table_data = cursor.fetchall()
+
+            data = json.loads(json.dumps(sensor_data))
+
+            for row in table_data:
+                max_sql = None
+                min_sql = None
+                sensor_value = None
+                do_update = False
+                # Get Value of Sensor if available
+                if row["sensorid"] == COL_DEWPOINT:
+                    if data.get("dewpoint"):
+                        sensor_value = data["dewpoint"]
+                if row["sensorid"] == COL_HUMIDITY:
+                    if data.get("relative_humidity"):
+                        sensor_value = data["relative_humidity"]
+                if row["sensorid"] == COL_ILLUMINANCE:
+                    if data.get("illuminance"):
+                        sensor_value = data["illuminance"]
+                if row["sensorid"] == COL_PRESSURE:
+                    if data.get("sealevel_pressure"):
+                        sensor_value = data["sealevel_pressure"]
+                if row["sensorid"] == COL_RAINDURATION:
+                    if data.get("rain_duration_today"):
+                        sensor_value = data["rain_duration_today"]
+                if row["sensorid"] == COL_RAINRATE:
+                    if data.get("rain_rate"):
+                        sensor_value = data["rain_rate"]
+                if row["sensorid"] == COL_SOLARRAD:
+                    if data.get("solar_radiation"):
+                        sensor_value = data["solar_radiation"]
+                if row["sensorid"] == COL_STRIKECOUNT:
+                    if data.get("lightning_strike_count_today"):
+                        sensor_value = data["lightning_strike_count_today"]
+                if row["sensorid"] == COL_STRIKEENERGY:
+                    if data.get("lightning_strike_energy"):
+                        sensor_value = data["lightning_strike_energy"]
+                if row["sensorid"] == COL_TEMPERATURE:
+                    if data.get("air_temperature"):
+                        sensor_value = data["air_temperature"]
+                if row["sensorid"] == COL_UV:
+                    if data.get("uv"):
+                        sensor_value = data["uv"]
+                if row["sensorid"] == COL_WINDGUST:
+                    if data.get("wind_gust"):
+                        sensor_value = data["wind_gust"]
+                if row["sensorid"] == COL_WINDLULL:
+                    if data.get("wind_lull"):
+                        sensor_value = data["wind_lull"]
+                if row["sensorid"] == COL_WINDSPEED:
+                    if data.get("wind_speed_avg"):
+                        sensor_value = data["wind_speed_avg"]
+
+                # If we have a value, check if min/max changes
+                if sensor_value:
+                    if  sensor_value > row["max_day"]:
+                        max_sql = f" max_day = {sensor_value}, max_day_time = {time.time()} "
+                        do_update = True
+                    if sensor_value < row["min_day"]:
+                        min_sql = f" min_day = {sensor_value}, min_day_time = {time.time()} "
+                        do_update = True
+
+                # If min/max changes, update the record
+                if do_update:
+                    sql = "UPDATE high_low SET"
+                    if max_sql:
+                        sql = f"{sql} {max_sql}"
+                    if max_sql and min_sql:
+                        sql = f"{sql},"
+                    if min_sql:
+                        sql = f"{sql} {min_sql}"
+                    sql = f"{sql} WHERE sensorid = '{row['sensorid']}'"
+                    _LOGGER.debug("SQL: %s", sql)
+                    cursor.execute(sql)
+                    self.connection.commit()
+
+        except SQLError as e:
+            _LOGGER.error("Could not update High and Low data. Error: %s", e)
+        except Exception as e:
+            _LOGGER.error("Could write to High and Low Table. Error message: %s", e)
+            return False
+
     async def migrateStorageFile(self):
         """Migrates the old .storage.json file to the database."""
 
@@ -271,12 +372,12 @@ class SQLFunctions:
                 await self.create_table(TABLE_STORAGE)
                 await self.create_table(TABLE_LIGHTNING)
                 await self.create_table(TABLE_PRESSURE)
-                await self.create_table(TABLE_DAY_HI_LOW)
-                await self.create_table(TABLE_DAILY_LOG)
+                await self.create_table(TABLE_HIGH_LOW)
 
                 # Store Initial Data
                 storage = (STORAGE_ID,0,0,0,0,0,0,0,0,0,0)
                 await self.create_storage_row(storage)
+                await self.initializeHighLow()
 
                 # Update the version number
                 cursor = self.connection.cursor()
@@ -289,6 +390,7 @@ class SQLFunctions:
         except Exception as e:
             _LOGGER.debug("Could not Read storage file. Error message: %s", e)
 
+    
     async def upgradeDatabase(self):
         """Upgrade the Database to ensure tables and columns are correct."""
 
@@ -301,14 +403,42 @@ class SQLFunctions:
             if db_version < DATABASE_VERSION:
                 _LOGGER.info("Upgrading the database....")
                 # Create Empty Tables
-                await self.create_table(TABLE_DAY_HI_LOW)
-                await self.create_table(TABLE_DAILY_LOG)
+                await self.create_table(TABLE_HIGH_LOW)
+                # Add Initial data to High Low
+                await self.initializeHighLow()
 
                 # Finally update the version number
                 cursor.execute(f"PRAGMA main.user_version = {DATABASE_VERSION};")
+                _LOGGER.info("Database now version %s", DATABASE_VERSION)
 
         except Exception as e:
             _LOGGER.debug("An undefined error occured. Error message: %s", e)
+
+    async def initializeHighLow(self):
+        """Writes the Initial Data to the High Low Tabble."""
+
+        try:
+            cursor = self.connection.cursor()
+            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_DEWPOINT}', -9999, 9999);")
+            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_HUMIDITY}', -9999, 9999);")
+            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_ILLUMINANCE}', 0, 0);")
+            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_PRESSURE}', -9999, 9999);")
+            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_RAINDURATION}', 0, 0);")
+            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_RAINRATE}', 0, 0);")
+            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_SOLARRAD}', 0, 0);")
+            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_STRIKECOUNT}', 0, 0);")
+            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_STRIKEENERGY}', 0, 0);")
+            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_TEMPERATURE}', -9999, 9999);")
+            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_UV}', 0, 0);")
+            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_WINDGUST}', 0, 0);")
+            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_WINDLULL}', 0, 0);")
+            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_WINDSPEED}', 0, 0);")
+            self.connection.commit()
+
+        except SQLError as e:
+            _LOGGER.error("Could not Insert data in table high_low. Error: %s", e)
+        except Exception as e:
+            _LOGGER.error("Could write to high_low Table. Error message: %s", e)
 
     async def dailyHousekeeping(self):
         """This function is called once a day, to clean up old data."""
