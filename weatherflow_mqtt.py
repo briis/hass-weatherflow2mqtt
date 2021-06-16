@@ -157,10 +157,11 @@ async def main():
             fcst_attr_topic = "homeassistant/sensor/{}/{}/attributes".format(DOMAIN, EVENT_FORECAST)
             if (now - forecast_last_run) >= forecast_interval:
                 condition_data, fcst_data  = await forecast.update_forecast()
-                client.publish(fcst_state_topic, json.dumps(condition_data))
-                await asyncio.sleep(0.01)
-                client.publish(fcst_attr_topic, json.dumps(fcst_data))
-                await asyncio.sleep(0.01)
+                if condition_data is not None:
+                    client.publish(fcst_state_topic, json.dumps(condition_data))
+                    await asyncio.sleep(0.01)
+                    client.publish(fcst_attr_topic, json.dumps(fcst_data))
+                    await asyncio.sleep(0.01)
                 forecast_last_run = now
 
         # Process the data
