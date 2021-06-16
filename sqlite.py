@@ -213,6 +213,26 @@ class SQLFunctions:
             _LOGGER.error("Could write to Lightning Table. Error message: %s", e)
             return False
 
+    async def writeDailyLog(self, data: OrderedDict):
+        """Adds an entry to the Daily Log Table."""
+
+        try:
+            temp = 0 if data["air_temperature"] is None else data["air_temperature"]
+            pres = 0 if data["sealevel_pressure"] is None else data["sealevel_pressure"]
+            wspeed = 0 if data["wind_speed_avg"] is None else data["wind_speed_avg"]
+
+            cur = self.connection.cursor()
+            cur.execute(f"INSERT INTO daily_log(timestamp, temperature, pressure, windspeed) VALUES({time.time()}, {temp}, {pres}, {wspeed});")
+            self.connection.commit()
+            return True
+
+        except SQLError as e:
+            _LOGGER.error("Could not Insert data in table daily_log. Error: %s", e)
+            return False
+        except Exception as e:
+            _LOGGER.error("Could write to daily_log Table. Error message: %s", e)
+            return False
+
     async def migrateStorageFile(self):
         """Migrates the old .storage.json file to the database."""
 
