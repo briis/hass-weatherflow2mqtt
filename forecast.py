@@ -145,6 +145,7 @@ class Forecast:
             return condition_data, fcst_data
         
         # Return None if we could not retrieve data
+        _LOGGER.warning("Forecast Server was unresponsive. Skipping forecast update")
         return None, None
 
     async def ha_condition_value(self, value):

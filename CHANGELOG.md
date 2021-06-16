@@ -1,5 +1,13 @@
 # Home Assistant WeatherFlow2MQTT Changelog
 
+## Version 2.0.2
+
+**Release Date**: NOT RELEASED YET
+
+### Changes in release 2.0.2
+
+* `FIX`: If the forecast data from WeatherFlow is not available, the program will now just skip the update, and wait for the next timely update, instead of crashing the Container.
+
 ## Version 2.0.1
 
 **Release Date**: June 15th, 2021
