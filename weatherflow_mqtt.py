@@ -122,7 +122,7 @@ async def main():
     current_day = datetime.today().weekday()
 
     # Connect to SQLite DB
-    sql = SQLFunctions(unit_system)
+    sql = SQLFunctions(unit_system, show_debug)
     database_exist = os.path.isfile(DATABASE)
     await sql.create_connection(DATABASE)
     if not database_exist:

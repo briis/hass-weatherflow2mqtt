@@ -40,9 +40,10 @@ _LOGGER = logging.getLogger(__name__)
 class SQLFunctions:
     """Class to handle SQLLite functions."""
 
-    def __init__(self, unit_system):
+    def __init__(self, unit_system, debug = False):
         self.connection = None
         self._unit_system = unit_system
+        self._debug = debug
 
     async def create_connection(self, db_file):
         """ create a database connection to a SQLite database """
@@ -322,7 +323,8 @@ class SQLFunctions:
                     if min_sql:
                         sql = f"{sql} {min_sql}"
                     sql = f"{sql} WHERE sensorid = '{row['sensorid']}'"
-                    _LOGGER.debug("SQL: %s", sql)
+                    if self._debug:
+                        _LOGGER.debug("SQL: %s", sql)
                     cursor.execute(sql)
                     self.connection.commit()
 
@@ -388,7 +390,7 @@ class SQLFunctions:
                     await self.migrateStorageFile()
 
         except Exception as e:
-            _LOGGER.debug("Could not Read storage file. Error message: %s", e)
+            _LOGGER.error("Could not Read storage file. Error message: %s", e)
 
     
     async def upgradeDatabase(self):
@@ -412,7 +414,7 @@ class SQLFunctions:
                 _LOGGER.info("Database now version %s", DATABASE_VERSION)
 
         except Exception as e:
-            _LOGGER.debug("An undefined error occured. Error message: %s", e)
+            _LOGGER.error("An undefined error occured. Error message: %s", e)
 
     async def initializeHighLow(self):
         """Writes the Initial Data to the High Low Tabble."""
