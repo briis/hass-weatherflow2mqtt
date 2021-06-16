@@ -33,6 +33,7 @@ from const import (
     EVENT_SKY_DATA,
     EVENT_STRIKE,
     EVENT_TEMPEST_DATA,
+    FORECAST_ENTITY,
     SENSOR_CLASS,
     SENSOR_DEVICE,
     SENSOR_ICON,
@@ -155,7 +156,7 @@ async def main():
         if add_forecast:
             now = datetime.now().timestamp()
             fcst_state_topic = "homeassistant/sensor/{}/{}/state".format(DOMAIN, EVENT_FORECAST)
-            fcst_attr_topic = "homeassistant/sensor/{}/{}/attributes".format(DOMAIN, EVENT_FORECAST)
+            fcst_attr_topic = "homeassistant/sensor/{}/{}/attributes".format(DOMAIN, FORECAST_ENTITY)
             if (now - forecast_last_run) >= forecast_interval:
                 condition_data, fcst_data  = await forecast.update_forecast()
                 if condition_data is not None:
@@ -213,7 +214,9 @@ async def main():
                 ).isoformat()
                 data["battery_air"] = round(obs[6], 2)
                 data["sealevel_pressure"] = await cnv.sea_level_pressure(obs[1], elevation)
-                data["pressure_trend"] = await sql.readPressureTrend(data["sealevel_pressure"])
+                trend_text, trend_value = await sql.readPressureTrend(data["sealevel_pressure"])
+                data["pressure_trend"] = trend_text
+                data["pressure_trend_value"] = trend_value
                 data["air_density"] = await cnv.air_density(obs[2], obs[1])
                 data["dewpoint"] = await cnv.dewpoint(obs[2], obs[3])
                 data["feelslike"] = await cnv.feels_like(obs[2], obs[3], wind_speed)
@@ -288,7 +291,9 @@ async def main():
                     storage["last_lightning_time"]
                 ).isoformat()
                 data["sealevel_pressure"] = await cnv.sea_level_pressure(obs[6], elevation)
-                data["pressure_trend"] = await sql.readPressureTrend(data["sealevel_pressure"])
+                trend_text, trend_value = await sql.readPressureTrend(data["sealevel_pressure"])
+                data["pressure_trend"] = trend_text
+                data["pressure_trend_value"] = trend_value
                 data["air_density"] = await cnv.air_density(obs[7], obs[6])
                 data["dewpoint"] = await cnv.dewpoint(obs[7], obs[8])
                 data["feelslike"] = await cnv.feels_like(obs[7], obs[8], wind_speed)
@@ -367,7 +372,7 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
             DOMAIN, sensor[SENSOR_DEVICE]
         )
         attr_topic = "homeassistant/sensor/{}/{}/attributes".format(
-            DOMAIN, sensor[SENSOR_DEVICE]
+            DOMAIN, sensor[SENSOR_ID]
         )
         discovery_topic = "homeassistant/sensor/{}/{}/config".format(
             DOMAIN, sensor[SENSOR_ID]
@@ -405,6 +410,14 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
             # Attributes
             attribution[ATTR_ATTRIBUTION] = ATTRIBUTION
             attribution[ATTR_BRAND] = BRAND
+            # Add additional attributes to some sensors
+            if sensor[SENSOR_ID] == "pressure_trend":
+                payload["json_attributes_topic"] = state_topic
+                template = OrderedDict()
+                template = attribution
+                template["trend_value"] = "{{ value_json.pressure_trend_value | round(2)}}"
+                payload["json_attributes_template"] = json.dumps(template)
+
 
         try:
             mqtt_client.publish(

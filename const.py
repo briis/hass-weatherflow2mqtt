@@ -49,6 +49,7 @@ TABLE_LIGHTNING = """ CREATE TABLE IF NOT EXISTS lightning (
 TABLE_HIGH_LOW = """
                     CREATE TABLE IF NOT EXISTS high_low (
                         sensorid TEXT PRIMARY KEY,
+                        latest REAL,
                         max_day REAL,
                         max_day_time REAL,
                         min_day REAL,
@@ -123,6 +124,7 @@ EVENT_FORECAST = "forecast"
 
 FORECAST_TYPE_DAILY = "daily"
 FORECAST_TYPE_HOURLY = "hourly"
+FORECAST_ENTITY = "weather"
 FORECAST_HOURLY_HOURS = 36
 
 STRIKE_COUNT_TIMER = 3 * 60 * 60
@@ -352,7 +354,7 @@ WEATHERFLOW_SENSORS = [
         None,
         EVENT_AIR_DATA,
     ],
-    ["weather", "Weather", None, None, None, "chart-box-outline", EVENT_FORECAST],
+    [FORECAST_ENTITY, "Weather", None, None, None, "chart-box-outline", EVENT_FORECAST],
 ]
 
 SENSOR_ID = 0

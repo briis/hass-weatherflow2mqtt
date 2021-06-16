@@ -7,6 +7,8 @@
 ### Changes in release 2.0.2
 
 * `FIX`: If the forecast data from WeatherFlow is not available, the program will now just skip the update, and wait for the next timely update, instead of crashing the Container.
+* `NEW`: Started the work on creating Sensors for High and Low values. For now there will be a new table created created and daily high/low will be calculated and written to this table. No sensors are currently populated with this data.
+* `CHANGED`: Attributes for each sensors are now moved from the event topics, to each individual sensor, so that we can add sensor specific attributes in the future. This will have no impact on a running system.
 
 ## Version 2.0.1
 

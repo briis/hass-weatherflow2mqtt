@@ -161,11 +161,11 @@ class SQLFunctions:
                 max_value = 0.0295
 
             if pressure_delta > min_value and pressure_delta < max_value:
-                return "Steady"
+                return "Steady", 0
             if pressure_delta <= min_value:
-                return "Falling"
+                return "Falling", pressure_delta
             if pressure_delta >= max_value:
-                return "Rising"
+                return "Rising", pressure_delta
 
         except SQLError as e:
             _LOGGER.error("Could not access storage data. Error: %s", e)
@@ -314,19 +314,24 @@ class SQLFunctions:
                         do_update = True
 
                 # If min/max changes, update the record
+                sql = "UPDATE high_low SET"
                 if do_update:
-                    sql = "UPDATE high_low SET"
                     if max_sql:
                         sql = f"{sql} {max_sql}"
                     if max_sql and min_sql:
                         sql = f"{sql},"
                     if min_sql:
                         sql = f"{sql} {min_sql}"
-                    sql = f"{sql} WHERE sensorid = '{row['sensorid']}'"
+                    sql = f"{sql}, latest = {sensor_value} WHERE sensorid = '{row['sensorid']}'"
                     if self._debug:
                         _LOGGER.debug("SQL: %s", sql)
                     cursor.execute(sql)
-                    self.connection.commit()
+                else:
+                    sql = f" latest = {sensor_value} WHERE sensorid = '{row['sensorid']}'"
+                    if self._debug:
+                        _LOGGER.debug("SQL: %s", sql)
+                    cursor.execute(sql)
+                self.connection.commit()
 
         except SQLError as e:
             _LOGGER.error("Could not update High and Low data. Error: %s", e)
@@ -455,8 +460,10 @@ class SQLFunctions:
             strike_time_point = time.time() - STRIKE_COUNT_TIMER - 60
             cursor.execute(f"DELETE FROM lightning WHERE timestamp < {strike_time_point};")
 
-            #Cleanup the Daily Log Table
-            cursor.execute(f"DELETE FROM daily_log WHERE date(timestamp, 'unixepoch', 'localtime') = DATE('now', '-1 day');")
+            # Reset Day High and Low values
+            cursor.execute("UPDATE high_low SET max_day = latest, min_day = latest WHERE min_day <> 0")
+            cursor.execute("UPDATE high_low SET max_day = latest WHERE min_day = 0")
+            self.connection.commit()
 
             return True
 
@@ -466,4 +473,3 @@ class SQLFunctions:
         except Exception as e:
             _LOGGER.error("Could not perform daily housekeeping. Error message: %s", e)
             return False
-      
