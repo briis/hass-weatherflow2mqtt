@@ -9,6 +9,7 @@ from typing import OrderedDict
 import logging
 
 from const import (
+    DATABASE_VERSION,
     PRESSURE_TREND_TIMER,
     STORAGE_ID,
     STORAGE_FILE,
@@ -259,6 +260,10 @@ class SQLFunctions:
                 storage = (STORAGE_ID,0,0,0,0,0,0,0,0,0,0)
                 await self.create_storage_row(storage)
 
+                # Update the version number
+                cursor = self.connection.cursor()
+                cursor.execute(f"PRAGMA main.user_version = {DATABASE_VERSION};")
+
                 # Migrate data if they exist
                 if os.path.isfile(STORAGE_FILE):
                     await self.migrateStorageFile()
@@ -270,12 +275,19 @@ class SQLFunctions:
         """Upgrade the Database to ensure tables and columns are correct."""
 
         try:
-            _LOGGER.info("Upgrading the database....")
-            with self.connection:
+            # Get Database Version
+            cursor = self.connection.cursor()
+            cursor.execute("PRAGMA main.user_version;")
+            db_version = int(cursor.fetchone()[0])
+
+            if db_version < DATABASE_VERSION:
+                _LOGGER.info("Upgrading the database....")
                 # Create Empty Tables
                 await self.create_table(TABLE_DAY_HI_LOW)
                 await self.create_table(TABLE_DAILY_LOG)
 
+                # Finally update the version number
+                cursor.execute(f"PRAGMA main.user_version = {DATABASE_VERSION};")
 
         except Exception as e:
             _LOGGER.debug("An undefined error occured. Error message: %s", e)

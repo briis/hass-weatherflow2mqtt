@@ -126,8 +126,9 @@ async def main():
     database_exist = os.path.isfile(DATABASE)
     await sql.create_connection(DATABASE)
     if not database_exist:
-        # Create Tables and Migrate Data
         await sql.createInitialDataset()
+    # Upgrade Database if needed
+    await sql.upgradeDatabase()
 
     # Read stored Values and set variable values
     storage = await sql.readStorage()
