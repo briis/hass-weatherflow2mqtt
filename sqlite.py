@@ -32,6 +32,7 @@ from const import (
     TABLE_LIGHTNING,
     TABLE_PRESSURE,
     TABLE_STORAGE,
+    UTC,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -340,6 +341,35 @@ class SQLFunctions:
         except Exception as e:
             _LOGGER.error("Could write to High and Low Table. Error message: %s", e)
             return False
+
+    async def readHighLow(self, sensor_id, fetch_min = False):
+        """Returns data from the high_low table as JSON."""
+        try:
+            self.connection.row_factory = sqlite3.Row
+            cursor = self.connection.cursor()
+            cursor.execute(f"SELECT * FROM high_low WHERE sensorid = '{sensor_id}'")
+            data = cursor.fetchall()
+            
+            sensor_json = {}
+            for row in data:
+                sensor_json["max_day"] = row["max_day"]
+                sensor_json["max_day_time"] = datetime.datetime.utcfromtimestamp(round(row["max_day_time"])).replace(tzinfo=UTC).isoformat()
+                sensor_json["max_all"] = row["max_all"]
+                sensor_json["max_all_time"] = datetime.datetime.utcfromtimestamp(round(row["max_all_time"])).replace(tzinfo=UTC).isoformat()
+                if fetch_min:
+                    sensor_json["min_day"] = row["min_day"]
+                    sensor_json["min_day_time"] = datetime.datetime.utcfromtimestamp(round(row["min_day_time"])).replace(tzinfo=UTC).isoformat()
+                    sensor_json["min_all"] = row["min_all"]
+                    sensor_json["min_all_time"] = datetime.datetime.utcfromtimestamp(round(row["min_all_time"])).replace(tzinfo=UTC).isoformat()
+
+            return sensor_json
+
+        except SQLError as e:
+            _LOGGER.error("Could not access high_low data. Error: %s", e)
+            return None
+        except Exception as e:
+            _LOGGER.error("Could not get all High Low values. Error message: %s", e)
+            return sensor_json
 
     async def migrateStorageFile(self):
         """Migrates the old .storage.json file to the database."""
