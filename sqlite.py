@@ -463,8 +463,8 @@ class SQLFunctions:
             cursor.execute(f"DELETE FROM lightning WHERE timestamp < {strike_time_point};")
 
             # Reset Day High and Low values
-            cursor.execute("UPDATE high_low SET max_day = latest, min_day = latest WHERE min_day <> 0")
-            cursor.execute("UPDATE high_low SET max_day = latest WHERE min_day = 0")
+            cursor.execute(f"UPDATE high_low SET max_day = latest, max_day_time = {time.time()}, min_day = latest, min_day_time = {time.time()} WHERE min_day <> 0")
+            cursor.execute(f"UPDATE high_low SET max_day = latest, max_day_time = {time.time()} WHERE min_day = 0")
             self.connection.commit()
 
             return True
