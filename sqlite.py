@@ -262,50 +262,50 @@ class SQLFunctions:
                 do_update = False
                 # Get Value of Sensor if available
                 if row["sensorid"] == COL_DEWPOINT:
-                    if data.get("dewpoint"):
+                    if data.get("dewpoint") != None:
                         sensor_value = data["dewpoint"]
                 if row["sensorid"] == COL_HUMIDITY:
-                    if data.get("relative_humidity"):
+                    if data.get("relative_humidity") != None:
                         sensor_value = data["relative_humidity"]
                 if row["sensorid"] == COL_ILLUMINANCE:
-                    if data.get("illuminance"):
+                    if data.get("illuminance") != None:
                         sensor_value = data["illuminance"]
                 if row["sensorid"] == COL_PRESSURE:
-                    if data.get("sealevel_pressure"):
+                    if data.get("sealevel_pressure") != None:
                         sensor_value = data["sealevel_pressure"]
                 if row["sensorid"] == COL_RAINDURATION:
-                    if data.get("rain_duration_today"):
+                    if data.get("rain_duration_today") != None:
                         sensor_value = data["rain_duration_today"]
                 if row["sensorid"] == COL_RAINRATE:
-                    if data.get("rain_rate"):
+                    if data.get("rain_rate") != None:
                         sensor_value = data["rain_rate"]
                 if row["sensorid"] == COL_SOLARRAD:
-                    if data.get("solar_radiation"):
+                    if data.get("solar_radiation") != None:
                         sensor_value = data["solar_radiation"]
                 if row["sensorid"] == COL_STRIKECOUNT:
-                    if data.get("lightning_strike_count_today"):
+                    if data.get("lightning_strike_count_today") != None:
                         sensor_value = data["lightning_strike_count_today"]
                 if row["sensorid"] == COL_STRIKEENERGY:
-                    if data.get("lightning_strike_energy"):
+                    if data.get("lightning_strike_energy") != None:
                         sensor_value = data["lightning_strike_energy"]
                 if row["sensorid"] == COL_TEMPERATURE:
-                    if data.get("air_temperature"):
+                    if data.get("air_temperature") != None:
                         sensor_value = data["air_temperature"]
                 if row["sensorid"] == COL_UV:
-                    if data.get("uv"):
+                    if data.get("uv") != None:
                         sensor_value = data["uv"]
                 if row["sensorid"] == COL_WINDGUST:
-                    if data.get("wind_gust"):
+                    if data.get("wind_gust") != None:
                         sensor_value = data["wind_gust"]
                 if row["sensorid"] == COL_WINDLULL:
-                    if data.get("wind_lull"):
+                    if data.get("wind_lull") != None:
                         sensor_value = data["wind_lull"]
                 if row["sensorid"] == COL_WINDSPEED:
-                    if data.get("wind_speed_avg"):
+                    if data.get("wind_speed_avg") != None:
                         sensor_value = data["wind_speed_avg"]
 
                 # If we have a value, check if min/max changes
-                if sensor_value:
+                if sensor_value != None:
                     if  sensor_value > row["max_day"]:
                         max_sql = f" max_day = {sensor_value}, max_day_time = {time.time()} "
                         do_update = True
@@ -328,7 +328,7 @@ class SQLFunctions:
                     cursor.execute(sql)
                     self.connection.commit()
                 else:
-                    if sensor_value:
+                    if sensor_value != None:
                         sql = f"{sql} latest = {sensor_value} WHERE sensorid = '{row['sensorid']}'"
                         if self._debug:
                             _LOGGER.debug("SQL: %s", sql)

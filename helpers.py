@@ -169,6 +169,8 @@ class ConversionFunctions:
 
     async def rain_rate(self, value):
         """Returns rain rate per hour."""
+        if not value:
+            return 0
         return await self.rain(value * 60)
 
     async def feels_like(self, temperature, humidity, windspeed):
