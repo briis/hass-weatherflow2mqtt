@@ -239,7 +239,7 @@ class DataStorage:
     def getVersion(self):
         """Returns the version number stored in the VERSION file."""
         try:
-            filepath = f"{EXTERNAL_DIRECTORY}/VERSION"
+            filepath = "VERSION"
             with open(filepath, "r") as file:
                 lines = file.readlines()
                 for line in lines:
@@ -250,6 +250,6 @@ class DataStorage:
         except FileNotFoundError as e:
             return None
         except Exception as e:
-            _LOGGER.debug("Could not read config.yaml file. Error message: %s", e)
+            _LOGGER.debug("Could not read program version file. Error message: %s", e)
             return None
 
