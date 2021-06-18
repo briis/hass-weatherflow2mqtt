@@ -12,7 +12,7 @@
 
 `CHANGED`: Attributes for each sensors are now moved from the event topics, to each individual sensor, so that we can add sensor specific attributes. This will have no impact on a running system.
 
-`NEW`: Started the work on creating Sensors for High and Low values. A new table is created and daily high/low will be calculated and written to this table. Currently only day high and low plus all-time high and low values are calculated. The values are written as attributes to each individual sensor where I believe it is relevant to have these values. **Note** It takes 10 min before the daily max and min values are shown, and all-time values are first shown the following day.
+`NEW`: Started the work on creating Sensors for High and Low values. A new table is created and daily high/low will be calculated and written to this table. Currently only day high and low plus all-time high and low values are calculated. The values are written as attributes to each individual sensor where I believe it is relevant to have these values. **Note** It takes 10 min before the daily max and min values are shown, and all-time values are first shown the following day after upgrading, or on the first run of this program.
 
 | Attribute Name   | Description   |
 | --- | --- |
