@@ -16,6 +16,7 @@ There is support for both the AIR & SKY devices and the TEMPEST device.
     2. [Docker Environment Variables](#docker-environment-variables)
 3. [Available Sensors](#available-sensors)
     1. [Sensor Structure](#sensor-structure)
+    2. [High and Low Values](#high-and-low-values)
 4. [Creating a Home Assistant Weather Entity](#creating-a-home-assistant-weather-entity)
 
 ## Installation
@@ -90,12 +91,12 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 
 | Sensor ID   | Name   | Description   | Calculated Sensor   | UDP Event/Index (Tempest)  | Default Units   | MQTT Topic   |
 | --- | --- | --- | --- | --- | --- | --- |
-| air_density | Air Density | The Air density | Yes |  |  |  |
-| air_temperature | Temperature | Outside Temperature | No | obs_st/7 | C |  |
+| air_density | Air Density | The Air density | Yes |  | kg/m^3 |  |
+| air_temperature | Temperature | Outside Temperature | No | obs_st/7 | C° |  |
 | battery | Battery SKY or TEMPEST | If this is a TEMPEST unit this is where the Voltage is displayed. Else it will be the Voltage of the SKY unit | No | obs_st/16 | Volts |  |
 | battery_air | Battery AIR | The voltage on the AIR unit (If present) | No |  | Volts |  |
-| dewpoint | Dew Point | Dewpoint in degrees | Yes |  | C |  |
-| feelslike | Feels Like Temperature | The apparent temperature, a mix of Heat Index and Wind Chill | Yes |  |  |  |
+| dewpoint | Dew Point | Dewpoint in degrees | Yes |  | C° |  |
+| feelslike | Feels Like Temperature | The apparent temperature, a mix of Heat Index and Wind Chill | Yes |  | C° |  |
 | illuminance | Illuminance | How much the incident light illuminates the surface | No | obs_st/9 | Lux |  |
 | lightning_strike_count | Lightning Count (3 hours) | Number of lightning strikes the last 3 hours | Yes |  |  |  |
 | lightning_strike_count_today | Lightning Count (Today) | Number of lightning strikes current day | Yes |  |  |  |
@@ -103,12 +104,12 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | lightning_strike_energy | Lightning Energy | Energy of the last strike | No | evt_strike/2 |  |  |
 | lightning_strike_time | Last Lightning Strike | When the last lightning strike occurred | Yes | evt_strike/0 | seconds |  |
 | precipitation_type | Precipitation Type | Can be one of None, Rain or Hail | No | obs_st/13 | 0 = none, 1 = rain, 2 = hail, 3 = rain + hail (heavy rain) |  |
-| rain_rate | Rain Rate | How much is it raining right now | Yes |  |  |  |
+| rain_rate | Rain Rate | How much is it raining right now | Yes |  | mm/h |  |
 | rain_start_time | Last Rain | When was the last time it rained | No | evt_precip/0 | seconds |  |
-| rain_today | Rain Today | Total rain for the current day. (Reset at midnight) | Yes |  |  |  |
-| rain_yesterday | Rain Yesterday | Total rain for yesterday (Reset at midnight) | Yes |  |  |  |
-| rain_duration_today | Rain Duration (Today) | Total rain minutes for the current day. (Reset at midnight) | Yes |  |  |  |
-| rain_duration_yesterday | Rain Duration (Yesterday) | Total rain minutes yesterday | Yes |  |  |  |
+| rain_today | Rain Today | Total rain for the current day. (Reset at midnight) | Yes |  | mm |  |
+| rain_yesterday | Rain Yesterday | Total rain for yesterday (Reset at midnight) | Yes |  | mm |  |
+| rain_duration_today | Rain Duration (Today) | Total rain minutes for the current day. (Reset at midnight) | Yes |  | minutes |  |
+| rain_duration_yesterday | Rain Duration (Yesterday) | Total rain minutes yesterday | Yes |  | minutes |  |
 | relative_humidity | Humidity | Relative Humidity | No | obs_st/8 | % |  |
 | sealevel_pressure | Station Pressure | Preasure measurement at Sea Level | Yes |  | MB |  |
 | pressure_trend | Pressure Trend | Returns Steady, Falling or Rising determined by the rate of change over the past 3 hours| Yes |  |  |  |
@@ -116,6 +117,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | station_pressure | Station Pressure | Pressure measurement where the station is located | No | obs_st/6 | MB |  |
 | uptime | Uptime | How long has the HUB been running | No | hub_status/uptime |  |  |
 | uv | UV Index | The UV index | No | obs_st/10 | Index |  |
+| visibility | Visibility | Distance to the horizon | Yes |  | km |  |
 | wind_bearing | Wind Bearing | Current measured Wind bearing in degrees | No | rapid_wind/2 | Degrees |  |
 | wind_bearing_avg | Wind Bearing Avg | The average wind bearing in degrees | No | obs_st/4 | Degrees |  |
 | wind_direction | Wind Direction | Current measured Wind bearing as compass symbol | Yes |  | Cardinal |  |
@@ -166,6 +168,42 @@ sensors:
   - wind_speed_avg
   - weather
 ```
+
+### High and Low Values
+
+For selected sensors high and low values are calculated and published to the attributes of the sensor. Currently daily and all-time values are calculated, but future values are planned. Only the sensors where it is relevant, will get a low value calculated. See the table further down, for the available sensors and what values to expect.
+
+Here are the current attributes, that will be applied to the selected sensor:
+
+| Attribute Name   | Description   |
+| --- | --- |
+| `max_day` | Maximum value for the current day. Reset at midnight. |
+| `max_day_time` | UTC time when the max value was recorded. Reset at midnight. |
+| `min_day` | Minimum value for the current day. Reset at midnight. |
+| `min_day_time` | UTC time when the min value was recorded. Reset at midnight. |
+| `max_all` | Maximum value ever recorded. Updated at midnight every day. |
+| `max_all_time` | UTC time when the all-time max value was recorded. Updated at midnight every day. |
+| `min_all` | Minimum value ever recorded. Updated at midnight every day. |
+| `min_all_time` | UTC time when the all-time min value was recorded. Updated at midnight every day. |
+
+The following sensors are displaying High and Low values:
+
+| Sensor ID   | High Value   | Low Value   |
+| --- | --- | --- |
+| `air_temperature` | Yes | Yes |
+| `dewpoint` | Yes | Yes |
+| `illuminance` | Yes | No |
+| `lightning_strike_count_today` | Yes | No |
+| `lightning_strike_energy` | Yes | No |
+| `rain_rate` | Yes | No |
+| `rain_duration_today` | Yes | No |
+| `relative_humidity` | Yes | Yes |
+| `sealevel_pressure` | Yes | Yes |
+| `solar_radiation` | Yes | No |
+| `uv` | Yes | No |
+| `wind_gust` | Yes | No |
+| `wind_lull` | Yes | No |
+| `wind_speed_avg` | Yes | No |
 
 ## Creating a Home Assistant Weather Entity
 
