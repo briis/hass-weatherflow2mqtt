@@ -164,9 +164,9 @@ class SQLFunctions:
             if pressure_delta > min_value and pressure_delta < max_value:
                 return "Steady", 0
             if pressure_delta <= min_value:
-                return "Falling", pressure_delta
+                return "Falling", round(pressure_delta, 2)
             if pressure_delta >= max_value:
-                return "Rising", pressure_delta
+                return "Rising", round(pressure_delta, 2)
 
         except SQLError as e:
             _LOGGER.error("Could not access storage data. Error: %s", e)
@@ -302,26 +302,26 @@ class SQLFunctions:
             _LOGGER.error("Could write to High and Low Table. Error message: %s", e)
             return False
 
-    async def readHighLow(self, sensor_id, fetch_min = False):
+    async def readHighLow(self):
         """Returns data from the high_low table as JSON."""
         try:
             self.connection.row_factory = sqlite3.Row
             cursor = self.connection.cursor()
-            cursor.execute(f"SELECT * FROM high_low WHERE sensorid = '{sensor_id}'")
+            cursor.execute(f"SELECT * FROM high_low")
             data = cursor.fetchall()
             
             sensor_json = {}
             for row in data:
-                sensor_json["max_day"] = row["max_day"]
-                sensor_json["max_day_time"] = datetime.datetime.utcfromtimestamp(round(row["max_day_time"])).replace(tzinfo=UTC).isoformat()
-                sensor_json["max_all"] = row["max_all"]
-                sensor_json["max_all_time"] = datetime.datetime.utcfromtimestamp(round(row["max_all_time"])).replace(tzinfo=UTC).isoformat()
-                if fetch_min:
-                    sensor_json["min_day"] = row["min_day"]
-                    sensor_json["min_day_time"] = datetime.datetime.utcfromtimestamp(round(row["min_day_time"])).replace(tzinfo=UTC).isoformat()
-                    sensor_json["min_all"] = row["min_all"]
-                    sensor_json["min_all_time"] = datetime.datetime.utcfromtimestamp(round(row["min_all_time"])).replace(tzinfo=UTC).isoformat()
-
+                sensor_json[row["sensorid"]] = {
+                    "max_day": row["max_day"],
+                    "max_day_time": None if not row["max_day_time"] else datetime.datetime.utcfromtimestamp(round(row["max_day_time"])).replace(tzinfo=UTC).isoformat(),
+                    "max_all": row["max_all"],
+                    "max_all_time": None if not row["max_all_time"] else datetime.datetime.utcfromtimestamp(round(row["max_all_time"])).replace(tzinfo=UTC).isoformat(),
+                    "min_day": row["min_day"],
+                    "min_day_time": None if not row["min_day_time"] else datetime.datetime.utcfromtimestamp(round(row["min_day_time"])).replace(tzinfo=UTC).isoformat(),
+                    "min_all": row["min_all"],
+                    "min_all_time": None if not row["min_all_time"] else datetime.datetime.utcfromtimestamp(round(row["min_all_time"])).replace(tzinfo=UTC).isoformat()
+                }
             return sensor_json
 
         except SQLError as e:

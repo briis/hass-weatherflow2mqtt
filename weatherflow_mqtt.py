@@ -28,18 +28,21 @@ from const import (
     EVENT_DEVICE_STATUS,
     EVENT_FORECAST,
     EVENT_RAPID_WIND,
+    EVENT_HIGH_LOW,
     EVENT_HUB_STATUS,
     EVENT_PRECIP_START,
     EVENT_SKY_DATA,
     EVENT_STRIKE,
     EVENT_TEMPEST_DATA,
     FORECAST_ENTITY,
+    HIGH_LOW_TIMER,
     SENSOR_CLASS,
     SENSOR_DEVICE,
     SENSOR_EXTRA_ATT,
     SENSOR_ICON,
     SENSOR_ID,
     SENSOR_NAME,
+    SENSOR_SHOW_MIN_ATT,
     SENSOR_UNIT_I,
     SENSOR_UNIT_M,
     UNITS_IMPERIAL,
@@ -121,6 +124,7 @@ async def main():
     # Set timer variables
     rapid_last_run = 1621229580.583215  # A time in the past
     forecast_last_run = 1621229580.583215  # A time in the past
+    high_low_last_run = 1621229580.583215  # A time in the past
     current_day = datetime.today().weekday()
 
     # Connect to SQLite DB
@@ -152,6 +156,14 @@ async def main():
             await sql.writeStorage(storage)
             await sql.dailyHousekeeping()
             current_day = datetime.today().weekday()
+
+        # Update High and Low values if it is time
+        now = datetime.now().timestamp()
+        if (now - high_low_last_run) >= HIGH_LOW_TIMER:
+            highlow_topic = "homeassistant/sensor/{}/{}/attributes".format(DOMAIN, EVENT_HIGH_LOW)
+            high_low_data = await sql.readHighLow()
+            client.publish(highlow_topic, json.dumps(high_low_data), qos=1, retain=True)
+            high_low_last_run = datetime.now().timestamp()
 
         # Update the Forecast if it is time and enabled
         if add_forecast:
@@ -378,6 +390,7 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
         discovery_topic = "homeassistant/sensor/{}/{}/config".format(
             DOMAIN, sensor[SENSOR_ID]
         )
+        highlow_topic = "homeassistant/sensor/{}/{}/attributes".format(DOMAIN, EVENT_HIGH_LOW)
 
         attribution = OrderedDict()
         payload = OrderedDict()
@@ -416,7 +429,21 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
                 payload["json_attributes_topic"] = state_topic
                 template = OrderedDict()
                 template = attribution
-                template["trend_value"] = "{{ value_json.pressure_trend_value | round(2)}}"
+                template["trend_value"] = "{{ value_json.pressure_trend_value }}"
+                payload["json_attributes_template"] = json.dumps(template)
+            if sensor[SENSOR_EXTRA_ATT]:
+                payload["json_attributes_topic"] = highlow_topic
+                template = OrderedDict()
+                template = attribution
+                template["max_day"] = "{{{{ value_json.{}['max_day'] }}}}".format(sensor[SENSOR_ID])
+                template["max_day_time"] = "{{{{ value_json.{}['max_day_time'] }}}}".format(sensor[SENSOR_ID])
+                template["max_all"] = "{{{{ value_json.{}['max_all'] }}}}".format(sensor[SENSOR_ID])
+                template["max_all_time"] = "{{{{ value_json.{}['max_all_time'] }}}}".format(sensor[SENSOR_ID])
+                if sensor[SENSOR_SHOW_MIN_ATT]:
+                    template["min_day"] = "{{{{ value_json.{}['min_day'] }}}}".format(sensor[SENSOR_ID])
+                    template["min_day_time"] = "{{{{ value_json.{}['min_day_time'] }}}}".format(sensor[SENSOR_ID])
+                    template["min_all"] = "{{{{ value_json.{}['min_all'] }}}}".format(sensor[SENSOR_ID])
+                    template["min_all_time"] = "{{{{ value_json.{}['min_all_time'] }}}}".format(sensor[SENSOR_ID])
                 payload["json_attributes_template"] = json.dumps(template)
 
 

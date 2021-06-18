@@ -2,13 +2,45 @@
 
 ## Version 2.0.2
 
-**Release Date**: NOT RELEASED YET
+**Release Date**: June 18th, 2021
 
 ### Changes in release 2.0.2
 
-* `FIX`: If the forecast data from WeatherFlow is not available, the program will now just skip the update, and wait for the next timely update, instead of crashing the Container.
-* `NEW`: Started the work on creating Sensors for High and Low values. For now there will be a new table created and daily high/low will be calculated and written to this table. No sensors are currently populated with this data.
-* `CHANGED`: Attributes for each sensors are now moved from the event topics, to each individual sensor, so that we can add sensor specific attributes in the future. This will have no impact on a running system.
+`FIX`: If the forecast data from WeatherFlow is not available, the program will now just skip the update, and wait for the next timely update, instead of crashing the Container.
+
+`CHANGED`: Attributes for each sensors are now moved from the event topics, to each individual sensor, so that we can add sensor specific attributes in the future. This will have no impact on a running system.
+
+`NEW`: Started the work on creating Sensors for High and Low values. A new table is created and daily high/low will be calculated and written to this table. Currently only day high and low plus all-time high and low values are calculated. The values are written as attributes to each individual sensor.
+
+| Attribute Name   | Description   |
+| --- | --- |
+| `max_day` | Maximum value for the current day. Reset at midnight. |
+| `max_day_time` | UTC time when the max value was recorded. Reset at midnight. |
+| `min_day` | Minimum value for the current day. Reset at midnight. |
+| `min_day_time` | UTC time when the min value was recorded. Reset at midnight. |
+| `max_all` | Maximum value ever recorded. Updated at midnight every day. |
+| `max_all_time` | UTC time when the all-time max value was recorded. Updated at midnight every day. |
+| `min_all` | Minimum value ever recorded. Updated at midnight every day. |
+| `min_all_time` | UTC time when the all-time min value was recorded. Updated at midnight every day. |
+
+The following sensors are displaying Max and Min values:
+
+| Sensor ID   | Max Value   | Min Value   |
+| --- | --- | --- |
+| `air_temperature` | Yes | Yes |
+| `dewpoint` | Yes | Yes |
+| `illuminance` | Yes | No |
+| `lightning_strike_count_today` | Yes | No |
+| `lightning_strike_energy` | Yes | No |
+| `rain_rate` | Yes | No |
+| `rain_duration_today` | Yes | No |
+| `relative_humidity` | Yes | Yes |
+| `sealevel_pressure` | Yes | Yes |
+| `solar_radiation` | Yes | No |
+| `uv` | Yes | No |
+| `wind_gust` | Yes | No |
+| `wind_lull` | Yes | No |
+| `wind_speed_avg` | Yes | No |
 
 ## Version 2.0.1
 
