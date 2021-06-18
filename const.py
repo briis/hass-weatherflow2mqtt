@@ -402,6 +402,7 @@ WEATHERFLOW_SENSORS = [
         False,
         False
     ],
+    ["visibility", "Visibility", "km", "nmi", None, "eye", EVENT_SKY_DATA, False, False],
     [FORECAST_ENTITY, "Weather", None, None, None, "chart-box-outline", EVENT_FORECAST, False, False],
 ]
 

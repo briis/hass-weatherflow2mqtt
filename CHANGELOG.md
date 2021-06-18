@@ -1,5 +1,13 @@
 # Home Assistant WeatherFlow2MQTT Changelog
 
+## Version 2.0.3
+
+**Release Date**: NOT RELEASED YET
+
+### Changes in release 2.0.3
+
+`NEW`: A new sensor called `wf_visibility`has been added. This sensor shows the distance to the horizon, in either km or nautical miles, depending on the unit_system.
+
 ## Version 2.0.2
 
 **Release Date**: June 18th, 2021

@@ -256,6 +256,7 @@ async def main():
                 data["solar_radiation"] = obs[10]
                 data["precipitation_type"] = await cnv.rain_type(obs[12])
                 data["rain_rate"] = await cnv.rain_rate(obs[3])
+                data["visibility"] = await cnv.visibility(elevation)
                 client.publish(state_topic, json.dumps(data))
                 await sql.updateHighLow(data)
                 await asyncio.sleep(0.01)
@@ -285,6 +286,7 @@ async def main():
                 data["precipitation_type"] = await cnv.rain_type(obs[13])
                 data["battery"] = round(obs[16], 2)
                 data["rain_rate"] = await cnv.rain_rate(obs[12])
+                data["visibility"] = await cnv.visibility(elevation)
                 client.publish(state_topic, json.dumps(data))
                 await sql.updateHighLow(data)
                 await asyncio.sleep(0.01)
