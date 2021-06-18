@@ -49,9 +49,6 @@ from const import (
     WEATHERFLOW_SENSORS,
 )
 
-data_store = DataStorage()
-PROGRAM_VERSION = data_store.getVersion()
-
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -83,7 +80,9 @@ async def main():
         forecast = Forecast(station_id, unit_system, station_token)
         forecast_interval = forecast_interval * 60
     # Read the sensor config
+    data_store = DataStorage()
     sensors = await data_store.read_config()
+    program_version = data_store.getVersion()
 
     mqtt_anonymous = False
     if not mqtt_username or not mqtt_password:
@@ -119,7 +118,7 @@ async def main():
         sys.exit(1)
 
     # Configure Sensors in MQTT
-    await setup_sensors(endpoint, client, unit_system, sensors, is_tempest, add_forecast)
+    await setup_sensors(endpoint, client, unit_system, sensors, is_tempest, add_forecast, program_version)
 
     # Set timer variables
     rapid_last_run = 1621229580.583215  # A time in the past
@@ -356,7 +355,7 @@ async def main():
                 )
 
 
-async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest, add_forecast):
+async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest, add_forecast, version):
     """Setup the Sensors in Home Assistant."""
 
     # Get Hub Information
@@ -419,7 +418,7 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
                 "connections": [["mac", serial_number]],
                 "manufacturer": "WeatherFlow",
                 "name": "WeatherFlow2MQTT",
-                "model": f"WeatherFlow Weather Station V{PROGRAM_VERSION}",
+                "model": f"WeatherFlow Weather Station V{version}",
                 "sw_version": firmware,
             }
 
