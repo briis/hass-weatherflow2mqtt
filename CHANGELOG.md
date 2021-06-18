@@ -2,7 +2,7 @@
 
 ## Version 2.0.3
 
-**Release Date**: NOT RELEASED YET
+**Release Date**: June 18th, 2021
 
 ### Changes in release 2.0.3
 
