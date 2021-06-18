@@ -192,8 +192,8 @@ class ConversionFunctions:
     async def visibility(self, elevation):
         """Returns the visibility."""
         if self._unit_system == UNITS_IMPERIAL:
-            return 1.22459 * math.sqrt(elevation * 3.2808)
-        return 3.56972 * math.sqrt(elevation)
+            return round(1.22459 * math.sqrt(elevation * 3.2808), 1)
+        return round(3.56972 * math.sqrt(elevation), 1)
 
     async def humanize_time(self, value):
         """Humanize Time in Seconds."""
