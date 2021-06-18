@@ -1,5 +1,57 @@
 # Home Assistant WeatherFlow2MQTT Changelog
 
+## Version 2.0.3
+
+**Release Date**: June 18th, 2021
+
+### Changes in release 2.0.3
+
+`NEW`: A new sensor called `wf_visibility`has been added. This sensor shows the distance to the horizon, in either km or nautical miles, depending on the unit_system.
+
+## Version 2.0.2
+
+**Release Date**: June 18th, 2021
+
+### Changes in release 2.0.2
+
+**Please make a backup of `weatherflow2mqtt.db` before upgrading. Just in case anything goes wrong.**
+
+`FIX`: If the forecast data from WeatherFlow is not available, the program will now just skip the update, and wait for the next timely update, instead of crashing the Container.
+
+`CHANGED`: Attributes for each sensors are now moved from the event topics, to each individual sensor, so that we can add sensor specific attributes. This will have no impact on a running system.
+
+`NEW`: Started the work on creating Sensors for High and Low values. A new table is created and daily high/low will be calculated and written to this table. Currently only day high and low plus all-time high and low values are calculated. The values are written as attributes to each individual sensor where I believe it is relevant to have these values. **Note** It takes 10 min before the daily max and min values are shown, and all-time values are first shown the following day after upgrading, or on the first run of this program.
+
+| Attribute Name   | Description   |
+| --- | --- |
+| `max_day` | Maximum value for the current day. Reset at midnight. |
+| `max_day_time` | UTC time when the max value was recorded. Reset at midnight. |
+| `min_day` | Minimum value for the current day. Reset at midnight. |
+| `min_day_time` | UTC time when the min value was recorded. Reset at midnight. |
+| `max_all` | Maximum value ever recorded. Updated at midnight every day. |
+| `max_all_time` | UTC time when the all-time max value was recorded. Updated at midnight every day. |
+| `min_all` | Minimum value ever recorded. Updated at midnight every day. |
+| `min_all_time` | UTC time when the all-time min value was recorded. Updated at midnight every day. |
+
+The following sensors are displaying Max and Min values:
+
+| Sensor ID   | Max Value   | Min Value   |
+| --- | --- | --- |
+| `air_temperature` | Yes | Yes |
+| `dewpoint` | Yes | Yes |
+| `illuminance` | Yes | No |
+| `lightning_strike_count_today` | Yes | No |
+| `lightning_strike_energy` | Yes | No |
+| `rain_rate` | Yes | No |
+| `rain_duration_today` | Yes | No |
+| `relative_humidity` | Yes | Yes |
+| `sealevel_pressure` | Yes | Yes |
+| `solar_radiation` | Yes | No |
+| `uv` | Yes | No |
+| `wind_gust` | Yes | No |
+| `wind_lull` | Yes | No |
+| `wind_speed_avg` | Yes | No |
+
 ## Version 2.0.1
 
 **Release Date**: June 15th, 2021

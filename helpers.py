@@ -14,11 +14,6 @@ from sqlite import SQLFunctions
 from const import (
     DEVICE_STATUS,
     EXTERNAL_DIRECTORY,
-    PRESSURE_STORAGE_FILE,
-    PRESSURE_TREND_TIMER,
-    STORAGE_FILE,
-    STORAGE_FIELDS,
-    STRIKE_STORAGE_FILE,
     UNITS_IMPERIAL,
 )
 
@@ -174,6 +169,8 @@ class ConversionFunctions:
 
     async def rain_rate(self, value):
         """Returns rain rate per hour."""
+        if not value:
+            return 0
         return await self.rain(value * 60)
 
     async def feels_like(self, temperature, humidity, windspeed):
@@ -191,6 +188,12 @@ class ConversionFunctions:
         """Returns the average Wind Bearing from an array of bearings."""
         mean_angle = degrees(phase(sum(rect(1, radians(d)) for d in bearing_arr)/len(bearing_arr)))
         return int(abs(mean_angle))
+
+    async def visibility(self, elevation):
+        """Returns the visibility."""
+        if self._unit_system == UNITS_IMPERIAL:
+            return round(1.22459 * math.sqrt(elevation * 3.2808), 1)
+        return round(3.56972 * math.sqrt(elevation), 1)
 
     async def humanize_time(self, value):
         """Humanize Time in Seconds."""
@@ -217,156 +220,6 @@ class DataStorage:
 
     logging.basicConfig(level=logging.DEBUG)
 
-    def _initialize_storage(self):
-
-        _LOGGER.info("Creating new Storage file...")
-        data = OrderedDict()
-        for item in STORAGE_FIELDS:
-            data[item[0]] = item[1]
-
-        try:
-            with open(STORAGE_FILE, "w") as jsonFile:
-                json.dump(data, jsonFile)
-        except Exception as e:
-            _LOGGER.error("Could not save Storage File. Error message: %s", e)
-
-        return data
-
-    async def read_storage(self):
-        """Read the storage file, and return values."""
-        try:
-            with open(STORAGE_FILE, "r") as jsonFile:
-                tmp_data = json.load(jsonFile)
-                data = await self._data_integrity(tmp_data)
-                return data
-        except FileNotFoundError as e:
-            data = self._initialize_storage()
-            return data
-        except Exception as e:
-            _LOGGER.debug("Could not Read storage file. Error message: %s", e)
-
-    async def _data_integrity(self, data):
-        """Checks the Integrity of the Data File."""
-
-        for item in STORAGE_FIELDS:
-            if item[0] not in data:
-                data[item[0]] = item[1]
-
-        await self.write_storage(data)
-        return data
-
-    async def write_storage(self, data: OrderedDict):
-        """Saves the last values in the Stotage file."""
-
-        try:
-            with open(STORAGE_FILE, "w") as jsonFile:
-                json.dump(data, jsonFile)
-        except Exception as e:
-            _LOGGER.error("Could not save Storage File. Error message: %s", e)
-
-    async def read_strike_storage(self):
-        """Read the strike storage file, and return number of strikes in last three hours."""
-        try:
-            with open(STRIKE_STORAGE_FILE, "r") as file:
-                lines = file.readlines()
-            cnt = 0
-            for item in lines:
-                if item != "\n":
-                    if time.time() - float(item) < 10800:
-                        cnt += 1
-            return cnt
-        except FileNotFoundError as e:
-            return 0
-        except Exception as e:
-            _LOGGER.debug("Could not read strike storage file. Error message: %s", e)
-            return 0
-
-    async def write_strike_storage(self):
-        """Saves an entry if a strike event occurs."""
-
-        try:
-            file = open(STRIKE_STORAGE_FILE, "a")
-            file.write(f"{time.time()}\n")
-            file.close()
-
-        except Exception as e:
-            _LOGGER.error("Could not save Lightning Storage File. Error message: %s", e)
-
-    async def housekeeping_strike(self):
-        """Performs housekeeping tasks on the strike data file."""
-
-        try:
-            with open(STRIKE_STORAGE_FILE, "r") as file:
-                lines = file.readlines()
-            newlines = ""
-            for item in lines:
-                if item != "\n":
-                    if time.time() - float(item) < 10800:
-                        newlines += item
-            file = open(STRIKE_STORAGE_FILE, "w")
-            file.write(f"{newlines}\n")
-            file.close()
-
-        except FileNotFoundError as e:
-            return 0
-        except Exception as e:
-            _LOGGER.debug(
-                "Could not perform housekeeping on strike storage file. Error message: %s",
-                e,
-            )
-
-    async def read_pressure_storage(self):
-        """Read the pressure storage file, and return pressure value 3 hours ago."""
-        try:
-            with open(PRESSURE_STORAGE_FILE, "r") as file:
-                lines = file.readlines()
-            val_available = False
-            for item in lines:
-                if item != "\n":
-                    if time.time() - PRESSURE_TREND_TIMER < float(item[0]):
-                        pressure = item[1]
-                        break
-            return pressure
-        except FileNotFoundError as e:
-            return 0
-        except Exception as e:
-            _LOGGER.debug("Could not read strike storage file. Error message: %s", e)
-            return 0
-
-    async def write_pressure_storage(self, value):
-        """Saves a pressure entry."""
-
-        try:
-            file = open(PRESSURE_STORAGE_FILE, "a")
-            file.write(f"[{time.time()}, {value}]\n")
-            file.close()
-
-        except Exception as e:
-            _LOGGER.error("Could not save Pressure Storage File. Error message: %s", e)
-
-    async def housekeeping_pressure_storage(self):
-        """Performs housekeeping tasks on the pressure data file."""
-
-        try:
-            with open(PRESSURE_STORAGE_FILE, "r") as file:
-                lines = file.readlines()
-            newlines = ""
-            for item in lines:
-                if item != "\n":
-                    if time.time() - float(item) < PRESSURE_TREND_TIMER:
-                        newlines += item
-            file = open(PRESSURE_STORAGE_FILE, "w")
-            file.write(f"{newlines}\n")
-            file.close()
-
-        except FileNotFoundError as e:
-            return 0
-        except Exception as e:
-            _LOGGER.debug(
-                "Could not perform housekeeping on pressure storage file. Error message: %s",
-                e,
-            )
-
     async def read_config(self):
         """Reads the config file, to look for sensors."""
         try:
@@ -386,7 +239,7 @@ class DataStorage:
     def getVersion(self):
         """Returns the version number stored in the VERSION file."""
         try:
-            filepath = f"{EXTERNAL_DIRECTORY}/VERSION"
+            filepath = "/VERSION"
             with open(filepath, "r") as file:
                 lines = file.readlines()
                 for line in lines:
@@ -395,8 +248,9 @@ class DataStorage:
 
 
         except FileNotFoundError as e:
+            _LOGGER.error("Could not find VERSION File.")
             return None
         except Exception as e:
-            _LOGGER.debug("Could not read config.yaml file. Error message: %s", e)
+            _LOGGER.debug("Could not read program version file. Error message: %s", e)
             return None
 

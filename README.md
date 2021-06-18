@@ -16,6 +16,7 @@ There is support for both the AIR & SKY devices and the TEMPEST device.
     2. [Docker Environment Variables](#docker-environment-variables)
 3. [Available Sensors](#available-sensors)
     1. [Sensor Structure](#sensor-structure)
+    2. [High and Low Values](#high-and-low-values)
 4. [Creating a Home Assistant Weather Entity](#creating-a-home-assistant-weather-entity)
 
 ## Installation
@@ -70,7 +71,7 @@ A description of the Environment Variables available for this container. All of 
 - `TEMPEST_DEVICE`: If you have a Tempest Weather Station set this to True. If False, the program will assume you have the older AIR and SKY units. Default is *True*
 - `UNIT_SYSTEM`: Enter *imperial* or *metric*. This will determine the unit system used when displaying the values. Default is *metric*
 - `RAPID_WIND_INTERVAL`: The weather stations delivers wind speed and bearing every 2 seconds. If you don't want to update the HA sensors so often, you can set a number here (in seconds), for how often they are updated. Default is *0*, which means data are updated when received from the station.
-- `ELEVATION`: Set the hight above sea level for where the station is placed. This is used when calculating some of the sensor values. Station elevation plus Device height above ground. The value has to be in meters. Default is *0*
+- `ELEVATION`: Set the hight above sea level for where the station is placed. This is used when calculating some of the sensor values. Station elevation plus Device height above ground. The value has to be in meters (`meters = feet * 0.3048`). Default is *0*
 - `WF_HOST`: Unless you have a very special IP setup or the Weatherflow hub is on a different network, you should not change this. Default is *0.0.0.0*
 - `WF_PORT`: Weatherflow always broadcasts on port 50222/udp, so don't change this. Default is *50222*
 - `MQTT_HOST`: The IP address of your mqtt server. Even though you have the MQTT Server on the same machine as this Container, don't use `127.0.0.1` as this will resolve to an IP Address inside your container. Use the external IP Address. Default value is *127.0.0.1* (**Required**)
@@ -90,12 +91,12 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 
 | Sensor ID   | Name   | Description   | Calculated Sensor   | UDP Event/Index (Tempest)  | Default Units   | MQTT Topic   |
 | --- | --- | --- | --- | --- | --- | --- |
-| air_density | Air Density | The Air density | Yes |  |  |  |
-| air_temperature | Temperature | Outside Temperature | No | obs_st/7 | C |  |
+| air_density | Air Density | The Air density | Yes |  | kg/m^3 |  |
+| air_temperature | Temperature | Outside Temperature | No | obs_st/7 | C° |  |
 | battery | Battery SKY or TEMPEST | If this is a TEMPEST unit this is where the Voltage is displayed. Else it will be the Voltage of the SKY unit | No | obs_st/16 | Volts |  |
 | battery_air | Battery AIR | The voltage on the AIR unit (If present) | No |  | Volts |  |
-| dewpoint | Dew Point | Dewpoint in degrees | Yes |  | C |  |
-| feelslike | Feels Like Temperature | The apparent temperature, a mix of Heat Index and Wind Chill | Yes |  |  |  |
+| dewpoint | Dew Point | Dewpoint in degrees | Yes |  | C° |  |
+| feelslike | Feels Like Temperature | The apparent temperature, a mix of Heat Index and Wind Chill | Yes |  | C° |  |
 | illuminance | Illuminance | How much the incident light illuminates the surface | No | obs_st/9 | Lux |  |
 | lightning_strike_count | Lightning Count (3 hours) | Number of lightning strikes the last 3 hours | Yes |  |  |  |
 | lightning_strike_count_today | Lightning Count (Today) | Number of lightning strikes current day | Yes |  |  |  |
@@ -103,12 +104,12 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | lightning_strike_energy | Lightning Energy | Energy of the last strike | No | evt_strike/2 |  |  |
 | lightning_strike_time | Last Lightning Strike | When the last lightning strike occurred | Yes | evt_strike/0 | seconds |  |
 | precipitation_type | Precipitation Type | Can be one of None, Rain or Hail | No | obs_st/13 | 0 = none, 1 = rain, 2 = hail, 3 = rain + hail (heavy rain) |  |
-| rain_rate | Rain Rate | How much is it raining right now | Yes |  |  |  |
+| rain_rate | Rain Rate | How much is it raining right now | Yes |  | mm/h |  |
 | rain_start_time | Last Rain | When was the last time it rained | No | evt_precip/0 | seconds |  |
-| rain_today | Rain Today | Total rain for the current day. (Reset at midnight) | Yes |  |  |  |
-| rain_yesterday | Rain Yesterday | Total rain for yesterday (Reset at midnight) | Yes |  |  |  |
-| rain_duration_today | Rain Duration (Today) | Total rain minutes for the current day. (Reset at midnight) | Yes |  |  |  |
-| rain_duration_yesterday | Rain Duration (Yesterday) | Total rain minutes yesterday | Yes |  |  |  |
+| rain_today | Rain Today | Total rain for the current day. (Reset at midnight) | Yes |  | mm |  |
+| rain_yesterday | Rain Yesterday | Total rain for yesterday (Reset at midnight) | Yes |  | mm |  |
+| rain_duration_today | Rain Duration (Today) | Total rain minutes for the current day. (Reset at midnight) | Yes |  | minutes |  |
+| rain_duration_yesterday | Rain Duration (Yesterday) | Total rain minutes yesterday | Yes |  | minutes |  |
 | relative_humidity | Humidity | Relative Humidity | No | obs_st/8 | % |  |
 | sealevel_pressure | Station Pressure | Preasure measurement at Sea Level | Yes |  | MB |  |
 | pressure_trend | Pressure Trend | Returns Steady, Falling or Rising determined by the rate of change over the past 3 hours| Yes |  |  |  |
@@ -116,6 +117,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | station_pressure | Station Pressure | Pressure measurement where the station is located | No | obs_st/6 | MB |  |
 | uptime | Uptime | How long has the HUB been running | No | hub_status/uptime |  |  |
 | uv | UV Index | The UV index | No | obs_st/10 | Index |  |
+| visibility | Visibility | Distance to the horizon | Yes |  | km |  |
 | wind_bearing | Wind Bearing | Current measured Wind bearing in degrees | No | rapid_wind/2 | Degrees |  |
 | wind_bearing_avg | Wind Bearing Avg | The average wind bearing in degrees | No | obs_st/4 | Degrees |  |
 | wind_direction | Wind Direction | Current measured Wind bearing as compass symbol | Yes |  | Cardinal |  |
@@ -167,6 +169,42 @@ sensors:
   - weather
 ```
 
+### High and Low Values
+
+For selected sensors high and low values are calculated and published to the attributes of the sensor. Currently daily and all-time values are calculated, but future values are planned. Only the sensors where it is relevant, will get a low value calculated. See the table further down, for the available sensors and what values to expect.
+
+Here are the current attributes, that will be applied to the selected sensor:
+
+| Attribute Name   | Description   |
+| --- | --- |
+| `max_day` | Maximum value for the current day. Reset at midnight. |
+| `max_day_time` | UTC time when the max value was recorded. Reset at midnight. |
+| `min_day` | Minimum value for the current day. Reset at midnight. |
+| `min_day_time` | UTC time when the min value was recorded. Reset at midnight. |
+| `max_all` | Maximum value ever recorded. Updated at midnight every day. |
+| `max_all_time` | UTC time when the all-time max value was recorded. Updated at midnight every day. |
+| `min_all` | Minimum value ever recorded. Updated at midnight every day. |
+| `min_all_time` | UTC time when the all-time min value was recorded. Updated at midnight every day. |
+
+The following sensors are displaying High and Low values:
+
+| Sensor ID   | High Value   | Low Value   |
+| --- | --- | --- |
+| `air_temperature` | Yes | Yes |
+| `dewpoint` | Yes | Yes |
+| `illuminance` | Yes | No |
+| `lightning_strike_count_today` | Yes | No |
+| `lightning_strike_energy` | Yes | No |
+| `rain_rate` | Yes | No |
+| `rain_duration_today` | Yes | No |
+| `relative_humidity` | Yes | Yes |
+| `sealevel_pressure` | Yes | Yes |
+| `solar_radiation` | Yes | No |
+| `uv` | Yes | No |
+| `wind_gust` | Yes | No |
+| `wind_lull` | Yes | No |
+| `wind_speed_avg` | Yes | No |
+
 ## Creating a Home Assistant Weather Entity
 
 If you have enabled the *Forecast* option, then there is a possibility to create a Weather Entity, that can be used in all the different Lovelace Cards there is for *Weather*. We will do this by using the [Weather Template](https://www.home-assistant.io/integrations/weather.template/). The naming of the sensors might vary based on your configuration, so check that if it does not work.
@@ -177,14 +215,15 @@ Edit `configuration.yaml` and insert the following:
 weather:
   - platform: template
     name: My Local Weather
-    condition_template: "{{ states('sensor.weather') }}"
-    temperature_template: "{{ states('sensor.temperature') | float}}"
-    humidity_template: "{{ states('sensor.humidity')| int }}"
-    pressure_template: "{{ states('sensor.sea_level_pressure')| float }}"
-    wind_speed_template: "{{ ( states('sensor.wind_speed_avg') | float * 18 / 5 ) | round(2) }}"
-    wind_bearing_template: "{{ states('sensor.wind_bearing_avg')| int }}"
-    forecast_template: "{{ state_attr('sensor.weather', 'hourly_forecast') }}"
+    condition_template: "{{ states('sensor.wf_weather') }}"
+    temperature_template: "{{ states('sensor.wf_temperature') | float}}"
+    humidity_template: "{{ states('sensor.wf_humidity')| int }}"
+    pressure_template: "{{ states('sensor.wf_sea_level_pressure')| float }}"
+    wind_speed_template: "{{ ( states('sensor.wf_wind_speed_avg') | float * 18 / 5 ) | round(2) }}"
+    wind_bearing_template: "{{ states('sensor.wf_wind_bearing_avg')| int }}"
+    visibility_template: "{{ states('sensor.wf_visibility')| float }}"
+    forecast_template: "{{ state_attr('sensor.wf_weather', 'hourly_forecast') }}"
 ```
 
-- The weather entity expects km/h when having metric units, so the above example converts m/s to km/h. If you are using *imperial* units, the line should just be `{{ states('sensor.wind_speed_avg') }}`
+- The weather entity expects km/h when having metric units, so the above example converts m/s to km/h. If you are using *imperial* units, the line should just be `{{ states('sensor.wf_wind_speed_avg') }}`
 - For the *forecast_template* you can either use `hourly_forecast` or `daily_forecast` to get Hourly or Day based forecast.
