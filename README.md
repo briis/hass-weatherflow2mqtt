@@ -183,6 +183,7 @@ weather:
     pressure_template: "{{ states('sensor.wf_sea_level_pressure')| float }}"
     wind_speed_template: "{{ ( states('sensor.wf_wind_speed_avg') | float * 18 / 5 ) | round(2) }}"
     wind_bearing_template: "{{ states('sensor.wf_wind_bearing_avg')| int }}"
+    visibility_template: "{{ states('sensor.wf_visibility')| float }}"
     forecast_template: "{{ state_attr('sensor.wf_weather', 'hourly_forecast') }}"
 ```
 
