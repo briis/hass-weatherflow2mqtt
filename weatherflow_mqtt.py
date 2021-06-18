@@ -36,6 +36,7 @@ from const import (
     FORECAST_ENTITY,
     SENSOR_CLASS,
     SENSOR_DEVICE,
+    SENSOR_EXTRA_ATT,
     SENSOR_ICON,
     SENSOR_ID,
     SENSOR_NAME,
