@@ -239,7 +239,7 @@ class DataStorage:
     def getVersion(self):
         """Returns the version number stored in the VERSION file."""
         try:
-            filepath = "VERSION"
+            filepath = "/VERSION"
             with open(filepath, "r") as file:
                 lines = file.readlines()
                 for line in lines:
