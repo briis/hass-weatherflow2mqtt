@@ -248,6 +248,7 @@ class DataStorage:
 
 
         except FileNotFoundError as e:
+            _LOGGER.error("Could not find VERSION File.")
             return None
         except Exception as e:
             _LOGGER.debug("Could not read program version file. Error message: %s", e)
