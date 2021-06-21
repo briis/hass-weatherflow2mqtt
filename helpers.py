@@ -195,6 +195,54 @@ class ConversionFunctions:
             return round(1.22459 * math.sqrt(elevation * 3.2808), 1)
         return round(3.56972 * math.sqrt(elevation), 1)
 
+    async def wetbulb(self, temp, humidity, pressure):
+        """Returns the Wel Bulb Temperature."""
+        t = float(temp)
+        rh = float(humidity)
+        p = float(pressure)
+
+        # Variables
+        edifference = 1
+        twguess = 0
+        previoussign = 1
+        incr = 10
+        es = 6.112 * math.exp(17.67 * t / (t + 243.5))
+        e2 = es * (rh / 100)
+
+        while (abs(edifference) > 0.005):
+            ewguess = 6.112 * math.exp((17.67 * twguess) / (twguess + 243.5))
+            eguess = ewguess - p * (t - twguess) * 0.00066 * (1 + (0.00115 * twguess))
+            edifference = e2 - eguess
+            if edifference == 0:
+                break
+
+            if edifference < 0:
+                cursign = -1
+                if (cursign != previoussign):
+                    previoussign = cursign
+                    incr = incr / 10
+                else:
+                    incr = incr
+            else:
+                cursign = 1
+                if (cursign != previoussign):
+                    previoussign = cursign
+                    incr = incr / 10
+                else:
+                    incr = incr
+
+            twguess = twguess + incr * previoussign
+
+        return self.temperature(twguess)
+
+    async def delta_t(self, temp, humidity, pressure):
+        """Returns Delta T temperature."""
+
+        wb = self.wetbulb(temp, humidity, pressure)
+        deltat = temp - wb
+
+        return self.temperature(deltat)
+
     async def humanize_time(self, value):
         """Humanize Time in Seconds."""
         if value is None:
