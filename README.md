@@ -176,7 +176,7 @@ sensors:
 
 ### High and Low Values
 
-For selected sensors high and low values are calculated and published to the attributes of the sensor. Currently daily and all-time values are calculated, but future values are planned. Only the sensors where it is relevant, will get a low value calculated. See the table further down, for the available sensors and what values to expect.
+For selected sensors high and low values are calculated and published to the attributes of the sensor. Currently daily, monthly and all-time values are calculated, but future values are planned. Only the sensors where it is relevant, will get a low value calculated. See the table further down, for the available sensors and what values to expect.
 
 Here are the current attributes, that will be applied to the selected sensor:
 
@@ -186,6 +186,10 @@ Here are the current attributes, that will be applied to the selected sensor:
 | `max_day_time` | UTC time when the max value was recorded. Reset at midnight. |
 | `min_day` | Minimum value for the current day. Reset at midnight. |
 | `min_day_time` | UTC time when the min value was recorded. Reset at midnight. |
+| `max_month` | Maximum value for the current month. Reset when new month. |
+| `max_month_time` | UTC time when the max value was recorded. Reset when new month. |
+| `min_month` | Minimum value for the current month. Reset when new month. |
+| `min_month_time` | UTC time when the min value was recorded. Reset when new month. |
 | `max_all` | Maximum value ever recorded. Updated at midnight every day. |
 | `max_all_time` | UTC time when the all-time max value was recorded. Updated at midnight every day. |
 | `min_all` | Minimum value ever recorded. Updated at midnight every day. |

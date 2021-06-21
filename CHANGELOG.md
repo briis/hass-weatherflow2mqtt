@@ -7,10 +7,19 @@
 ### Changes in release 2.0.4
 
 `NEW`: A new sensor called `wf_wetbulb`has been added. This sensor returns the temperature of a parcel of air cooled to saturation (100% relative humidity)
-`NEW`: A new sensor called `wf_delta_t`has been added. Delta T, is used in agriculture to indicate acceptable conditions for spraying pesticides and fertilizers. It is simply the difference between the air temperature (aka "dry bulb temperature") and the wet bulb temperature:
+`NEW`: A new sensor called `wf_delta_t`has been added. Delta T, is used in agriculture to indicate acceptable conditions for spraying pesticides and fertilizers. It is simply the difference between the air temperature (aka "dry bulb temperature") and the wet bulb temperature
+`NEW`: Added monthly min and max values to selected sensors. **Note** Data will only be updated once a day, so first values will be shown after midnight after the upgrade.
 `FIXED`: Daily Max value did not reset for some sensors at midnight.
 `FIXED`: When using the WeatherFlow forecast, there could be a mismatch in the condition state.
 `CHANGES`: Some *Under the Hood* changes to prepare for future enhancements.
+
+
+| Attribute Name   | Description   |
+| --- | --- |
+| `max_month` | Maximum value for the current month. Reset when new month. |
+| `max_month_time` | UTC time when the max value was recorded. Reset when new month. |
+| `min_month` | Minimum value for the current month. Reset when new month. |
+| `min_month_time` | UTC time when the min value was recorded. Reset when new month. |
 
 ## Version 2.0.3
 
