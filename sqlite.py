@@ -464,6 +464,18 @@ class SQLFunctions:
             cursor.execute(f"UPDATE high_low SET max_all = max_day, max_all_time = max_day_time WHERE max_day > max_all or max_all IS NULL")
             cursor.execute(f"UPDATE high_low SET min_all = min_day, min_all_time = min_day_time WHERE (min_day < min_all or min_all IS NULL) and min_day_time IS NOT NULL")
 
+            # Update or Reset Year Values
+            cursor.execute(f"UPDATE high_low SET max_year = max_day, max_year_time = max_day_time WHERE (max_day > max_year or max_year IS NULL) AND strftime('%Y', 'now') = strftime('%Y', datetime(max_day_time, 'unixepoch', 'localtime'))")
+            cursor.execute(f"UPDATE high_low SET min_year = min_day, min_year_time = min_day_time WHERE ((min_day < min_year or min_year IS NULL) AND min_day_time IS NOT NULL) AND strftime('%Y', 'now') = strftime('%Y', datetime(min_day_time, 'unixepoch', 'localtime'))")
+            cursor.execute(f"UPDATE high_low SET max_year = latest, max_year_time = {time.time()}, min_year = latest, min_year_time = {time.time()} WHERE min_day <> 0 AND strftime('%Y', 'now') <> strftime('%Y', datetime(max_day_time, 'unixepoch', 'localtime'))")
+            cursor.execute(f"UPDATE high_low SET max_year = 0, max_year_time = {time.time()} WHERE min_day = 0 AND strftime('%Y', 'now') <> strftime('%Y', datetime(max_day_time, 'unixepoch', 'localtime'))")
+
+            # Update or Reset Month Values
+            cursor.execute(f"UPDATE high_low SET max_month = max_day, max_month_time = max_day_time WHERE (max_day > max_month or max_month IS NULL) AND strftime('%m', 'now') = strftime('%m', datetime(max_day_time, 'unixepoch', 'localtime'))")
+            cursor.execute(f"UPDATE high_low SET min_month = min_day, min_month_time = min_day_time WHERE ((min_day < min_month or min_month IS NULL) AND min_day_time IS NOT NULL) AND strftime('%m', 'now') = strftime('%m', datetime(min_day_time, 'unixepoch', 'localtime'))")
+            cursor.execute(f"UPDATE high_low SET max_month = latest, max_month_time = {time.time()}, min_month = latest, min_month_time = {time.time()} WHERE min_day <> 0 AND strftime('%m', 'now') <> strftime('%m', datetime(max_day_time, 'unixepoch', 'localtime'))")
+            cursor.execute(f"UPDATE high_low SET max_month = 0, max_month_time = {time.time()} WHERE min_day = 0 AND strftime('%m', 'now') <> strftime('%m', datetime(max_day_time, 'unixepoch', 'localtime'))")
+
             # Update or Reset Week Values
             cursor.execute(f"UPDATE high_low SET max_week = max_day, max_week_time = max_day_time WHERE (max_day > max_week or max_week IS NULL) AND strftime('%W', 'now') = strftime('%W', datetime(max_day_time, 'unixepoch', 'localtime'))")
             cursor.execute(f"UPDATE high_low SET min_week = min_day, min_week_time = min_day_time WHERE ((min_day < min_week or min_week IS NULL) AND min_day_time IS NOT NULL) AND strftime('%W', 'now') = strftime('%W', datetime(min_day_time, 'unixepoch', 'localtime'))")
