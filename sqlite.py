@@ -399,12 +399,20 @@ class SQLFunctions:
             cursor.execute("PRAGMA main.user_version;")
             db_version = int(cursor.fetchone()[0])
 
-            if db_version < DATABASE_VERSION:
-                _LOGGER.info("Upgrading the database....")
+            if db_version < 1:
+                _LOGGER.info("Upgrading the database to version 1")
                 # Create Empty Tables
                 await self.create_table(TABLE_HIGH_LOW)
                 # Add Initial data to High Low
                 await self.initializeHighLow()
+
+            if db_version < DATABASE_VERSION:
+                _LOGGER.info("Upgrading the database to version %s...", DATABASE_VERSION)
+                cursor.execute("ALTER TABLE high_low ADD max_yday REAL")
+                cursor.execute("ALTER TABLE high_low ADD max_yday_time REAL")
+                cursor.execute("ALTER TABLE high_low ADD min_yday REAL")
+                cursor.execute("ALTER TABLE high_low ADD min_yday_time REAL")
+                self.connection.commit()
 
                 # Finally update the version number
                 cursor.execute(f"PRAGMA main.user_version = {DATABASE_VERSION};")
@@ -455,6 +463,15 @@ class SQLFunctions:
             # Update All Time Values values
             cursor.execute(f"UPDATE high_low SET max_all = max_day, max_all_time = max_day_time WHERE max_day > max_all or max_all IS NULL")
             cursor.execute(f"UPDATE high_low SET min_all = min_day, min_all_time = min_day_time WHERE (min_day < min_all or min_all IS NULL) and min_day_time IS NOT NULL")
+
+            # Update or Reset Week Values
+            cursor.execute(f"UPDATE high_low SET max_week = max_day, max_week_time = max_day_time WHERE (max_day > max_week or max_week IS NULL) AND strftime('%W', 'now') = strftime('%W', datetime(max_day_time, 'unixepoch', 'localtime'))")
+            cursor.execute(f"UPDATE high_low SET min_week = min_day, min_week_time = min_day_time WHERE ((min_day < min_week or min_week IS NULL) AND min_day_time IS NOT NULL) AND strftime('%W', 'now') = strftime('%W', datetime(min_day_time, 'unixepoch', 'localtime'))")
+            cursor.execute(f"UPDATE high_low SET max_week = latest, max_week_time = {time.time()}, min_week = latest, min_week_time = {time.time()} WHERE min_day <> 0 AND strftime('%W', 'now') <> strftime('%W', datetime(max_day_time, 'unixepoch', 'localtime'))")
+            cursor.execute(f"UPDATE high_low SET max_week = 0, max_week_time = {time.time()} WHERE min_day = 0 AND strftime('%W', 'now') <> strftime('%W', datetime(max_day_time, 'unixepoch', 'localtime'))")
+
+            # Update Yesterday Values
+            cursor.execute(f"UPDATE high_low SET max_yday = max_day, max_yday_time = max_day_time, min_yday = min_day, min_yday_time = min_day_time")
 
             # Reset Day High and Low values
             cursor.execute(f"UPDATE high_low SET max_day = latest, max_day_time = {time.time()}, min_day = latest, min_day_time = {time.time()} WHERE min_day <> 0")

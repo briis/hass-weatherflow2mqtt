@@ -21,7 +21,7 @@ EXTERNAL_DIRECTORY = "/usr/local/config"
 INTERNAL_DIRECTORY = "/app"
 STORAGE_FILE = f"{EXTERNAL_DIRECTORY}/.storage.json"
 DATABASE = f"{EXTERNAL_DIRECTORY}/weatherflow2mqtt.db"
-DATABASE_VERSION = 1
+DATABASE_VERSION = 2
 STORAGE_ID = 1
 
 TABLE_STORAGE = """ CREATE TABLE IF NOT EXISTS storage (
@@ -55,6 +55,10 @@ TABLE_HIGH_LOW = """
                         max_day_time REAL,
                         min_day REAL,
                         min_day_time REAL,
+                        max_yday REAL,
+                        max_yday_time REAL,
+                        min_yday REAL,
+                        min_yday_time REAL,
                         max_week REAL,
                         max_week_time REAL,
                         min_week REAL,
