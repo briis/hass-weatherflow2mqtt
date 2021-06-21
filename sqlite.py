@@ -458,7 +458,7 @@ class SQLFunctions:
 
             # Reset Day High and Low values
             cursor.execute(f"UPDATE high_low SET max_day = latest, max_day_time = {time.time()}, min_day = latest, min_day_time = {time.time()} WHERE min_day <> 0")
-            cursor.execute(f"UPDATE high_low SET max_day = latest, max_day_time = {time.time()} WHERE min_day = 0")
+            cursor.execute(f"UPDATE high_low SET max_day = 0, max_day_time = {time.time()} WHERE min_day = 0")
             self.connection.commit()
 
             return True
