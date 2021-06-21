@@ -442,11 +442,15 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
                 template = attribution
                 template["max_day"] = "{{{{ value_json.{}['max_day'] }}}}".format(sensor[SENSOR_ID])
                 template["max_day_time"] = "{{{{ value_json.{}['max_day_time'] }}}}".format(sensor[SENSOR_ID])
+                template["max_month"] = "{{{{ value_json.{}['max_month'] }}}}".format(sensor[SENSOR_ID])
+                template["max_month_time"] = "{{{{ value_json.{}['max_month_time'] }}}}".format(sensor[SENSOR_ID])
                 template["max_all"] = "{{{{ value_json.{}['max_all'] }}}}".format(sensor[SENSOR_ID])
                 template["max_all_time"] = "{{{{ value_json.{}['max_all_time'] }}}}".format(sensor[SENSOR_ID])
                 if sensor[SENSOR_SHOW_MIN_ATT]:
                     template["min_day"] = "{{{{ value_json.{}['min_day'] }}}}".format(sensor[SENSOR_ID])
                     template["min_day_time"] = "{{{{ value_json.{}['min_day_time'] }}}}".format(sensor[SENSOR_ID])
+                    template["min_month"] = "{{{{ value_json.{}['min_month'] }}}}".format(sensor[SENSOR_ID])
+                    template["min_month_time"] = "{{{{ value_json.{}['min_month_time'] }}}}".format(sensor[SENSOR_ID])
                     template["min_all"] = "{{{{ value_json.{}['min_all'] }}}}".format(sensor[SENSOR_ID])
                     template["min_all_time"] = "{{{{ value_json.{}['min_all_time'] }}}}".format(sensor[SENSOR_ID])
                 payload["json_attributes_template"] = json.dumps(template)

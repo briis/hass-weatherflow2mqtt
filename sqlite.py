@@ -315,10 +315,14 @@ class SQLFunctions:
                 sensor_json[row["sensorid"]] = {
                     "max_day": row["max_day"],
                     "max_day_time": None if not row["max_day_time"] else datetime.datetime.utcfromtimestamp(round(row["max_day_time"])).replace(tzinfo=UTC).isoformat(),
+                    "max_month": row["max_month"],
+                    "max_month_time": None if not row["max_month_time"] else datetime.datetime.utcfromtimestamp(round(row["max_month_time"])).replace(tzinfo=UTC).isoformat(),
                     "max_all": row["max_all"],
                     "max_all_time": None if not row["max_all_time"] else datetime.datetime.utcfromtimestamp(round(row["max_all_time"])).replace(tzinfo=UTC).isoformat(),
                     "min_day": row["min_day"],
                     "min_day_time": None if not row["min_day_time"] else datetime.datetime.utcfromtimestamp(round(row["min_day_time"])).replace(tzinfo=UTC).isoformat(),
+                    "min_month": row["min_month"],
+                    "min_month_time": None if not row["min_month_time"] else datetime.datetime.utcfromtimestamp(round(row["min_month_time"])).replace(tzinfo=UTC).isoformat(),
                     "min_all": row["min_all"],
                     "min_all_time": None if not row["min_all_time"] else datetime.datetime.utcfromtimestamp(round(row["min_all_time"])).replace(tzinfo=UTC).isoformat()
                 }
