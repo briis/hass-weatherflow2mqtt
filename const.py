@@ -125,7 +125,7 @@ EVENT_SKY_DATA = "obs_sky"
 EVENT_TEMPEST_DATA = "obs_st"
 EVENT_PRECIP_START = "evt_precip"
 EVENT_STRIKE = "evt_strike"
-EVENT_FORECAST = "forecast"
+EVENT_FORECAST = "weather"
 EVENT_HIGH_LOW = "high_low"
 
 FORECAST_TYPE_DAILY = "daily"

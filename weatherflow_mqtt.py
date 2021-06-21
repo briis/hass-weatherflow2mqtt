@@ -167,7 +167,7 @@ async def main():
         # Update the Forecast if it is time and enabled
         if add_forecast:
             now = datetime.now().timestamp()
-            fcst_state_topic = "homeassistant/sensor/{}/{}/state".format(DOMAIN, EVENT_FORECAST)
+            fcst_state_topic = "homeassistant/sensor/{}/{}/state".format(DOMAIN, FORECAST_ENTITY)
             fcst_attr_topic = "homeassistant/sensor/{}/{}/attributes".format(DOMAIN, FORECAST_ENTITY)
             if (now - forecast_last_run) >= forecast_interval:
                 condition_data, fcst_data  = await forecast.update_forecast()
