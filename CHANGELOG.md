@@ -13,7 +13,6 @@
 `FIXED`: When using the WeatherFlow forecast, there could be a mismatch in the condition state.
 `CHANGES`: Some *Under the Hood* changes to prepare for future enhancements.
 
-
 | Attribute Name   | Description   |
 | --- | --- |
 | `max_month` | Maximum value for the current month. Reset when new month. |
