@@ -9,6 +9,8 @@
 `NEW`: A new sensor called `wf_wetbulb`has been added. This sensor returns the temperature of a parcel of air cooled to saturation (100% relative humidity)
 `NEW`: A new sensor called `wf_delta_t`has been added. Delta T, is used in agriculture to indicate acceptable conditions for spraying pesticides and fertilizers. It is simply the difference between the air temperature (aka "dry bulb temperature") and the wet bulb temperature:
 `FIXED`: Daily Max value did not reset for some sensors at midnight.
+`FIXED`: When using the WeatherFlow forecast, there could be a mismatch in the condition state.
+`CHANGES`: Some *Under the Hood* changes to prepare for future enhancements.
 
 ## Version 2.0.3
 
