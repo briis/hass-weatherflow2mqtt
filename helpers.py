@@ -127,7 +127,9 @@ class ConversionFunctions:
         _LOGGER.error("FUNC: air_density ERROR: Temperature or Pressure value was reported as NoneType. Check the sensor")
 
     async def sea_level_pressure(self, station_press, elevation):
-        """Returns Sea Level pressure."""
+        """Returns Sea Level pressure.
+            Converted from a JS formula made by Gary W Funk
+        """
         if station_press is not None:
             elev = float(elevation)
             press = float(station_press)
@@ -196,7 +198,13 @@ class ConversionFunctions:
         return round(3.56972 * math.sqrt(elevation), 1)
 
     async def wetbulb(self, temp, humidity, pressure):
-        """Returns the Wel Bulb Temperature."""
+        """Returns the Wel Bulb Temperature.
+            Converted from a JS formula made by Gary W Funk
+            Input:
+                Temperature in Celcius
+                Humdity in Percent
+                Station Pressure in MB
+        """
         t = float(temp)
         rh = float(humidity)
         p = float(pressure)
