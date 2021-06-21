@@ -241,15 +241,15 @@ class ConversionFunctions:
 
             twguess = twguess + incr * previoussign
 
-        return self.temperature(twguess)
+        return await self.temperature(twguess)
 
     async def delta_t(self, temp, humidity, pressure):
         """Returns Delta T temperature."""
 
-        wb = self.wetbulb(temp, humidity, pressure)
+        wb = await self.wetbulb(temp, humidity, pressure)
         deltat = temp - wb
 
-        return self.temperature(deltat)
+        return await self.temperature(deltat)
 
     async def humanize_time(self, value):
         """Humanize Time in Seconds."""
