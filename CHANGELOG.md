@@ -6,7 +6,7 @@
 
 ### Changes in release 2.0.4
 
-`NEW`: A new sensor called `wf_wetbulb`has been added. This sensor returns the temperature of a parcel of air cooled to saturation (100% relative humidity)
+`NEW`: A new sensor called `wf_wet_bulb_temperature`has been added. This sensor returns the temperature of a parcel of air cooled to saturation (100% relative humidity)
 `NEW`: A new sensor called `wf_delta_t`has been added. Delta T, is used in agriculture to indicate acceptable conditions for spraying pesticides and fertilizers. It is simply the difference between the air temperature (aka "dry bulb temperature") and the wet bulb temperature
 `NEW`: Added monthly min and max values to selected sensors. **Note** Data will only be updated once a day, so first values will be shown after midnight after the upgrade.
 `FIXED`: Daily Max value did not reset for some sensors at midnight.
