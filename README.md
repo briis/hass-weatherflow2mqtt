@@ -95,6 +95,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | air_temperature | Temperature | Outside Temperature | No | obs_st/7 | C° |  |
 | battery | Battery SKY or TEMPEST | If this is a TEMPEST unit this is where the Voltage is displayed. Else it will be the Voltage of the SKY unit | No | obs_st/16 | Volts |  |
 | battery_air | Battery AIR | The voltage on the AIR unit (If present) | No |  | Volts |  |
+| delta_t | Delta T | Difference between Air Temperature and Wet Bulb Temperature | Yes |  | C° |  |
 | dewpoint | Dew Point | Dewpoint in degrees | Yes |  | C° |  |
 | feelslike | Feels Like Temperature | The apparent temperature, a mix of Heat Index and Wind Chill | Yes |  | C° |  |
 | illuminance | Illuminance | How much the incident light illuminates the surface | No | obs_st/9 | Lux |  |
@@ -118,6 +119,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | uptime | Uptime | How long has the HUB been running | No | hub_status/uptime |  |  |
 | uv | UV Index | The UV index | No | obs_st/10 | Index |  |
 | visibility | Visibility | Distance to the horizon | Yes |  | km |  |
+| wetbulb | Wet Bulb Temperature | Temperature of a parcel of air cooled to saturation (100% relative humidity) | Yes |  | C° |  |
 | wind_bearing | Wind Bearing | Current measured Wind bearing in degrees | No | rapid_wind/2 | Degrees |  |
 | wind_bearing_avg | Wind Bearing Avg | The average wind bearing in degrees | No | obs_st/4 | Degrees |  |
 | wind_direction | Wind Direction | Current measured Wind bearing as compass symbol | Yes |  | Cardinal |  |
@@ -137,6 +139,7 @@ sensors:
   - battery
   - battery_air
   - dewpoint
+  - delta_t
   - feelslike
   - illuminance
   - lightning_strike_count
@@ -158,6 +161,8 @@ sensors:
   - station_pressure
   - uptime
   - uv
+  - visibility
+  - wetbulb
   - wind_bearing
   - wind_bearing_avg
   - wind_direction

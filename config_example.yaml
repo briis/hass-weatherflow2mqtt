@@ -4,6 +4,7 @@ sensors:
   - battery
   - battery_air
   - dewpoint
+  - delta_t
   - feelslike
   - illuminance
   - lightning_strike_count
@@ -23,6 +24,8 @@ sensors:
   - station_pressure
   - uptime
   - uv
+  - visibility
+  - wetbulb
   - wind_bearing
   - wind_bearing_avg
   - wind_direction

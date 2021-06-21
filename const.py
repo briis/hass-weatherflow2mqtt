@@ -404,6 +404,28 @@ WEATHERFLOW_SENSORS = [
         False
     ],
     ["visibility", "Visibility", "km", "nmi", None, "eye", EVENT_SKY_DATA, False, False],
+    [
+        "wetbulb",
+        "Wet Bulb Temperature",
+        "˚C",
+        "˚F",
+        DEVICE_CLASS_TEMPERATURE,
+        None,
+        EVENT_AIR_DATA,
+        False,
+        False
+    ],
+    [
+        "delta_t",
+        "Delta T",
+        "˚C",
+        "˚F",
+        DEVICE_CLASS_TEMPERATURE,
+        None,
+        EVENT_AIR_DATA,
+        False,
+        False
+    ],
     [FORECAST_ENTITY, "Weather", None, None, None, "chart-box-outline", EVENT_FORECAST, False, False],
 ]
 

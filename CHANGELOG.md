@@ -1,5 +1,14 @@
 # Home Assistant WeatherFlow2MQTT Changelog
 
+## Version 2.0.4
+
+**Release Date**: NOT RELEASED YET
+
+### Changes in release 2.0.4
+
+`NEW`: A new sensor called `wf_wetbulb`has been added. This sensor returns the temperature of a parcel of air cooled to saturation (100% relative humidity)
+`NEW`: A new sensor called `wf_delta_t`has been added. Delta T, is used in agriculture to indicate acceptable conditions for spraying pesticides and fertilizers. It is simply the difference between the air temperature (aka "dry bulb temperature") and the wet bulb temperature:
+
 ## Version 2.0.3
 
 **Release Date**: June 18th, 2021
