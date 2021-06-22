@@ -1,5 +1,13 @@
 # Home Assistant WeatherFlow2MQTT Changelog
 
+## Version 2.0.5
+
+**Release Date**: June 22nd, 2021
+
+### Changes in release 2.0.5
+
+`FIX`: (Issue #25) Sometimes the Pressure Trend calculation would get the program to crash due a timing in when data was logged by the system. With this fix, a `None` value will be returned instead.
+
 ## Version 2.0.4
 
 **Release Date**: June 21st, 2021
