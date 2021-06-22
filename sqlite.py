@@ -144,6 +144,9 @@ class SQLFunctions:
 
     async def readPressureTrend(self, new_pressure):
         """Returns the Pressure Trend."""
+        if new_pressure is None:
+            return None
+            
         try:
             time_point = time.time() - PRESSURE_TREND_TIMER
             cursor = self.connection.cursor()
@@ -169,7 +172,9 @@ class SQLFunctions:
                 return "Rising", round(pressure_delta, 2)
 
         except SQLError as e:
-            _LOGGER.error("Could not access storage data. Error: %s", e)
+            _LOGGER.error("Could not read pressure data. Error: %s", e)
+        except Exception as e:
+            _LOGGER.error("Could not calculate pressure trend. Error message: %s", e)
 
     async def readPressureData(self):
         """Returns the formatted pressure data - USED FOR TESTING ONLY."""
