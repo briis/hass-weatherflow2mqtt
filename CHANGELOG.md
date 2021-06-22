@@ -6,7 +6,7 @@
 
 ### Changes in release 2.0.5
 
-`FIX`: (Issue #25) Sometimes the Pressure Trend calculation would get the program to crash due a timing in when data was logged by the system. With this fix, a `None` value will be returned instead.
+`FIX`: (Issue #28) Sometimes the Pressure Trend calculation would get the program to crash due a timing in when data was logged by the system. With this fix, a `None` value will be returned instead.
 
 ## Version 2.0.4
 
