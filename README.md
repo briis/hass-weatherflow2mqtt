@@ -97,6 +97,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | battery_air | Battery AIR | The voltage on the AIR unit (If present) | No |  | Volts |  |
 | delta_t | Delta T | Difference between Air Temperature and Wet Bulb Temperature | Yes |  | C° |  |
 | dewpoint | Dew Point | Dewpoint in degrees | Yes |  | C° |  |
+| dewpoint_description | Dewpoint Comfort Level | Textual representation of the Dewpoint value | Yes |  |  |  |
 | feelslike | Feels Like Temperature | The apparent temperature, a mix of Heat Index and Wind Chill | Yes |  | C° |  |
 | illuminance | Illuminance | How much the incident light illuminates the surface | No | obs_st/9 | Lux |  |
 | lightning_strike_count | Lightning Count (3 hours) | Number of lightning strikes the last 3 hours | Yes |  |  |  |
@@ -116,8 +117,10 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | pressure_trend | Pressure Trend | Returns Steady, Falling or Rising determined by the rate of change over the past 3 hours| Yes |  |  |  |
 | solar_radiation | Solar Radiation | Electromagnetic radiation emitted by the sun | No | obs_st/11 | W/m^2 |  |
 | station_pressure | Station Pressure | Pressure measurement where the station is located | No | obs_st/6 | MB |  |
+| temperature_description | Temperature Level | Textual representation of the Outside Air Temperature value | Yes |  |  |  |
 | uptime | Uptime | How long has the HUB been running | No | hub_status/uptime |  |  |
 | uv | UV Index | The UV index | No | obs_st/10 | Index |  |
+| uv_description | UV Level | Textual representation of the UV Index value | Yes |  |  |  |
 | visibility | Visibility | Distance to the horizon | Yes |  | km |  |
 | wetbulb | Wet Bulb Temperature | Temperature of a parcel of air cooled to saturation (100% relative humidity) | Yes |  | C° |  |
 | wind_bearing | Wind Bearing | Current measured Wind bearing in degrees | No | rapid_wind/2 | Degrees |  |
@@ -139,6 +142,7 @@ sensors:
   - battery
   - battery_air
   - dewpoint
+  - dewpoint_description
   - delta_t
   - feelslike
   - illuminance
@@ -159,8 +163,10 @@ sensors:
   - sealevel_pressure
   - solar_radiation
   - station_pressure
+  - temperature_description
   - uptime
   - uv
+  - uv_description
   - visibility
   - wetbulb
   - wind_bearing
