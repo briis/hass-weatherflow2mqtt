@@ -251,6 +251,33 @@ class ConversionFunctions:
 
         return await self.temperature(deltat)
 
+    async def dewpoint_level(self, dewpoint_c):
+        """Returns a text based comfort level, based on dewpoint F value."""
+        dewpoint = (dewpoint_c * 9 / 5) + 32
+
+        if dewpoint >= 80:
+            return "Severely High"
+        if dewpoint >= 75:
+            return "Miserable"
+        if dewpoint >= 70:
+            return "Oppressive"
+        if dewpoint >= 65:
+            return "Uncomfortable"
+        if dewpoint >= 60:
+            return "Ok for Most"
+        if dewpoint >= 55:
+            return "Comfortable"
+        if dewpoint >= 50:
+            return "Very Comfortable"
+        if dewpoint >= 30:
+            return "Somewhat Dry"
+        if dewpoint >= 0.5:
+            return "Dry"
+        if dewpoint >= 0:
+            return "Very Dry"
+        
+        return "undefined"
+
     async def humanize_time(self, value):
         """Humanize Time in Seconds."""
         if value is None:
