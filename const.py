@@ -430,6 +430,39 @@ WEATHERFLOW_SENSORS = [
         False,
         False
     ],
+    [
+        "dewpoint_description",
+        "Dewpoint Comfort Level",
+        None,
+        None,
+        None,
+        "text-box-outline",
+        EVENT_AIR_DATA,
+        False,
+        False
+    ],
+    [
+        "temperature_description",
+        "Temperature Level",
+        None,
+        None,
+        None,
+        "text-box-outline",
+        EVENT_AIR_DATA,
+        False,
+        False
+    ],
+    [
+        "uv_description",
+        "UV Level",
+        None,
+        None,
+        None,
+        "text-box-outline",
+        EVENT_SKY_DATA,
+        False,
+        False
+    ],
     [FORECAST_ENTITY, "Weather", None, None, None, "chart-box-outline", EVENT_FORECAST, False, False],
 ]
 
