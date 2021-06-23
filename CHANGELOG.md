@@ -1,5 +1,13 @@
 # Home Assistant WeatherFlow2MQTT Changelog
 
+## Version 2.0.6
+
+**Release Date**: June 23rd, 2021
+
+### Changes in release 2.0.6
+
+`FIX`: (Issue #28) The fix on release 2.0.5, was not completely solving the issue. Now a base Base value of Steady will be returned, if we are not able to calculate the Trend due to lack of data.
+
 ## Version 2.0.5
 
 **Release Date**: June 22nd, 2021
