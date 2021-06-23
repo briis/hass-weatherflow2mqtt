@@ -253,6 +253,9 @@ class ConversionFunctions:
 
     async def dewpoint_level(self, dewpoint_c):
         """Returns a text based comfort level, based on dewpoint F value."""
+        if dewpoint_c is None:
+            return "undefined"
+
         dewpoint = (dewpoint_c * 9 / 5) + 32
 
         if dewpoint >= 80:
@@ -277,6 +280,56 @@ class ConversionFunctions:
             return "Very Dry"
         
         return "undefined"
+
+    async def temperature_level(self, temperature_c):
+        """Returns a text based comfort level, based on Air Temperature value."""
+        if temperature_c is None:
+            return "undefined"
+
+        temperature = (temperature_c * 9 / 5) + 32
+
+        if temperature >= 104:
+            return "Inferno"
+        if temperature >= 95:
+            return "Very Hot"
+        if temperature >= 86:
+            return "Hot"
+        if temperature >= 77:
+            return "Warm"
+        if temperature >= 68:
+            return "Nice"
+        if temperature >= 59:
+            return "Cool"
+        if temperature >= 41:
+            return "Chilly"
+        if temperature >= 32:
+            return "Cold"
+        if temperature >= 20:
+            return "Freezing"
+        if temperature <= 20:
+            return "Fridged"
+        
+        return "undefined"
+
+
+    async def uv_level(self, uvi):
+        """Returns a text based UV Description."""
+
+        if uvi is None:
+            return "undefined"
+
+        if uvi >= 10.5:
+            return "Extreme"
+        if uvi >= 7.5:
+            return "Very High"
+        if uvi >= 5.5:
+            return "High"
+        if uvi >= 2.5:
+            return "Moderate"
+        if uvi > 0:
+            return "Low"
+            
+        return "None"
 
     async def humanize_time(self, value):
         """Humanize Time in Seconds."""
