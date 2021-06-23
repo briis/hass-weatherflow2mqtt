@@ -145,7 +145,7 @@ class SQLFunctions:
     async def readPressureTrend(self, new_pressure):
         """Returns the Pressure Trend."""
         if new_pressure is None:
-            return None
+            return "Steady", 0
             
         try:
             time_point = time.time() - PRESSURE_TREND_TIMER
