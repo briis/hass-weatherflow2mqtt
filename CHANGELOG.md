@@ -7,6 +7,9 @@
 ### Changes in release 2.0.6
 
 `FIX`: (Issue #28) The fix on release 2.0.5, was not completely solving the issue. Now a base Base value of Steady will be returned, if we are not able to calculate the Trend due to lack of data.
+`NEW`: (Issue #29) Adding new sensor `sensor.wf_dewpoint_comfort_level` which gives a textual representation of the Dewpoint value.
+`NEW`: (Issue #29) Adding new sensor `sensor.wf_temperature_level` which gives a textual representation of the Outside Air Temperature value.
+`NEW`: (Issue #29) Adding new sensor `sensor.wf_uv_level` which gives a textual representation of the UV Index value.
 
 ## Version 2.0.5
 
