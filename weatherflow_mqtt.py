@@ -73,17 +73,23 @@ async def main():
     station_id = os.environ["STATION_ID"]
     station_token = os.environ["STATION_TOKEN"]
     forecast_interval = int(os.environ["FORECAST_INTERVAL"])
+    language = os.environ["LANGUAGE"]
 
-
-    cnv = ConversionFunctions(unit_system)
-    if add_forecast:
-        forecast = Forecast(station_id, unit_system, station_token)
-        forecast_interval = forecast_interval * 60
-    # Read the sensor config
+    # Read the sensor config and translation file
     data_store = DataStorage()
     sensors = await data_store.read_config()
     program_version = data_store.getVersion()
+    translations = await data_store.getLanguageFile(language)
 
+    # Helper Functions
+    cnv = ConversionFunctions(unit_system, translations)
+
+    # Forecast
+    if add_forecast:
+        forecast = Forecast(station_id, unit_system, translations, station_token)
+        forecast_interval = forecast_interval * 60
+
+    # MQTT
     mqtt_anonymous = False
     if not mqtt_username or not mqtt_password:
         _LOGGER.debug("MQTT Credentials not needed")
@@ -118,6 +124,7 @@ async def main():
         sys.exit(1)
 
     # Configure Sensors in MQTT
+    _LOGGER.info("Defining Sensors for Home Assistant")
     await setup_sensors(endpoint, client, unit_system, sensors, is_tempest, add_forecast, program_version)
 
     # Set timer variables
@@ -226,7 +233,7 @@ async def main():
                 ).isoformat()
                 data["battery_air"] = round(obs[6], 2)
                 data["sealevel_pressure"] = await cnv.sea_level_pressure(obs[1], elevation)
-                trend_text, trend_value = await sql.readPressureTrend(data["sealevel_pressure"])
+                trend_text, trend_value = await sql.readPressureTrend(data["sealevel_pressure"], translations)
                 data["pressure_trend"] = trend_text
                 data["pressure_trend_value"] = trend_value
                 data["air_density"] = await cnv.air_density(obs[2], obs[1])
@@ -311,7 +318,7 @@ async def main():
                     storage["last_lightning_time"]
                 ).isoformat()
                 data["sealevel_pressure"] = await cnv.sea_level_pressure(obs[6], elevation)
-                trend_text, trend_value = await sql.readPressureTrend(data["sealevel_pressure"])
+                trend_text, trend_value = await sql.readPressureTrend(data["sealevel_pressure"], translations)
                 data["pressure_trend"] = trend_text
                 data["pressure_trend_value"] = trend_value
                 data["air_density"] = await cnv.air_density(obs[7], obs[6])

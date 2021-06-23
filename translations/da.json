@@ -1,0 +1,74 @@
+{
+    "beaufort": {
+        "0": "Stille",
+        "1": "Næsten stille",
+        "2": "Svag vind",
+        "3": "Let vind",
+        "4": "Jævn vind",
+        "5": "Frisk vind",
+        "6": "Hård vind",
+        "7": "Stiv kuling",
+        "8": "Hård kuling",
+        "9": "Stormende kuling",
+        "10": "Storm",
+        "11": "Stærk storm",
+        "12": "Orkan"
+    },
+    "wind_dir": {
+        "N": "N",
+        "NNE": "NNØ",
+        "NE": "NØ",
+        "ENE": "ØNØ",
+        "E": "Ø",
+        "ESE": "ØSØ",
+        "SE": "SØ",
+        "SSE": "SSØ",
+        "S": "S",
+        "SSW": "SSV",
+        "SW": "SV",
+        "WSW": "VSV",
+        "W": "V",
+        "WNW": "VNV",
+        "NW": "NV",
+        "NNW": "NNV"
+    },
+    "trend": {
+        "falling": "Falder",
+        "rising": "Stiger",
+        "steady": "Stabil"
+    },
+    "dewpoint": {
+        "severely-high": "Meget høj",
+        "miserable": "Miserabel",
+        "oppressive": "Tryggende",
+        "uncomfortable": "Ubehagelig",
+        "ok-for-most": "Ok for de fleste",
+        "comfortable": "Behageligt",
+        "very-comfortable": "Meget behageligt",
+        "somewhat-dry": "Delvist tørt",
+        "dry": "Tørt",
+        "very-dry": "Meget tørt",
+        "undefined": "Ingen data"
+    },
+    "temperature": {
+        "inferno": "Mega varmt",
+        "very-hot": "Meget varmt",
+        "hot": "Varmt",
+        "warm": "Behagelig varmt",
+        "nice": "Dejligt",
+        "cool": "Kølig",
+        "chilly": "Meget køligt",
+        "cold": "Koldt",
+        "freezing": "Meget koldt",
+        "fridged": "Frysende",
+        "undefined": "Ingen data"
+    },
+    "uv": {
+        "extreme": "Ekstrem høj",
+        "very-high": "Meget høj",
+        "high": "Høj",
+        "moderate": "Moderat",
+        "low": "Lav",
+        "none": "Ingen data"
+    }
+}

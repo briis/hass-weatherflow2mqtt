@@ -137,6 +137,11 @@ STRIKE_COUNT_TIMER = 3 * 60 * 60
 PRESSURE_TREND_TIMER = 3 * 60 * 60
 HIGH_LOW_TIMER = 10 * 60
 
+SUPPORTED_LANGUAGES = [
+    "en",
+    "da",
+]
+
 UNITS_IMPERIAL = "imperial"
 
 UTC = datetime.timezone.utc

@@ -14,6 +14,7 @@ from sqlite import SQLFunctions
 from const import (
     DEVICE_STATUS,
     EXTERNAL_DIRECTORY,
+    SUPPORTED_LANGUAGES,
     UNITS_IMPERIAL,
 )
 
@@ -23,8 +24,9 @@ _LOGGER = logging.getLogger(__name__)
 class ConversionFunctions:
     """Class to help with converting from different units."""
 
-    def __init__(self, unit_system):
+    def __init__(self, unit_system, translations):
         self._unit_system = unit_system
+        self._translations = translations
 
     async def temperature(self, value) -> float:
         """Convert Temperature Value."""
@@ -86,6 +88,7 @@ class ConversionFunctions:
         """Returns a directional Wind Direction string."""
         if value is None:
             return "N"
+
         direction_array = [
             "N",
             "NNE",
@@ -105,8 +108,8 @@ class ConversionFunctions:
             "NNW",
             "N",
         ]
-        direction = direction_array[int((value + 11.25) / 22.5)]
-        return direction
+        direction_str = direction_array[int((value + 11.25) / 22.5)]
+        return self._translations["wind_dir"][direction_str]
 
     async def air_density(self, temperature, station_pressure):
         """Returns the Air Density."""
@@ -254,82 +257,82 @@ class ConversionFunctions:
     async def dewpoint_level(self, dewpoint_c):
         """Returns a text based comfort level, based on dewpoint F value."""
         if dewpoint_c is None:
-            return "undefined"
+            return "no-data"
 
         dewpoint = (dewpoint_c * 9 / 5) + 32
 
         if dewpoint >= 80:
-            return "Severely High"
+            return self._translations["dewpoint"]["severely-high"]
         if dewpoint >= 75:
-            return "Miserable"
+            return self._translations["dewpoint"]["miserable"]
         if dewpoint >= 70:
-            return "Oppressive"
+            return self._translations["dewpoint"]["oppressive"]
         if dewpoint >= 65:
-            return "Uncomfortable"
+            return self._translations["dewpoint"]["uncomfortable"]
         if dewpoint >= 60:
-            return "Ok for Most"
+            return self._translations["dewpoint"]["ok-for-most"]
         if dewpoint >= 55:
-            return "Comfortable"
+            return self._translations["dewpoint"]["comfortable"]
         if dewpoint >= 50:
-            return "Very Comfortable"
+            return self._translations["dewpoint"]["very-comfortable"]
         if dewpoint >= 30:
-            return "Somewhat Dry"
+            return self._translations["dewpoint"]["somewhat-dry"]
         if dewpoint >= 0.5:
-            return "Dry"
+            return self._translations["dewpoint"]["dry"]
         if dewpoint >= 0:
-            return "Very Dry"
+            return self._translations["dewpoint"]["very-dry"]
         
-        return "undefined"
+        return self._translations["dewpoint"]["undefined"]
 
     async def temperature_level(self, temperature_c):
         """Returns a text based comfort level, based on Air Temperature value."""
         if temperature_c is None:
-            return "undefined"
+            return "no-data"
 
         temperature = (temperature_c * 9 / 5) + 32
 
         if temperature >= 104:
-            return "Inferno"
+            return self._translations["temperature"]["inferno"]
         if temperature >= 95:
-            return "Very Hot"
+            return self._translations["temperature"]["hot"]
         if temperature >= 86:
-            return "Hot"
+            return self._translations["temperature"]["miserable"]
         if temperature >= 77:
-            return "Warm"
+            return self._translations["temperature"]["warm"]
         if temperature >= 68:
-            return "Nice"
+            return self._translations["temperature"]["nice"]
         if temperature >= 59:
-            return "Cool"
+            return self._translations["temperature"]["cool"]
         if temperature >= 41:
-            return "Chilly"
+            return self._translations["temperature"]["chilly"]
         if temperature >= 32:
-            return "Cold"
+            return self._translations["temperature"]["cold"]
         if temperature >= 20:
-            return "Freezing"
+            return self._translations["temperature"]["freezing"]
         if temperature <= 20:
-            return "Fridged"
+            return self._translations["temperature"]["fridged"]
         
-        return "undefined"
+        return self._translations["temperature"]["undefined"]
 
 
     async def uv_level(self, uvi):
         """Returns a text based UV Description."""
 
         if uvi is None:
-            return "undefined"
+            return "no-data"
 
         if uvi >= 10.5:
-            return "Extreme"
+            return self._translations["uv"]["extreme"]
         if uvi >= 7.5:
-            return "Very High"
+            return self._translations["uv"]["very-high"]
         if uvi >= 5.5:
-            return "High"
+            return self._translations["uv"]["high"]
         if uvi >= 2.5:
-            return "Moderate"
+            return self._translations["uv"]["moderate"]
         if uvi > 0:
-            return "Low"
+            return self._translations["uv"]["low"]
             
-        return "None"
+        return self._translations["uv"]["none"]
 
     async def humanize_time(self, value):
         """Humanize Time in Seconds."""
@@ -371,6 +374,25 @@ class DataStorage:
         except Exception as e:
             _LOGGER.debug("Could not read config.yaml file. Error message: %s", e)
             return None
+
+    async def getLanguageFile(self, language: str):
+        """Return the language file json array."""
+        try:
+            if language not in SUPPORTED_LANGUAGES:
+                filename = "translations/en.json"
+            else:
+                filename = f"translations/{language.lower()}.json"
+
+            with open(filename, "r") as json_file:
+                return json.load(json_file)
+
+        except FileNotFoundError as e:
+            _LOGGER.debug("Could not read language file. Error message: %s", e)
+            return None
+        except Exception as e:
+            _LOGGER.debug("Could not read language file. Error message: %s", e)
+            return None
+
 
     def getVersion(self):
         """Returns the version number stored in the VERSION file."""

@@ -1,5 +1,15 @@
 # Home Assistant WeatherFlow2MQTT Changelog
 
+## Version 2.0.7
+
+**Release Date**: Not Released Yet
+
+### Changes in release 2.0.7
+
+`NEW`: There is now multi language support for text states and other strings. Currently the support is limited to Danish (da) and English (en), and the default is English. In order to active another language than English add the following to the Docker Run command: `-e LANGUAGE=da`. If LANGUAGE is omitted, english will be used. So if this is the language you want, you don't have to do anything.
+
+If you want to help translate in to another language, go to Github and in the translations directory, download the `en.json` file, save it as `yourlanguagecode.json`, translate the strings, and make a pull request on Github.
+
 ## Version 2.0.6
 
 **Release Date**: June 23rd, 2021
