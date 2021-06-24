@@ -6,11 +6,10 @@
 
 ### Changes in release 2.0.7
 
-`NEW`: There is now multi language support for text states and other strings. Currently the support is limited to Danish (da) and English (en), and the default is English. In order to active another language than English add the following to the Docker Run command: `-e LANGUAGE=da`. If LANGUAGE is omitted, english will be used. So if this is the language you want, you don't have to do anything.
-
+`NEW`: There is now multi language support for text states and other strings. Currently the support is limited to Danish (da) and English (en), and the default is English. In order to active another language than English add the following to the Docker Run command: `-e LANGUAGE=da`. If LANGUAGE is omitted, english will be used. So if this is the language you want, you don't have to do anything.  
 If you want to help translate in to another language, go to Github and in the translations directory, download the `en.json` file, save it as `yourlanguagecode.json`, translate the strings, and make a pull request on Github.
-
 `FIX`: `sensor.wf_dewpoint_comfort_level` was not showing the correct value when using Imperial Units.
+`NEW`: A new sensor called `sensor.wf_beaufort_scale` is added. The Beaufort scale is an empirical measure that relates wind speed to observed conditions at sea or on land and holds a value between 0 and 12, where 0 is Calm and 12 is Hurricane force. The state holds the numeric value and there is an Attribute named `description` that holds the textual representation.
 
 ## Version 2.0.6
 

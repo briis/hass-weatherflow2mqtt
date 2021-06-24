@@ -468,6 +468,17 @@ WEATHERFLOW_SENSORS = [
         False,
         False
     ],
+    [
+        "beaufort",
+        "Beaufort Scale",
+        None,
+        None,
+        None,
+        "tailwind",
+        EVENT_SKY_DATA,
+        False,
+        False
+    ],
     [FORECAST_ENTITY, "Weather", None, None, None, "chart-box-outline", EVENT_FORECAST, False, False],
 ]
 

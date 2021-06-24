@@ -268,6 +268,9 @@ async def main():
                 data["rain_rate"] = await cnv.rain_rate(obs[3])
                 data["visibility"] = await cnv.visibility(elevation)
                 data["uv_description"] = await cnv.uv_level(obs[2])
+                bft_value, bft_text = await cnv.beaufort(obs[5])
+                data["beaufort"] = bft_value
+                data["beaufort_text"] = bft_text
                 client.publish(state_topic, json.dumps(data))
                 await sql.updateHighLow(data)
                 await asyncio.sleep(0.01)
@@ -299,6 +302,9 @@ async def main():
                 data["rain_rate"] = await cnv.rain_rate(obs[12])
                 data["visibility"] = await cnv.visibility(elevation)
                 data["uv_description"] = await cnv.uv_level(obs[10])
+                bft_value, bft_text = await cnv.beaufort(obs[2])
+                data["beaufort"] = bft_value
+                data["beaufort_text"] = bft_text
                 client.publish(state_topic, json.dumps(data))
                 await sql.updateHighLow(data)
                 await asyncio.sleep(0.01)
@@ -448,6 +454,12 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
                 template = OrderedDict()
                 template = attribution
                 template["trend_value"] = "{{ value_json.pressure_trend_value }}"
+                payload["json_attributes_template"] = json.dumps(template)
+            if sensor[SENSOR_ID] == "beaufort":
+                payload["json_attributes_topic"] = state_topic
+                template = OrderedDict()
+                template = attribution
+                template["description"] = "{{ value_json.beaufort_text }}"
                 payload["json_attributes_template"] = json.dumps(template)
             if sensor[SENSOR_EXTRA_ATT]:
                 payload["json_attributes_topic"] = highlow_topic

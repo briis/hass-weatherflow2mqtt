@@ -3,6 +3,7 @@ sensors:
   - air_temperature
   - battery
   - battery_air
+  - beaufort
   - dewpoint
   - dewpoint_description
   - delta_t

@@ -111,6 +111,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | air_temperature | Temperature | Outside Temperature | No | obs_st/7 | C° |  |
 | battery | Battery SKY or TEMPEST | If this is a TEMPEST unit this is where the Voltage is displayed. Else it will be the Voltage of the SKY unit | No | obs_st/16 | Volts |  |
 | battery_air | Battery AIR | The voltage on the AIR unit (If present) | No |  | Volts |  |
+| beaufort | Beaufort Scale | Beaufort scale is an empirical measure that relates wind speed to observed conditions at sea or on land | Yes |  |  |  |
 | delta_t | Delta T | Difference between Air Temperature and Wet Bulb Temperature | Yes |  | C° |  |
 | dewpoint | Dew Point | Dewpoint in degrees | Yes |  | C° |  |
 | dewpoint_description | Dewpoint Comfort Level | Textual representation of the Dewpoint value | Yes |  |  |  |
@@ -157,6 +158,7 @@ sensors:
   - air_temperature
   - battery
   - battery_air
+  - beaufort
   - dewpoint
   - dewpoint_description
   - delta_t
