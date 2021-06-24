@@ -335,9 +335,9 @@ class ConversionFunctions:
         if temperature >= 104:
             return self._translations["temperature"]["inferno"]
         if temperature >= 95:
-            return self._translations["temperature"]["hot"]
+            return self._translations["temperature"]["very-hot"]
         if temperature >= 86:
-            return self._translations["temperature"]["miserable"]
+            return self._translations["temperature"]["hot"]
         if temperature >= 77:
             return self._translations["temperature"]["warm"]
         if temperature >= 68:
