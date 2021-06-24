@@ -70,5 +70,11 @@
         "moderate": "Moderat",
         "low": "Lav",
         "none": "Ingen data"
+    },
+    "precip_type": {
+        "none": "Ingen",
+        "rain": "Regn",
+        "hail": "Hagl",
+        "heavy-rain": "Kraftig regn"
     }
 }

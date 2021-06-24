@@ -77,9 +77,10 @@ class ConversionFunctions:
 
     async def rain_type(self, value) -> str:
         """Convert rain type."""
-        type_array = ["None", "Rain", "Hail", "Heavy Rain"]
+        type_array = ["none", "rain", "hail", "heavy-rain"]
         try:
-            return type_array[int(value)]
+            precip_type = type_array[int(value)]
+            return self._translations["precip_type"][precip_type]
         except IndexError as e:
             _LOGGER.debug("VALUE is: %s", value)
             return f"Unknown - {value}"
