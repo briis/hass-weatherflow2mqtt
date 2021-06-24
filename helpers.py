@@ -255,6 +255,43 @@ class ConversionFunctions:
 
         return await self.temperature(deltat)
 
+    async def beaufort(self, wind_speed):
+        """Returns the Beaufort Scale value based on Wind Speed."""
+
+        if wind_speed is None:
+            return 0, self._translations["beaufort"][str(0)]
+
+        if wind_speed > 32.7:
+            bft_value = 12
+        elif wind_speed >= 28.5:
+            bft_value = 11
+        elif wind_speed >= 24.5:
+            bft_value = 10
+        elif wind_speed >= 20.8:
+            bft_value = 9
+        elif wind_speed >= 17.2:
+            bft_value = 8
+        elif wind_speed >= 13.9:
+            bft_value = 7
+        elif wind_speed >= 10.8:
+            bft_value = 6
+        elif wind_speed >= 8.0:
+            bft_value = 5
+        elif wind_speed >= 5.5:
+            bft_value = 4
+        elif wind_speed >= 3.4:
+            bft_value = 3
+        elif wind_speed >= 1.6:
+            bft_value = 2
+        elif wind_speed >= 0.3:
+            bft_value = 1
+        else:
+            bft_value = 0
+        
+        bft_text = self._translations["beaufort"][str(bft_value)]
+
+        return bft_value, bft_text
+
     async def dewpoint_level(self, dewpoint_c):
         """Returns a text based comfort level, based on dewpoint F value."""
         if dewpoint_c is None:
