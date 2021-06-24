@@ -2,7 +2,7 @@
 
 ## Version 2.0.7
 
-**Release Date**: Not Released Yet
+**Release Date**: June 24th, 2021
 
 ### Changes in release 2.0.7
 
