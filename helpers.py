@@ -260,7 +260,10 @@ class ConversionFunctions:
         if dewpoint_c is None:
             return "no-data"
 
-        dewpoint = (dewpoint_c * 9 / 5) + 32
+        if self._unit_system == UNITS_IMPERIAL:
+            dewpoint = dewpoint_c
+        else:
+            dewpoint = (dewpoint_c * 9 / 5) + 32
 
         if dewpoint >= 80:
             return self._translations["dewpoint"]["severely-high"]
