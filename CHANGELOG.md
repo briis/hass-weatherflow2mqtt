@@ -10,6 +10,8 @@
 
 If you want to help translate in to another language, go to Github and in the translations directory, download the `en.json` file, save it as `yourlanguagecode.json`, translate the strings, and make a pull request on Github.
 
+`FIX`: `sensor.wf_dewpoint_comfort_level` was not showing the correct value when using Imperial Units.
+
 ## Version 2.0.6
 
 **Release Date**: June 23rd, 2021
