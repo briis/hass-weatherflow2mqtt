@@ -4,6 +4,7 @@ ADD VERSION .
 RUN pip install paho-mqtt asyncio aiohttp pyyaml
 RUN mkdir -p /usr/local/config
 RUN mkdir /app
+RUN mkdir /app/translations
 WORKDIR /app
 ADD __init__.py /app
 ADD aioudp.py /app
@@ -12,6 +13,8 @@ ADD forecast.py /app
 ADD weatherflow_mqtt.py /app
 ADD helpers.py /app
 ADD sqlite.py /app
+ADD translations/en.json /app/translations
+ADD translations/da.json /app/translations
 ENV TZ=Europe/Copenhagen
 ENV TEMPEST_DEVICE=True
 ENV UNIT_SYSTEM=metric
@@ -29,6 +32,7 @@ ENV ADD_FORECAST=False
 ENV STATION_ID=
 ENV STATION_TOKEN=
 ENV FORECAST_INTERVAL=30
+ENV LANGUAGE=en
 EXPOSE 50222/udp
 EXPOSE 1883
 CMD [ "python", "weatherflow_mqtt.py" ]

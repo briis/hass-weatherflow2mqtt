@@ -42,6 +42,7 @@ docker run -d \
 -e TZ=Europe/Copenhagen \
 -e TEMPEST_DEVICE=True \
 -e UNIT_SYSTEM=metric \
+-e LANGUAGE=en \
 -e RAPID_WIND_INTERVAL=0 \
 -e DEBUG=False \
 -e ELEVATION=0 \
@@ -70,6 +71,7 @@ A description of the Environment Variables available for this container. All of 
 - `TZ`: Set your local Timezone. It is important that you use the right timezone here, or else some of the calculations done by the container will not be correct. Default Timezone is *Europe/Copenhagen* (**Required**)
 - `TEMPEST_DEVICE`: If you have a Tempest Weather Station set this to True. If False, the program will assume you have the older AIR and SKY units. Default is *True*
 - `UNIT_SYSTEM`: Enter *imperial* or *metric*. This will determine the unit system used when displaying the values. Default is *metric*
+- `LANGUAGE`: Use this to set the language for Wind Direction cardinals and other sensors with text strings as state value. These strings will then be displayed in HA in the selected language. See section [Supported Languages](#supported-languages)
 - `RAPID_WIND_INTERVAL`: The weather stations delivers wind speed and bearing every 2 seconds. If you don't want to update the HA sensors so often, you can set a number here (in seconds), for how often they are updated. Default is *0*, which means data are updated when received from the station.
 - `ELEVATION`: Set the hight above sea level for where the station is placed. This is used when calculating some of the sensor values. Station elevation plus Device height above ground. The value has to be in meters (`meters = feet * 0.3048`). Default is *0*
 - `WF_HOST`: Unless you have a very special IP setup or the Weatherflow hub is on a different network, you should not change this. Default is *0.0.0.0*
@@ -85,6 +87,20 @@ A description of the Environment Variables available for this container. All of 
 - `STATION_TOKEN`: Enter your personal access Token to allow retrieval of data. If you don't have the token [login with your account](https://tempestwx.com/settings/tokens) and create the token. **NOTE** You must own a WeatherFlow station to get this token. Default value is *blank*
 - `FORECAST_INTERVAL`: The interval in minutes, between updates of the Forecast data. Default value is *30* minutes.
 
+### Supported Languages
+
+Currently these languages are supported for Wind Cardinals and other Text state strings:
+
+- `en`: English
+- `da`: Danish
+
+If you would like to assist in translating to a new language, do the following:
+
+- From the `translations` directory on this Github Project, download the file `en.json`
+- Rename the file to `YourLanguageCode.json` - example for Spanish rename it to `es.json`
+- Edit the file and translate the strings
+- Make a pull request in Github and attach the file.
+
 ## Available Sensors
 
 Here is the list of sensors that the program generates. Calculated Sensor means, if No, then data comes directly from the Weather Station, if yes, it is a sensor that is derived from some of the other sensors. For a *copy ready* list see [further below](#sensor-structure)
@@ -95,6 +111,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | air_temperature | Temperature | Outside Temperature | No | obs_st/7 | C° |  |
 | battery | Battery SKY or TEMPEST | If this is a TEMPEST unit this is where the Voltage is displayed. Else it will be the Voltage of the SKY unit | No | obs_st/16 | Volts |  |
 | battery_air | Battery AIR | The voltage on the AIR unit (If present) | No |  | Volts |  |
+| beaufort | Beaufort Scale | Beaufort scale is an empirical measure that relates wind speed to observed conditions at sea or on land | Yes |  |  |  |
 | delta_t | Delta T | Difference between Air Temperature and Wet Bulb Temperature | Yes |  | C° |  |
 | dewpoint | Dew Point | Dewpoint in degrees | Yes |  | C° |  |
 | dewpoint_description | Dewpoint Comfort Level | Textual representation of the Dewpoint value | Yes |  |  |  |
@@ -141,6 +158,7 @@ sensors:
   - air_temperature
   - battery
   - battery_air
+  - beaufort
   - dewpoint
   - dewpoint_description
   - delta_t

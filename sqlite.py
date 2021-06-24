@@ -142,7 +142,7 @@ class SQLFunctions:
         except SQLError as e:
             _LOGGER.error("Could not update storage data. Error: %s", e)
 
-    async def readPressureTrend(self, new_pressure):
+    async def readPressureTrend(self, new_pressure, translations):
         """Returns the Pressure Trend."""
         if new_pressure is None:
             return "Steady", 0
@@ -165,11 +165,11 @@ class SQLFunctions:
                 max_value = 0.0295
 
             if pressure_delta > min_value and pressure_delta < max_value:
-                return "Steady", 0
+                return translations["trend"]["steady"], 0
             if pressure_delta <= min_value:
-                return "Falling", round(pressure_delta, 2)
+                return translations["trend"]["falling"], round(pressure_delta, 2)
             if pressure_delta >= max_value:
-                return "Rising", round(pressure_delta, 2)
+                return translations["trend"]["rising"], round(pressure_delta, 2)
 
         except SQLError as e:
             _LOGGER.error("Could not read pressure data. Error: %s", e)

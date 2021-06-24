@@ -1,0 +1,80 @@
+{
+    "beaufort": {
+        "0": "Calm",
+        "1": "Light air",
+        "2": "Light breeze",
+        "3": "Gentle breeze",
+        "4": "Moderate breeze",
+        "5": "Fresh breeze",
+        "6": "Strong breeze",
+        "7": "Moderate Gale",
+        "8": "Fresh Gale",
+        "9": "Strong Gale",
+        "10": "Storm",
+        "11": "Violent Storm",
+        "12": "Hurricane"
+    },
+    "wind_dir": {
+        "N": "N",
+        "NNE": "NNE",
+        "NE": "NE",
+        "ENE": "ENE",
+        "E": "E",
+        "ESE": "ESE",
+        "SE": "SE",
+        "SSE": "SSE",
+        "S": "S",
+        "SSW": "SSW",
+        "SW": "SW",
+        "WSW": "WSW",
+        "W": "W",
+        "WNW": "WNW",
+        "NW": "NW",
+        "NNW": "NNW"
+    },
+    "trend": {
+        "falling": "Falling",
+        "rising": "Rising",
+        "steady": "Steady"
+    },
+    "dewpoint": {
+        "severely-high": "Severely High",
+        "miserable": "Miserable",
+        "oppressive": "Oppressive",
+        "uncomfortable": "Uncomfortable",
+        "ok-for-most": "Ok for Most",
+        "comfortable": "Comfortable",
+        "very-comfortable": "Very Comfortable",
+        "somewhat-dry": "Somewhat Dry",
+        "dry": "Dry",
+        "very-dry": "Very Dry",
+        "undefined": "Undefined"
+    },
+    "temperature": {
+        "inferno": "Inferno",
+        "very-hot": "Very Hot",
+        "hot": "Hot",
+        "warm": "Warm",
+        "nice": "Nice",
+        "cool": "Cool",
+        "chilly": "Chilly",
+        "cold": "Cold",
+        "freezing": "Freezing",
+        "fridged": "Fridged",
+        "undefined": "Undefined"
+    },
+    "uv": {
+        "extreme": "Extreme",
+        "very-high": "Very High",
+        "high": "High",
+        "moderate": "Moderate",
+        "low": "Low",
+        "none": "None"
+    },
+    "precip_type": {
+        "none": "None",
+        "rain": "Rain",
+        "hail": "Hail",
+        "heavy-rain": "Heavy Rain"
+    }
+}
