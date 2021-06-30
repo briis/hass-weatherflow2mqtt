@@ -142,8 +142,11 @@ class SQLFunctions:
         except SQLError as e:
             _LOGGER.error("Could not update storage data. Error: %s", e)
 
-    async def readPressureTrend(self, new_pressure):
+    async def readPressureTrend(self, new_pressure, translations):
         """Returns the Pressure Trend."""
+        if new_pressure is None:
+            return "Steady", 0
+            
         try:
             time_point = time.time() - PRESSURE_TREND_TIMER
             cursor = self.connection.cursor()
@@ -162,14 +165,16 @@ class SQLFunctions:
                 max_value = 0.0295
 
             if pressure_delta > min_value and pressure_delta < max_value:
-                return "Steady", 0
+                return translations["trend"]["steady"], 0
             if pressure_delta <= min_value:
-                return "Falling", round(pressure_delta, 2)
+                return translations["trend"]["falling"], round(pressure_delta, 2)
             if pressure_delta >= max_value:
-                return "Rising", round(pressure_delta, 2)
+                return translations["trend"]["rising"], round(pressure_delta, 2)
 
         except SQLError as e:
-            _LOGGER.error("Could not access storage data. Error: %s", e)
+            _LOGGER.error("Could not read pressure data. Error: %s", e)
+        except Exception as e:
+            _LOGGER.error("Could not calculate pressure trend. Error message: %s", e)
 
     async def readPressureData(self):
         """Returns the formatted pressure data - USED FOR TESTING ONLY."""
@@ -315,10 +320,14 @@ class SQLFunctions:
                 sensor_json[row["sensorid"]] = {
                     "max_day": row["max_day"],
                     "max_day_time": None if not row["max_day_time"] else datetime.datetime.utcfromtimestamp(round(row["max_day_time"])).replace(tzinfo=UTC).isoformat(),
+                    "max_month": row["max_month"],
+                    "max_month_time": None if not row["max_month_time"] else datetime.datetime.utcfromtimestamp(round(row["max_month_time"])).replace(tzinfo=UTC).isoformat(),
                     "max_all": row["max_all"],
                     "max_all_time": None if not row["max_all_time"] else datetime.datetime.utcfromtimestamp(round(row["max_all_time"])).replace(tzinfo=UTC).isoformat(),
                     "min_day": row["min_day"],
                     "min_day_time": None if not row["min_day_time"] else datetime.datetime.utcfromtimestamp(round(row["min_day_time"])).replace(tzinfo=UTC).isoformat(),
+                    "min_month": row["min_month"],
+                    "min_month_time": None if not row["min_month_time"] else datetime.datetime.utcfromtimestamp(round(row["min_month_time"])).replace(tzinfo=UTC).isoformat(),
                     "min_all": row["min_all"],
                     "min_all_time": None if not row["min_all_time"] else datetime.datetime.utcfromtimestamp(round(row["min_all_time"])).replace(tzinfo=UTC).isoformat()
                 }
@@ -399,12 +408,20 @@ class SQLFunctions:
             cursor.execute("PRAGMA main.user_version;")
             db_version = int(cursor.fetchone()[0])
 
-            if db_version < DATABASE_VERSION:
-                _LOGGER.info("Upgrading the database....")
+            if db_version < 1:
+                _LOGGER.info("Upgrading the database to version 1")
                 # Create Empty Tables
                 await self.create_table(TABLE_HIGH_LOW)
                 # Add Initial data to High Low
                 await self.initializeHighLow()
+
+            if db_version < DATABASE_VERSION:
+                _LOGGER.info("Upgrading the database to version %s...", DATABASE_VERSION)
+                cursor.execute("ALTER TABLE high_low ADD max_yday REAL")
+                cursor.execute("ALTER TABLE high_low ADD max_yday_time REAL")
+                cursor.execute("ALTER TABLE high_low ADD min_yday REAL")
+                cursor.execute("ALTER TABLE high_low ADD min_yday_time REAL")
+                self.connection.commit()
 
                 # Finally update the version number
                 cursor.execute(f"PRAGMA main.user_version = {DATABASE_VERSION};")
@@ -456,9 +473,30 @@ class SQLFunctions:
             cursor.execute(f"UPDATE high_low SET max_all = max_day, max_all_time = max_day_time WHERE max_day > max_all or max_all IS NULL")
             cursor.execute(f"UPDATE high_low SET min_all = min_day, min_all_time = min_day_time WHERE (min_day < min_all or min_all IS NULL) and min_day_time IS NOT NULL")
 
+            # Update or Reset Year Values
+            cursor.execute(f"UPDATE high_low SET max_year = max_day, max_year_time = max_day_time WHERE (max_day > max_year or max_year IS NULL) AND strftime('%Y', 'now') = strftime('%Y', datetime(max_day_time, 'unixepoch', 'localtime'))")
+            cursor.execute(f"UPDATE high_low SET min_year = min_day, min_year_time = min_day_time WHERE ((min_day < min_year or min_year IS NULL) AND min_day_time IS NOT NULL) AND strftime('%Y', 'now') = strftime('%Y', datetime(min_day_time, 'unixepoch', 'localtime'))")
+            cursor.execute(f"UPDATE high_low SET max_year = latest, max_year_time = {time.time()}, min_year = latest, min_year_time = {time.time()} WHERE min_day <> 0 AND strftime('%Y', 'now') <> strftime('%Y', datetime(max_day_time, 'unixepoch', 'localtime'))")
+            cursor.execute(f"UPDATE high_low SET max_year = 0, max_year_time = {time.time()} WHERE min_day = 0 AND strftime('%Y', 'now') <> strftime('%Y', datetime(max_day_time, 'unixepoch', 'localtime'))")
+
+            # Update or Reset Month Values
+            cursor.execute(f"UPDATE high_low SET max_month = max_day, max_month_time = max_day_time WHERE (max_day > max_month or max_month IS NULL) AND strftime('%m', 'now') = strftime('%m', datetime(max_day_time, 'unixepoch', 'localtime'))")
+            cursor.execute(f"UPDATE high_low SET min_month = min_day, min_month_time = min_day_time WHERE ((min_day < min_month or min_month IS NULL) AND min_day_time IS NOT NULL) AND strftime('%m', 'now') = strftime('%m', datetime(min_day_time, 'unixepoch', 'localtime'))")
+            cursor.execute(f"UPDATE high_low SET max_month = latest, max_month_time = {time.time()}, min_month = latest, min_month_time = {time.time()} WHERE min_day <> 0 AND strftime('%m', 'now') <> strftime('%m', datetime(max_day_time, 'unixepoch', 'localtime'))")
+            cursor.execute(f"UPDATE high_low SET max_month = 0, max_month_time = {time.time()} WHERE min_day = 0 AND strftime('%m', 'now') <> strftime('%m', datetime(max_day_time, 'unixepoch', 'localtime'))")
+
+            # Update or Reset Week Values
+            cursor.execute(f"UPDATE high_low SET max_week = max_day, max_week_time = max_day_time WHERE (max_day > max_week or max_week IS NULL) AND strftime('%W', 'now') = strftime('%W', datetime(max_day_time, 'unixepoch', 'localtime'))")
+            cursor.execute(f"UPDATE high_low SET min_week = min_day, min_week_time = min_day_time WHERE ((min_day < min_week or min_week IS NULL) AND min_day_time IS NOT NULL) AND strftime('%W', 'now') = strftime('%W', datetime(min_day_time, 'unixepoch', 'localtime'))")
+            cursor.execute(f"UPDATE high_low SET max_week = latest, max_week_time = {time.time()}, min_week = latest, min_week_time = {time.time()} WHERE min_day <> 0 AND strftime('%W', 'now') <> strftime('%W', datetime(max_day_time, 'unixepoch', 'localtime'))")
+            cursor.execute(f"UPDATE high_low SET max_week = 0, max_week_time = {time.time()} WHERE min_day = 0 AND strftime('%W', 'now') <> strftime('%W', datetime(max_day_time, 'unixepoch', 'localtime'))")
+
+            # Update Yesterday Values
+            cursor.execute(f"UPDATE high_low SET max_yday = max_day, max_yday_time = max_day_time, min_yday = min_day, min_yday_time = min_day_time")
+
             # Reset Day High and Low values
             cursor.execute(f"UPDATE high_low SET max_day = latest, max_day_time = {time.time()}, min_day = latest, min_day_time = {time.time()} WHERE min_day <> 0")
-            cursor.execute(f"UPDATE high_low SET max_day = latest, max_day_time = {time.time()} WHERE min_day = 0")
+            cursor.execute(f"UPDATE high_low SET max_day = 0, max_day_time = {time.time()} WHERE min_day = 0")
             self.connection.commit()
 
             return True

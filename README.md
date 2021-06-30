@@ -42,6 +42,7 @@ docker run -d \
 -e TZ=Europe/Copenhagen \
 -e TEMPEST_DEVICE=True \
 -e UNIT_SYSTEM=metric \
+-e LANGUAGE=en \
 -e RAPID_WIND_INTERVAL=0 \
 -e DEBUG=False \
 -e ELEVATION=0 \
@@ -70,6 +71,7 @@ A description of the Environment Variables available for this container. All of 
 - `TZ`: Set your local Timezone. It is important that you use the right timezone here, or else some of the calculations done by the container will not be correct. Default Timezone is *Europe/Copenhagen* (**Required**)
 - `TEMPEST_DEVICE`: If you have a Tempest Weather Station set this to True. If False, the program will assume you have the older AIR and SKY units. Default is *True*
 - `UNIT_SYSTEM`: Enter *imperial* or *metric*. This will determine the unit system used when displaying the values. Default is *metric*
+- `LANGUAGE`: Use this to set the language for Wind Direction cardinals and other sensors with text strings as state value. These strings will then be displayed in HA in the selected language. See section [Supported Languages](#supported-languages)
 - `RAPID_WIND_INTERVAL`: The weather stations delivers wind speed and bearing every 2 seconds. If you don't want to update the HA sensors so often, you can set a number here (in seconds), for how often they are updated. Default is *0*, which means data are updated when received from the station.
 - `ELEVATION`: Set the hight above sea level for where the station is placed. This is used when calculating some of the sensor values. Station elevation plus Device height above ground. The value has to be in meters (`meters = feet * 0.3048`). Default is *0*
 - `WF_HOST`: Unless you have a very special IP setup or the Weatherflow hub is on a different network, you should not change this. Default is *0.0.0.0*
@@ -85,6 +87,20 @@ A description of the Environment Variables available for this container. All of 
 - `STATION_TOKEN`: Enter your personal access Token to allow retrieval of data. If you don't have the token [login with your account](https://tempestwx.com/settings/tokens) and create the token. **NOTE** You must own a WeatherFlow station to get this token. Default value is *blank*
 - `FORECAST_INTERVAL`: The interval in minutes, between updates of the Forecast data. Default value is *30* minutes.
 
+### Supported Languages
+
+Currently these languages are supported for Wind Cardinals and other Text state strings:
+
+- `en`: English
+- `da`: Danish
+
+If you would like to assist in translating to a new language, do the following:
+
+- From the `translations` directory on this Github Project, download the file `en.json`
+- Rename the file to `YourLanguageCode.json` - example for Spanish rename it to `es.json`
+- Edit the file and translate the strings
+- Make a pull request in Github and attach the file.
+
 ## Available Sensors
 
 Here is the list of sensors that the program generates. Calculated Sensor means, if No, then data comes directly from the Weather Station, if yes, it is a sensor that is derived from some of the other sensors. For a *copy ready* list see [further below](#sensor-structure)
@@ -95,7 +111,10 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | air_temperature | Temperature | Outside Temperature | No | obs_st/7 | C° |  |
 | battery | Battery SKY or TEMPEST | If this is a TEMPEST unit this is where the Voltage is displayed. Else it will be the Voltage of the SKY unit | No | obs_st/16 | Volts |  |
 | battery_air | Battery AIR | The voltage on the AIR unit (If present) | No |  | Volts |  |
+| beaufort | Beaufort Scale | Beaufort scale is an empirical measure that relates wind speed to observed conditions at sea or on land | Yes |  |  |  |
+| delta_t | Delta T | Difference between Air Temperature and Wet Bulb Temperature | Yes |  | C° |  |
 | dewpoint | Dew Point | Dewpoint in degrees | Yes |  | C° |  |
+| dewpoint_description | Dewpoint Comfort Level | Textual representation of the Dewpoint value | Yes |  |  |  |
 | feelslike | Feels Like Temperature | The apparent temperature, a mix of Heat Index and Wind Chill | Yes |  | C° |  |
 | illuminance | Illuminance | How much the incident light illuminates the surface | No | obs_st/9 | Lux |  |
 | lightning_strike_count | Lightning Count (3 hours) | Number of lightning strikes the last 3 hours | Yes |  |  |  |
@@ -115,9 +134,12 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | pressure_trend | Pressure Trend | Returns Steady, Falling or Rising determined by the rate of change over the past 3 hours| Yes |  |  |  |
 | solar_radiation | Solar Radiation | Electromagnetic radiation emitted by the sun | No | obs_st/11 | W/m^2 |  |
 | station_pressure | Station Pressure | Pressure measurement where the station is located | No | obs_st/6 | MB |  |
+| temperature_description | Temperature Level | Textual representation of the Outside Air Temperature value | Yes |  |  |  |
 | uptime | Uptime | How long has the HUB been running | No | hub_status/uptime |  |  |
 | uv | UV Index | The UV index | No | obs_st/10 | Index |  |
+| uv_description | UV Level | Textual representation of the UV Index value | Yes |  |  |  |
 | visibility | Visibility | Distance to the horizon | Yes |  | km |  |
+| wetbulb | Wet Bulb Temperature | Temperature of a parcel of air cooled to saturation (100% relative humidity) | Yes |  | C° |  |
 | wind_bearing | Wind Bearing | Current measured Wind bearing in degrees | No | rapid_wind/2 | Degrees |  |
 | wind_bearing_avg | Wind Bearing Avg | The average wind bearing in degrees | No | obs_st/4 | Degrees |  |
 | wind_direction | Wind Direction | Current measured Wind bearing as compass symbol | Yes |  | Cardinal |  |
@@ -136,7 +158,10 @@ sensors:
   - air_temperature
   - battery
   - battery_air
+  - beaufort
   - dewpoint
+  - dewpoint_description
+  - delta_t
   - feelslike
   - illuminance
   - lightning_strike_count
@@ -156,8 +181,12 @@ sensors:
   - sealevel_pressure
   - solar_radiation
   - station_pressure
+  - temperature_description
   - uptime
   - uv
+  - uv_description
+  - visibility
+  - wetbulb
   - wind_bearing
   - wind_bearing_avg
   - wind_direction
@@ -171,7 +200,7 @@ sensors:
 
 ### High and Low Values
 
-For selected sensors high and low values are calculated and published to the attributes of the sensor. Currently daily and all-time values are calculated, but future values are planned. Only the sensors where it is relevant, will get a low value calculated. See the table further down, for the available sensors and what values to expect.
+For selected sensors high and low values are calculated and published to the attributes of the sensor. Currently daily, monthly and all-time values are calculated, but future values are planned. Only the sensors where it is relevant, will get a low value calculated. See the table further down, for the available sensors and what values to expect.
 
 Here are the current attributes, that will be applied to the selected sensor:
 
@@ -181,6 +210,10 @@ Here are the current attributes, that will be applied to the selected sensor:
 | `max_day_time` | UTC time when the max value was recorded. Reset at midnight. |
 | `min_day` | Minimum value for the current day. Reset at midnight. |
 | `min_day_time` | UTC time when the min value was recorded. Reset at midnight. |
+| `max_month` | Maximum value for the current month. Reset when new month. |
+| `max_month_time` | UTC time when the max value was recorded. Reset when new month. |
+| `min_month` | Minimum value for the current month. Reset when new month. |
+| `min_month_time` | UTC time when the min value was recorded. Reset when new month. |
 | `max_all` | Maximum value ever recorded. Updated at midnight every day. |
 | `max_all_time` | UTC time when the all-time max value was recorded. Updated at midnight every day. |
 | `min_all` | Minimum value ever recorded. Updated at midnight every day. |

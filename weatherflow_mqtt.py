@@ -73,17 +73,23 @@ async def main():
     station_id = os.environ["STATION_ID"]
     station_token = os.environ["STATION_TOKEN"]
     forecast_interval = int(os.environ["FORECAST_INTERVAL"])
+    language = os.environ["LANGUAGE"]
 
-
-    cnv = ConversionFunctions(unit_system)
-    if add_forecast:
-        forecast = Forecast(station_id, unit_system, station_token)
-        forecast_interval = forecast_interval * 60
-    # Read the sensor config
+    # Read the sensor config and translation file
     data_store = DataStorage()
     sensors = await data_store.read_config()
     program_version = data_store.getVersion()
+    translations = await data_store.getLanguageFile(language)
 
+    # Helper Functions
+    cnv = ConversionFunctions(unit_system, translations)
+
+    # Forecast
+    if add_forecast:
+        forecast = Forecast(station_id, unit_system, translations, station_token)
+        forecast_interval = forecast_interval * 60
+
+    # MQTT
     mqtt_anonymous = False
     if not mqtt_username or not mqtt_password:
         _LOGGER.debug("MQTT Credentials not needed")
@@ -118,6 +124,7 @@ async def main():
         sys.exit(1)
 
     # Configure Sensors in MQTT
+    _LOGGER.info("Defining Sensors for Home Assistant")
     await setup_sensors(endpoint, client, unit_system, sensors, is_tempest, add_forecast, program_version)
 
     # Set timer variables
@@ -167,7 +174,7 @@ async def main():
         # Update the Forecast if it is time and enabled
         if add_forecast:
             now = datetime.now().timestamp()
-            fcst_state_topic = "homeassistant/sensor/{}/{}/state".format(DOMAIN, EVENT_FORECAST)
+            fcst_state_topic = "homeassistant/sensor/{}/{}/state".format(DOMAIN, FORECAST_ENTITY)
             fcst_attr_topic = "homeassistant/sensor/{}/{}/attributes".format(DOMAIN, FORECAST_ENTITY)
             if (now - forecast_last_run) >= forecast_interval:
                 condition_data, fcst_data  = await forecast.update_forecast()
@@ -226,12 +233,16 @@ async def main():
                 ).isoformat()
                 data["battery_air"] = round(obs[6], 2)
                 data["sealevel_pressure"] = await cnv.sea_level_pressure(obs[1], elevation)
-                trend_text, trend_value = await sql.readPressureTrend(data["sealevel_pressure"])
+                trend_text, trend_value = await sql.readPressureTrend(data["sealevel_pressure"], translations)
                 data["pressure_trend"] = trend_text
                 data["pressure_trend_value"] = trend_value
                 data["air_density"] = await cnv.air_density(obs[2], obs[1])
                 data["dewpoint"] = await cnv.dewpoint(obs[2], obs[3])
                 data["feelslike"] = await cnv.feels_like(obs[2], obs[3], wind_speed)
+                data["wetbulb"] = await cnv.wetbulb(obs[2], obs[3], obs[1])
+                data["delta_t"] = await cnv.delta_t(obs[2], obs[3], obs[1])
+                data["dewpoint_description"] = await cnv.dewpoint_level(data["dewpoint"])
+                data["temperature_description"] = await cnv.temperature_level(obs[2])
                 client.publish(state_topic, json.dumps(data))
                 await sql.writePressure(data["sealevel_pressure"])
                 await sql.updateHighLow(data)
@@ -256,6 +267,10 @@ async def main():
                 data["precipitation_type"] = await cnv.rain_type(obs[12])
                 data["rain_rate"] = await cnv.rain_rate(obs[3])
                 data["visibility"] = await cnv.visibility(elevation)
+                data["uv_description"] = await cnv.uv_level(obs[2])
+                bft_value, bft_text = await cnv.beaufort(obs[5])
+                data["beaufort"] = bft_value
+                data["beaufort_text"] = bft_text
                 client.publish(state_topic, json.dumps(data))
                 await sql.updateHighLow(data)
                 await asyncio.sleep(0.01)
@@ -286,6 +301,10 @@ async def main():
                 data["battery"] = round(obs[16], 2)
                 data["rain_rate"] = await cnv.rain_rate(obs[12])
                 data["visibility"] = await cnv.visibility(elevation)
+                data["uv_description"] = await cnv.uv_level(obs[10])
+                bft_value, bft_text = await cnv.beaufort(obs[2])
+                data["beaufort"] = bft_value
+                data["beaufort_text"] = bft_text
                 client.publish(state_topic, json.dumps(data))
                 await sql.updateHighLow(data)
                 await asyncio.sleep(0.01)
@@ -305,12 +324,16 @@ async def main():
                     storage["last_lightning_time"]
                 ).isoformat()
                 data["sealevel_pressure"] = await cnv.sea_level_pressure(obs[6], elevation)
-                trend_text, trend_value = await sql.readPressureTrend(data["sealevel_pressure"])
+                trend_text, trend_value = await sql.readPressureTrend(data["sealevel_pressure"], translations)
                 data["pressure_trend"] = trend_text
                 data["pressure_trend_value"] = trend_value
                 data["air_density"] = await cnv.air_density(obs[7], obs[6])
                 data["dewpoint"] = await cnv.dewpoint(obs[7], obs[8])
                 data["feelslike"] = await cnv.feels_like(obs[7], obs[8], wind_speed)
+                data["wetbulb"] = await cnv.wetbulb(obs[7], obs[8], obs[6])
+                data["delta_t"] = await cnv.delta_t(obs[7], obs[8], obs[6])
+                data["dewpoint_description"] = await cnv.dewpoint_level(data["dewpoint"])
+                data["temperature_description"] = await cnv.temperature_level(obs[7])
                 client.publish(state_topic, json.dumps(data))
                 await sql.writePressure(data["sealevel_pressure"])
                 await sql.updateHighLow(data)
@@ -432,17 +455,27 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
                 template = attribution
                 template["trend_value"] = "{{ value_json.pressure_trend_value }}"
                 payload["json_attributes_template"] = json.dumps(template)
+            if sensor[SENSOR_ID] == "beaufort":
+                payload["json_attributes_topic"] = state_topic
+                template = OrderedDict()
+                template = attribution
+                template["description"] = "{{ value_json.beaufort_text }}"
+                payload["json_attributes_template"] = json.dumps(template)
             if sensor[SENSOR_EXTRA_ATT]:
                 payload["json_attributes_topic"] = highlow_topic
                 template = OrderedDict()
                 template = attribution
                 template["max_day"] = "{{{{ value_json.{}['max_day'] }}}}".format(sensor[SENSOR_ID])
                 template["max_day_time"] = "{{{{ value_json.{}['max_day_time'] }}}}".format(sensor[SENSOR_ID])
+                template["max_month"] = "{{{{ value_json.{}['max_month'] }}}}".format(sensor[SENSOR_ID])
+                template["max_month_time"] = "{{{{ value_json.{}['max_month_time'] }}}}".format(sensor[SENSOR_ID])
                 template["max_all"] = "{{{{ value_json.{}['max_all'] }}}}".format(sensor[SENSOR_ID])
                 template["max_all_time"] = "{{{{ value_json.{}['max_all_time'] }}}}".format(sensor[SENSOR_ID])
                 if sensor[SENSOR_SHOW_MIN_ATT]:
                     template["min_day"] = "{{{{ value_json.{}['min_day'] }}}}".format(sensor[SENSOR_ID])
                     template["min_day_time"] = "{{{{ value_json.{}['min_day_time'] }}}}".format(sensor[SENSOR_ID])
+                    template["min_month"] = "{{{{ value_json.{}['min_month'] }}}}".format(sensor[SENSOR_ID])
+                    template["min_month_time"] = "{{{{ value_json.{}['min_month_time'] }}}}".format(sensor[SENSOR_ID])
                     template["min_all"] = "{{{{ value_json.{}['min_all'] }}}}".format(sensor[SENSOR_ID])
                     template["min_all_time"] = "{{{{ value_json.{}['min_all_time'] }}}}".format(sensor[SENSOR_ID])
                 payload["json_attributes_template"] = json.dumps(template)

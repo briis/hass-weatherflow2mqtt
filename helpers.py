@@ -14,6 +14,7 @@ from sqlite import SQLFunctions
 from const import (
     DEVICE_STATUS,
     EXTERNAL_DIRECTORY,
+    SUPPORTED_LANGUAGES,
     UNITS_IMPERIAL,
 )
 
@@ -23,8 +24,9 @@ _LOGGER = logging.getLogger(__name__)
 class ConversionFunctions:
     """Class to help with converting from different units."""
 
-    def __init__(self, unit_system):
+    def __init__(self, unit_system, translations):
         self._unit_system = unit_system
+        self._translations = translations
 
     async def temperature(self, value) -> float:
         """Convert Temperature Value."""
@@ -75,9 +77,10 @@ class ConversionFunctions:
 
     async def rain_type(self, value) -> str:
         """Convert rain type."""
-        type_array = ["None", "Rain", "Hail", "Heavy Rain"]
+        type_array = ["none", "rain", "hail", "heavy-rain"]
         try:
-            return type_array[int(value)]
+            precip_type = type_array[int(value)]
+            return self._translations["precip_type"][precip_type]
         except IndexError as e:
             _LOGGER.debug("VALUE is: %s", value)
             return f"Unknown - {value}"
@@ -86,6 +89,7 @@ class ConversionFunctions:
         """Returns a directional Wind Direction string."""
         if value is None:
             return "N"
+
         direction_array = [
             "N",
             "NNE",
@@ -105,8 +109,8 @@ class ConversionFunctions:
             "NNW",
             "N",
         ]
-        direction = direction_array[int((value + 11.25) / 22.5)]
-        return direction
+        direction_str = direction_array[int((value + 11.25) / 22.5)]
+        return self._translations["wind_dir"][direction_str]
 
     async def air_density(self, temperature, station_pressure):
         """Returns the Air Density."""
@@ -127,7 +131,9 @@ class ConversionFunctions:
         _LOGGER.error("FUNC: air_density ERROR: Temperature or Pressure value was reported as NoneType. Check the sensor")
 
     async def sea_level_pressure(self, station_press, elevation):
-        """Returns Sea Level pressure."""
+        """Returns Sea Level pressure.
+            Converted from a JS formula made by Gary W Funk
+        """
         if station_press is not None:
             elev = float(elevation)
             press = float(station_press)
@@ -195,6 +201,180 @@ class ConversionFunctions:
             return round(1.22459 * math.sqrt(elevation * 3.2808), 1)
         return round(3.56972 * math.sqrt(elevation), 1)
 
+    async def wetbulb(self, temp, humidity, pressure):
+        """Returns the Wel Bulb Temperature.
+            Converted from a JS formula made by Gary W Funk
+            Input:
+                Temperature in Celcius
+                Humdity in Percent
+                Station Pressure in MB
+        """
+        t = float(temp)
+        rh = float(humidity)
+        p = float(pressure)
+
+        # Variables
+        edifference = 1
+        twguess = 0
+        previoussign = 1
+        incr = 10
+        es = 6.112 * math.exp(17.67 * t / (t + 243.5))
+        e2 = es * (rh / 100)
+
+        while (abs(edifference) > 0.005):
+            ewguess = 6.112 * math.exp((17.67 * twguess) / (twguess + 243.5))
+            eguess = ewguess - p * (t - twguess) * 0.00066 * (1 + (0.00115 * twguess))
+            edifference = e2 - eguess
+            if edifference == 0:
+                break
+
+            if edifference < 0:
+                cursign = -1
+                if (cursign != previoussign):
+                    previoussign = cursign
+                    incr = incr / 10
+                else:
+                    incr = incr
+            else:
+                cursign = 1
+                if (cursign != previoussign):
+                    previoussign = cursign
+                    incr = incr / 10
+                else:
+                    incr = incr
+
+            twguess = twguess + incr * previoussign
+
+        return await self.temperature(twguess)
+
+    async def delta_t(self, temp, humidity, pressure):
+        """Returns Delta T temperature."""
+
+        wb = await self.wetbulb(temp, humidity, pressure)
+        deltat = temp - wb
+
+        return await self.temperature(deltat)
+
+    async def beaufort(self, wind_speed):
+        """Returns the Beaufort Scale value based on Wind Speed."""
+
+        if wind_speed is None:
+            return 0, self._translations["beaufort"][str(0)]
+
+        if wind_speed > 32.7:
+            bft_value = 12
+        elif wind_speed >= 28.5:
+            bft_value = 11
+        elif wind_speed >= 24.5:
+            bft_value = 10
+        elif wind_speed >= 20.8:
+            bft_value = 9
+        elif wind_speed >= 17.2:
+            bft_value = 8
+        elif wind_speed >= 13.9:
+            bft_value = 7
+        elif wind_speed >= 10.8:
+            bft_value = 6
+        elif wind_speed >= 8.0:
+            bft_value = 5
+        elif wind_speed >= 5.5:
+            bft_value = 4
+        elif wind_speed >= 3.4:
+            bft_value = 3
+        elif wind_speed >= 1.6:
+            bft_value = 2
+        elif wind_speed >= 0.3:
+            bft_value = 1
+        else:
+            bft_value = 0
+        
+        bft_text = self._translations["beaufort"][str(bft_value)]
+
+        return bft_value, bft_text
+
+    async def dewpoint_level(self, dewpoint_c):
+        """Returns a text based comfort level, based on dewpoint F value."""
+        if dewpoint_c is None:
+            return "no-data"
+
+        if self._unit_system == UNITS_IMPERIAL:
+            dewpoint = dewpoint_c
+        else:
+            dewpoint = (dewpoint_c * 9 / 5) + 32
+
+        if dewpoint >= 80:
+            return self._translations["dewpoint"]["severely-high"]
+        if dewpoint >= 75:
+            return self._translations["dewpoint"]["miserable"]
+        if dewpoint >= 70:
+            return self._translations["dewpoint"]["oppressive"]
+        if dewpoint >= 65:
+            return self._translations["dewpoint"]["uncomfortable"]
+        if dewpoint >= 60:
+            return self._translations["dewpoint"]["ok-for-most"]
+        if dewpoint >= 55:
+            return self._translations["dewpoint"]["comfortable"]
+        if dewpoint >= 50:
+            return self._translations["dewpoint"]["very-comfortable"]
+        if dewpoint >= 30:
+            return self._translations["dewpoint"]["somewhat-dry"]
+        if dewpoint >= 0.5:
+            return self._translations["dewpoint"]["dry"]
+        if dewpoint >= 0:
+            return self._translations["dewpoint"]["very-dry"]
+        
+        return self._translations["dewpoint"]["undefined"]
+
+    async def temperature_level(self, temperature_c):
+        """Returns a text based comfort level, based on Air Temperature value."""
+        if temperature_c is None:
+            return "no-data"
+
+        temperature = (temperature_c * 9 / 5) + 32
+
+        if temperature >= 104:
+            return self._translations["temperature"]["inferno"]
+        if temperature >= 95:
+            return self._translations["temperature"]["very-hot"]
+        if temperature >= 86:
+            return self._translations["temperature"]["hot"]
+        if temperature >= 77:
+            return self._translations["temperature"]["warm"]
+        if temperature >= 68:
+            return self._translations["temperature"]["nice"]
+        if temperature >= 59:
+            return self._translations["temperature"]["cool"]
+        if temperature >= 41:
+            return self._translations["temperature"]["chilly"]
+        if temperature >= 32:
+            return self._translations["temperature"]["cold"]
+        if temperature >= 20:
+            return self._translations["temperature"]["freezing"]
+        if temperature <= 20:
+            return self._translations["temperature"]["fridged"]
+        
+        return self._translations["temperature"]["undefined"]
+
+
+    async def uv_level(self, uvi):
+        """Returns a text based UV Description."""
+
+        if uvi is None:
+            return "no-data"
+
+        if uvi >= 10.5:
+            return self._translations["uv"]["extreme"]
+        if uvi >= 7.5:
+            return self._translations["uv"]["very-high"]
+        if uvi >= 5.5:
+            return self._translations["uv"]["high"]
+        if uvi >= 2.5:
+            return self._translations["uv"]["moderate"]
+        if uvi > 0:
+            return self._translations["uv"]["low"]
+            
+        return self._translations["uv"]["none"]
+
     async def humanize_time(self, value):
         """Humanize Time in Seconds."""
         if value is None:
@@ -235,6 +415,25 @@ class DataStorage:
         except Exception as e:
             _LOGGER.debug("Could not read config.yaml file. Error message: %s", e)
             return None
+
+    async def getLanguageFile(self, language: str):
+        """Return the language file json array."""
+        try:
+            if language not in SUPPORTED_LANGUAGES:
+                filename = "translations/en.json"
+            else:
+                filename = f"translations/{language.lower()}.json"
+
+            with open(filename, "r") as json_file:
+                return json.load(json_file)
+
+        except FileNotFoundError as e:
+            _LOGGER.debug("Could not read language file. Error message: %s", e)
+            return None
+        except Exception as e:
+            _LOGGER.debug("Could not read language file. Error message: %s", e)
+            return None
+
 
     def getVersion(self):
         """Returns the version number stored in the VERSION file."""

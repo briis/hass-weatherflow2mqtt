@@ -1,5 +1,63 @@
 # Home Assistant WeatherFlow2MQTT Changelog
 
+## Version 2.0.8
+
+**Release Date**: June 24th, 2021
+
+### Changes in release 2.0.8
+
+`FIX`: Wrong key in the Temperature Level description
+
+## Version 2.0.7
+
+**Release Date**: June 24th, 2021
+
+### Changes in release 2.0.7
+
+`NEW`: There is now multi language support for text states and other strings. Currently the support is limited to Danish (da) and English (en), and the default is English. In order to active another language than English add the following to the Docker Run command: `-e LANGUAGE=da`. If LANGUAGE is omitted, english will be used. So if this is the language you want, you don't have to do anything.  
+If you want to help translate in to another language, go to Github and in the translations directory, download the `en.json` file, save it as `yourlanguagecode.json`, translate the strings, and make a pull request on Github.
+`FIX`: `sensor.wf_dewpoint_comfort_level` was not showing the correct value when using Imperial Units.
+`NEW`: A new sensor called `sensor.wf_beaufort_scale` is added. The Beaufort scale is an empirical measure that relates wind speed to observed conditions at sea or on land and holds a value between 0 and 12, where 0 is Calm and 12 is Hurricane force. The state holds the numeric value and there is an Attribute named `description` that holds the textual representation.
+
+## Version 2.0.6
+
+**Release Date**: June 23rd, 2021
+
+### Changes in release 2.0.6
+
+`FIX`: (Issue #28) The fix on release 2.0.5, was not completely solving the issue. Now a base Base value of Steady will be returned, if we are not able to calculate the Trend due to lack of data.
+`NEW`: (Issue #29) Adding new sensor `sensor.wf_dewpoint_comfort_level` which gives a textual representation of the Dewpoint value.
+`NEW`: (Issue #29) Adding new sensor `sensor.wf_temperature_level` which gives a textual representation of the Outside Air Temperature value.
+`NEW`: (Issue #29) Adding new sensor `sensor.wf_uv_level` which gives a textual representation of the UV Index value.
+
+## Version 2.0.5
+
+**Release Date**: June 22nd, 2021
+
+### Changes in release 2.0.5
+
+`FIX`: (Issue #28) Sometimes the Pressure Trend calculation would get the program to crash due a timing in when data was logged by the system. With this fix, a `None` value will be returned instead.
+
+## Version 2.0.4
+
+**Release Date**: June 21st, 2021
+
+### Changes in release 2.0.4
+
+`NEW`: A new sensor called `wf_wet_bulb_temperature` has been added. This sensor returns the temperature of a parcel of air cooled to saturation (100% relative humidity)
+`NEW`: A new sensor called `wf_delta_t` has been added. Delta T, is used in agriculture to indicate acceptable conditions for spraying pesticides and fertilizers. It is simply the difference between the air temperature (aka "dry bulb temperature") and the wet bulb temperature
+`NEW`: Added monthly min and max values to selected sensors. **Note** Data will only be updated once a day, so first values will be shown after midnight after the upgrade and new Attributes will require a restart of HA before they appear.
+`FIXED`: Daily Max value did not reset for some sensors at midnight.
+`FIXED`: When using the WeatherFlow forecast, there could be a mismatch in the condition state.
+`CHANGES`: Some *Under the Hood* changes to prepare for future enhancements.
+
+| Attribute Name   | Description   |
+| --- | --- |
+| `max_month` | Maximum value for the current month. Reset when new month. |
+| `max_month_time` | UTC time when the max value was recorded. Reset when new month. |
+| `min_month` | Minimum value for the current month. Reset when new month. |
+| `min_month_time` | UTC time when the min value was recorded. Reset when new month. |
+
 ## Version 2.0.3
 
 **Release Date**: June 18th, 2021

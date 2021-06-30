@@ -138,3 +138,4 @@ forecast.json
 weatherfunctions.js
 .pressure.data
 weatherflow2mqtt.db
+config_bck.yaml

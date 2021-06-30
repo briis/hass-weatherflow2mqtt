@@ -3,7 +3,10 @@ sensors:
   - air_temperature
   - battery
   - battery_air
+  - beaufort
   - dewpoint
+  - dewpoint_description
+  - delta_t
   - feelslike
   - illuminance
   - lightning_strike_count
@@ -17,12 +20,18 @@ sensors:
   - rain_start_time
   - rain_today
   - rain_yesterday
+  - rain_duration_today
+  - rain_duration_yesterday
   - relative_humidity
   - sealevel_pressure
   - solar_radiation
   - station_pressure
+  - temperature_description
   - uptime
   - uv
+  - uv_description
+  - visibility
+  - wetbulb
   - wind_bearing
   - wind_bearing_avg
   - wind_direction

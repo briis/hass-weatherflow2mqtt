@@ -36,10 +36,11 @@ _LOGGER = logging.getLogger(__name__)
 
 class Forecast:
 
-    def __init__(self, station_id, unit_system, token, session: Optional[ClientSession] = None,):
+    def __init__(self, station_id, unit_system, translations, token, session: Optional[ClientSession] = None,):
         self._station_id = station_id
         self._token = token
         self._unit_system = unit_system
+        self._translations = translations
         self._session: ClientSession = session
         self.req = session
 
@@ -48,7 +49,7 @@ class Forecast:
         endpoint = f"better_forecast?station_id={self._station_id}&token={self._token}"
         json_data = await self.async_request("get", endpoint)
         items = []
-        cnv = ConversionFunctions(self._unit_system)
+        cnv = ConversionFunctions(self._unit_system, self._translations)
 
         if json_data is not None:
             # We need a few Items from the Current Conditions section
@@ -131,7 +132,7 @@ class Forecast:
                     ATTR_FORECAST_WIND_SPEED: await cnv.speed(row["wind_avg"], True),
                     "wind_gust": await cnv.speed(row["wind_gust"], True),
                     ATTR_FORECAST_WIND_BEARING: row["wind_direction"],
-                    "wind_direction_cardinal": row["wind_direction_cardinal"],
+                    "wind_direction_cardinal": self._translations["wind_dir"][row["wind_direction_cardinal"]],
                     "uv": row["uv"],
                     "feels_like": await cnv.temperature(row["feels_like"]),
                 }

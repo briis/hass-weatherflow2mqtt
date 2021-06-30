@@ -21,7 +21,7 @@ EXTERNAL_DIRECTORY = "/usr/local/config"
 INTERNAL_DIRECTORY = "/app"
 STORAGE_FILE = f"{EXTERNAL_DIRECTORY}/.storage.json"
 DATABASE = f"{EXTERNAL_DIRECTORY}/weatherflow2mqtt.db"
-DATABASE_VERSION = 1
+DATABASE_VERSION = 2
 STORAGE_ID = 1
 
 TABLE_STORAGE = """ CREATE TABLE IF NOT EXISTS storage (
@@ -55,6 +55,10 @@ TABLE_HIGH_LOW = """
                         max_day_time REAL,
                         min_day REAL,
                         min_day_time REAL,
+                        max_yday REAL,
+                        max_yday_time REAL,
+                        min_yday REAL,
+                        min_yday_time REAL,
                         max_week REAL,
                         max_week_time REAL,
                         min_week REAL,
@@ -121,7 +125,7 @@ EVENT_SKY_DATA = "obs_sky"
 EVENT_TEMPEST_DATA = "obs_st"
 EVENT_PRECIP_START = "evt_precip"
 EVENT_STRIKE = "evt_strike"
-EVENT_FORECAST = "forecast"
+EVENT_FORECAST = "weather"
 EVENT_HIGH_LOW = "high_low"
 
 FORECAST_TYPE_DAILY = "daily"
@@ -132,6 +136,11 @@ FORECAST_HOURLY_HOURS = 36
 STRIKE_COUNT_TIMER = 3 * 60 * 60
 PRESSURE_TREND_TIMER = 3 * 60 * 60
 HIGH_LOW_TIMER = 10 * 60
+
+SUPPORTED_LANGUAGES = [
+    "en",
+    "da",
+]
 
 UNITS_IMPERIAL = "imperial"
 
@@ -404,6 +413,72 @@ WEATHERFLOW_SENSORS = [
         False
     ],
     ["visibility", "Visibility", "km", "nmi", None, "eye", EVENT_SKY_DATA, False, False],
+    [
+        "wetbulb",
+        "Wet Bulb Temperature",
+        "˚C",
+        "˚F",
+        DEVICE_CLASS_TEMPERATURE,
+        None,
+        EVENT_AIR_DATA,
+        False,
+        False
+    ],
+    [
+        "delta_t",
+        "Delta T",
+        "˚C",
+        "˚F",
+        DEVICE_CLASS_TEMPERATURE,
+        None,
+        EVENT_AIR_DATA,
+        False,
+        False
+    ],
+    [
+        "dewpoint_description",
+        "Dewpoint Comfort Level",
+        None,
+        None,
+        None,
+        "text-box-outline",
+        EVENT_AIR_DATA,
+        False,
+        False
+    ],
+    [
+        "temperature_description",
+        "Temperature Level",
+        None,
+        None,
+        None,
+        "text-box-outline",
+        EVENT_AIR_DATA,
+        False,
+        False
+    ],
+    [
+        "uv_description",
+        "UV Level",
+        None,
+        None,
+        None,
+        "text-box-outline",
+        EVENT_SKY_DATA,
+        False,
+        False
+    ],
+    [
+        "beaufort",
+        "Beaufort Scale",
+        None,
+        None,
+        None,
+        "tailwind",
+        EVENT_SKY_DATA,
+        False,
+        False
+    ],
     [FORECAST_ENTITY, "Weather", None, None, None, "chart-box-outline", EVENT_FORECAST, False, False],
 ]
 
