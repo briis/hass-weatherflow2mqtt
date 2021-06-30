@@ -211,7 +211,7 @@ class ConversionFunctions:
         """
         if temp is None or humidity is None or pressure is None:
             return None
-            
+
         t = float(temp)
         rh = float(humidity)
         p = float(pressure)
@@ -252,6 +252,8 @@ class ConversionFunctions:
 
     async def delta_t(self, temp, humidity, pressure):
         """Returns Delta T temperature."""
+        if temp is None or humidity is None or pressure is None:
+            return None
 
         wb = await self.wetbulb(temp, humidity, pressure)
         deltat = temp - wb
