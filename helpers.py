@@ -209,6 +209,9 @@ class ConversionFunctions:
                 Humdity in Percent
                 Station Pressure in MB
         """
+        if temp is None or humidity is None or pressure is None:
+            return None
+            
         t = float(temp)
         rh = float(humidity)
         p = float(pressure)
