@@ -21,7 +21,7 @@ EXTERNAL_DIRECTORY = "/usr/local/config"
 INTERNAL_DIRECTORY = "/app"
 STORAGE_FILE = f"{EXTERNAL_DIRECTORY}/.storage.json"
 DATABASE = f"{EXTERNAL_DIRECTORY}/weatherflow2mqtt.db"
-DATABASE_VERSION = 2
+DATABASE_VERSION = 3
 STORAGE_ID = 1
 
 TABLE_STORAGE = """ CREATE TABLE IF NOT EXISTS storage (
@@ -77,6 +77,25 @@ TABLE_HIGH_LOW = """
                         min_all_time REAL
                     );
                   """
+
+TABLE_DAY_DATA = """ CREATE TABLE IF NOT EXISTS day_data (
+                    timestamp REAL PRIMARY KEY,
+                    air_temperature REAL,
+                    relative_humidity REAL,
+                    dewpoint REAL,
+                    illuminance REAL,
+                    rain_duration_today REAL,
+                    rain_rate REAL,
+                    wind_gust REAL,
+                    wind_lull REAL,
+                    wind_speed_avg REAL,
+                    lightning_strike_energy REAL,
+                    lightning_strike_count_today REAL,
+                    sealevel_pressure REAL,
+                    uv REAL,
+                    solar_radiation REAL
+                );"""
+
 COL_TEMPERATURE = "air_temperature"
 COL_HUMIDITY = "relative_humidity"
 COL_DEWPOINT = "dewpoint"
