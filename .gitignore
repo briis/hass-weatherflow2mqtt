@@ -139,3 +139,4 @@ weatherfunctions.js
 .pressure.data
 weatherflow2mqtt.db
 config_bck.yaml
+max_min_day.sql
