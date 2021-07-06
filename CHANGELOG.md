@@ -1,5 +1,13 @@
 # Home Assistant WeatherFlow2MQTT Changelog
 
+## Version 2.0.9
+
+**Release Date**: NOT RELEASED YET
+
+### Changes in release 2.0.9
+
+`FIX`: Wetbulb Calculation crashed the system if one of the sensors had a NoneType value. Fixing issue #33
+
 ## Version 2.0.8
 
 **Release Date**: June 24th, 2021

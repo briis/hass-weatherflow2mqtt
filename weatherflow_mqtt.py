@@ -246,6 +246,7 @@ async def main():
                 client.publish(state_topic, json.dumps(data))
                 await sql.writePressure(data["sealevel_pressure"])
                 await sql.updateHighLow(data)
+                # await sql.updateDayData(data)
                 await asyncio.sleep(0.01)
             if msg_type in EVENT_SKY_DATA:
                 obs = json_response["obs"][0]
@@ -273,6 +274,7 @@ async def main():
                 data["beaufort_text"] = bft_text
                 client.publish(state_topic, json.dumps(data))
                 await sql.updateHighLow(data)
+                # await sql.updateDayData(data)
                 await asyncio.sleep(0.01)
                 if obs[3] > 0:
                     storage["rain_duration_today"] += 1
@@ -307,6 +309,7 @@ async def main():
                 data["beaufort_text"] = bft_text
                 client.publish(state_topic, json.dumps(data))
                 await sql.updateHighLow(data)
+                # await sql.updateDayData(data)
                 await asyncio.sleep(0.01)
 
                 state_topic = "homeassistant/sensor/{}/{}/state".format(
@@ -337,6 +340,7 @@ async def main():
                 client.publish(state_topic, json.dumps(data))
                 await sql.writePressure(data["sealevel_pressure"])
                 await sql.updateHighLow(data)
+                # await sql.updateDayData(data)
                 await asyncio.sleep(0.01)
 
                 if obs[12] > 0:

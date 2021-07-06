@@ -28,6 +28,7 @@ from const import (
     STORAGE_ID,
     STORAGE_FILE,
     STRIKE_COUNT_TIMER,
+    TABLE_DAY_DATA,
     TABLE_HIGH_LOW,
     TABLE_LIGHTNING,
     TABLE_PRESSURE,
@@ -251,6 +252,40 @@ class SQLFunctions:
         except Exception as e:
             _LOGGER.error("Could not write to daily_log Table. Error message: %s", e)
 
+    async def updateDayData(self, sensor_data):
+        """Updates the Day Data Table."""
+
+        try:
+            data = json.loads(json.dumps(sensor_data))
+            temp = data.get("air_temperature")
+            pres = data.get("sealevel_pressure")
+            wspeed = data.get("wind_speed_avg")
+            hum = data.get("relative_humidity")
+            dew = data.get("dewpoint")
+            illum = data.get("illuminance")
+            rain_dur = data.get("rain_duration_today")
+            rain_rate = data.get("rain_rate")
+            wgust = data.get("wind_gust")
+            wlull = data.get("wind_lull")
+            strike_e = data.get("lightning_strike_energy")
+            strike_c = data.get("lightning_strike_count_today")
+            uv = data.get("uv")
+            solrad = data.get("solar_radiation")
+
+            cursor = self.connection.cursor()
+            sql_columns = "INSERT INTO day_data("
+            sql_columns += "timestamp, air_temperature, sealevel_pressure, wind_speed_avg, relative_humidity, dewpoint,"
+            sql_columns += "illuminance, rain_duration_today, rain_rate, wind_gust, wind_lull, lightning_strike_energy,"
+            sql_columns += "lightning_strike_count_today, uv, solar_radiation"
+            sql_columns += ")"
+            cursor.execute(f"{sql_columns} VALUES({time.time()}, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (temp, pres, wspeed, hum, dew, illum, rain_dur, rain_rate, wgust, wlull, strike_e, strike_c, uv, solrad))
+            self.connection.commit()
+
+        except SQLError as e:
+            _LOGGER.error("Could not Insert data in table day_data. Error: %s", e)
+        except Exception as e:
+            _LOGGER.error("Could not write to day_data Table. Error message: %s", e)
+
     async def updateHighLow(self, sensor_data):
         """Updates the High and Low Values."""
         try:
@@ -381,6 +416,7 @@ class SQLFunctions:
                 await self.create_table(TABLE_LIGHTNING)
                 await self.create_table(TABLE_PRESSURE)
                 await self.create_table(TABLE_HIGH_LOW)
+                await self.create_table(TABLE_DAY_DATA)
 
                 # Store Initial Data
                 storage = (STORAGE_ID,0,0,0,0,0,0,0,0,0,0)
@@ -416,12 +452,25 @@ class SQLFunctions:
                 await self.initializeHighLow()
 
             if db_version < DATABASE_VERSION:
-                _LOGGER.info("Upgrading the database to version %s...", DATABASE_VERSION)
+                _LOGGER.info("Upgrading the database to version 2")
                 cursor.execute("ALTER TABLE high_low ADD max_yday REAL")
                 cursor.execute("ALTER TABLE high_low ADD max_yday_time REAL")
                 cursor.execute("ALTER TABLE high_low ADD min_yday REAL")
                 cursor.execute("ALTER TABLE high_low ADD min_yday_time REAL")
+
                 self.connection.commit()
+
+            # if db_version < 2:
+            #     _LOGGER.info("Upgrading the database to version 2")
+            #     cursor.execute("ALTER TABLE high_low ADD max_yday REAL")
+            #     cursor.execute("ALTER TABLE high_low ADD max_yday_time REAL")
+            #     cursor.execute("ALTER TABLE high_low ADD min_yday REAL")
+            #     cursor.execute("ALTER TABLE high_low ADD min_yday_time REAL")
+
+            # if db_version < DATABASE_VERSION:
+            #     _LOGGER.info("Upgrading the database to version %s...", DATABASE_VERSION)
+            #     await self.create_table(TABLE_DAY_DATA)
+            #     self.connection.commit()
 
                 # Finally update the version number
                 cursor.execute(f"PRAGMA main.user_version = {DATABASE_VERSION};")
