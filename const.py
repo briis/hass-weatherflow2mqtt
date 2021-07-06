@@ -1,5 +1,6 @@
 """Constant file for weatherflow2mqtt."""
 import datetime
+import os
 
 ATTRIBUTION = "Powered by WeatherFlow2MQTT"
 BRAND = "WeatherFlow"
@@ -17,7 +18,7 @@ ATTR_FORECAST_WIND_BEARING = "wind_bearing"
 ATTR_FORECAST_WIND_SPEED = "wind_speed"
 ATTR_FORECAST_HUMIDITY = "humidity"
 
-EXTERNAL_DIRECTORY = "/usr/local/config"
+EXTERNAL_DIRECTORY = os.environ.get("EXTERNAL_DIRECTORY", "/usr/local/config")
 INTERNAL_DIRECTORY = "/app"
 STORAGE_FILE = f"{EXTERNAL_DIRECTORY}/.storage.json"
 DATABASE = f"{EXTERNAL_DIRECTORY}/weatherflow2mqtt.db"
@@ -103,7 +104,6 @@ DEVICE_CLASS_TIMESTAMP = "timestamp"
 DEVICE_CLASS_VOLTAGE = "voltage"
 
 DEVICE_STATUS = [
-    "Sensors OK",
     "lightning failed",
     "lightning noise",
     "lightning disturber",
