@@ -2,12 +2,15 @@
 
 ## Version 2.0.9
 
-**Release Date**: NOT RELEASED YET
+**Release Date**: July 6th, 2021
 
 ### Changes in release 2.0.9
 
 `FIX`: Wetbulb Calculation crashed the system if one of the sensors had a NoneType value. Fixing issue #33
+
 `NEW`: Added French Tranlation, thanks to @titilambert.
+
+`FIX`: Issue #37, where the device status check could fail. thanks to @titilambert for fixing this.
 
 ## Version 2.0.8
 
