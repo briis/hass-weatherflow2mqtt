@@ -451,17 +451,26 @@ class SQLFunctions:
                 # Add Initial data to High Low
                 await self.initializeHighLow()
 
-            if db_version < 2:
+            if db_version < DATABASE_VERSION:
                 _LOGGER.info("Upgrading the database to version 2")
                 cursor.execute("ALTER TABLE high_low ADD max_yday REAL")
                 cursor.execute("ALTER TABLE high_low ADD max_yday_time REAL")
                 cursor.execute("ALTER TABLE high_low ADD min_yday REAL")
                 cursor.execute("ALTER TABLE high_low ADD min_yday_time REAL")
 
-            if db_version < DATABASE_VERSION:
-                _LOGGER.info("Upgrading the database to version %s...", DATABASE_VERSION)
-                await self.create_table(TABLE_DAY_DATA)
                 self.connection.commit()
+
+            # if db_version < 2:
+            #     _LOGGER.info("Upgrading the database to version 2")
+            #     cursor.execute("ALTER TABLE high_low ADD max_yday REAL")
+            #     cursor.execute("ALTER TABLE high_low ADD max_yday_time REAL")
+            #     cursor.execute("ALTER TABLE high_low ADD min_yday REAL")
+            #     cursor.execute("ALTER TABLE high_low ADD min_yday_time REAL")
+
+            # if db_version < DATABASE_VERSION:
+            #     _LOGGER.info("Upgrading the database to version %s...", DATABASE_VERSION)
+            #     await self.create_table(TABLE_DAY_DATA)
+            #     self.connection.commit()
 
                 # Finally update the version number
                 cursor.execute(f"PRAGMA main.user_version = {DATABASE_VERSION};")
