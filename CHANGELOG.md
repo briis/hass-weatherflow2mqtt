@@ -7,6 +7,7 @@
 ### Changes in release 2.0.9
 
 `FIX`: Wetbulb Calculation crashed the system if one of the sensors had a NoneType value. Fixing issue #33
+`NEW`: Added French Tranlation, thanks to @titilambert.
 
 ## Version 2.0.8
 

@@ -159,6 +159,7 @@ HIGH_LOW_TIMER = 10 * 60
 SUPPORTED_LANGUAGES = [
     "en",
     "da",
+    "fr",
 ]
 
 UNITS_IMPERIAL = "imperial"
