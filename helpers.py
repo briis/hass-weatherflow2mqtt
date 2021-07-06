@@ -392,11 +392,12 @@ class ConversionFunctions:
             return
             
         binvalue = str(bin(value))
-        binarr = binvalue[2:]
+        binarr = binvalue[::-1]
+        binarr = binarr[:len(DEVICE_STATUS)]
         return_value = []
-        for x in range(len(binarr)):
-            if binarr[x:x+1] == "1":
-                return_value.append(DEVICE_STATUS[len(binarr)-x])
+        for x in range(len(DEVICE_STATUS)):
+            if binarr[len(binarr) - 1 - x] == "1":
+                return_value.append(DEVICE_STATUS[x])
 
         return return_value
 
@@ -443,7 +444,7 @@ class DataStorage:
     def getVersion(self):
         """Returns the version number stored in the VERSION file."""
         try:
-            filepath = "/VERSION"
+            filepath = f"{EXTERNAL_DIRECTORY}/VERSION"
             with open(filepath, "r") as file:
                 lines = file.readlines()
                 for line in lines:
