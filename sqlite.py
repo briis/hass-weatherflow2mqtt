@@ -416,7 +416,6 @@ class SQLFunctions:
                 await self.create_table(TABLE_LIGHTNING)
                 await self.create_table(TABLE_PRESSURE)
                 await self.create_table(TABLE_HIGH_LOW)
-                await self.create_table(TABLE_DAY_DATA)
 
                 # Store Initial Data
                 storage = (STORAGE_ID,0,0,0,0,0,0,0,0,0,0)
