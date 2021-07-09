@@ -8,7 +8,7 @@ from sqlite3 import Error as SQLError
 from typing import OrderedDict
 import logging
 
-from const import (
+from weatherflow2mqtt.const import (
     COL_DEWPOINT,
     COL_HUMIDITY,
     COL_ILLUMINANCE,

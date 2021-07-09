@@ -260,3 +260,13 @@ weather:
 
 - The weather entity expects km/h when having metric units, so the above example converts m/s to km/h. If you are using *imperial* units, the line should just be `{{ states('sensor.wf_wind_speed_avg') }}`
 - For the *forecast_template* you can either use `hourly_forecast` or `daily_forecast` to get Hourly or Day based forecast.
+
+
+## Setup Dev environment
+
+```bash
+virtualenv -p `which python3` env
+source env/bin/activate
+python setup.py install
+weatherflow2mqt
+```

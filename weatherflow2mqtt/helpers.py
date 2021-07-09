@@ -10,8 +10,9 @@ import yaml
 from cmath import rect, phase
 from math import gamma, radians, degrees
 
-from sqlite import SQLFunctions
-from const import (
+from weatherflow2mqtt.sqlite import SQLFunctions
+from weatherflow2mqtt.__version__ import DB_VERSION
+from weatherflow2mqtt.const import (
     DEVICE_STATUS,
     EXTERNAL_DIRECTORY,
     SUPPORTED_LANGUAGES,
@@ -442,20 +443,5 @@ class DataStorage:
 
 
     def getVersion(self):
-        """Returns the version number stored in the VERSION file."""
-        try:
-            filepath = f"{EXTERNAL_DIRECTORY}/VERSION"
-            with open(filepath, "r") as file:
-                lines = file.readlines()
-                for line in lines:
-                    if line != "\n":
-                        return line.replace("\n", "")
-
-
-        except FileNotFoundError as e:
-            _LOGGER.error("Could not find VERSION File.")
-            return None
-        except Exception as e:
-            _LOGGER.debug("Could not read program version file. Error message: %s", e)
-            return None
-
+        """Returns the version number stored in the __version__.py file."""
+        return DB_VERSION

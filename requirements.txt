@@ -1,0 +1,4 @@
+paho-mqtt==1.5.1
+asyncio==3.4.3
+aiohttp==3.7.4.post0
+PyYAML==5.4.1
