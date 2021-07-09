@@ -268,5 +268,32 @@ weather:
 virtualenv -p `which python3` env
 source env/bin/activate
 python setup.py install
+```
+
+Then you just need to export the configuration
+```
+export TZ="America/Toronto"
+export TEMPEST_DEVICE="True"
+export UNIT_SYSTEM="metric"
+export LANGUAGE="en"
+export RAPID_WIND_INTERVAL="0"
+export DEBUG="True"
+export EXTERNAL_DIRECTORY="."
+export ELEVATION="30"
+export WF_HOST="0.0.0.0"
+export WF_PORT="50222"
+export MQTT_HOST="..."
+export MQTT_PORT="1883"
+export MQTT_DEBUG="False"
+export ADD_FORECAST="True"
+export STATION_ID="..."
+export STATION_TOKEN="..."
+export FORECAST_INTERVAL="30"
+export MQTT_USERNAME="..."
+export MQTT_PASSWORD="..."
+```
+
+Then you can run the daemon with
+```
 weatherflow2mqt
 ```
