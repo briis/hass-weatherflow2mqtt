@@ -57,8 +57,9 @@ docker run -d \
 -e STATION_ID= \
 -e STATION_TOKEN= \
 -e FORECAST_INTERVAL=30 \
-briis/hass-weatherflow2mqtt:latest
+briis/weatherflow2mqtt:latest
 ```
+The container is build for both Intel and ARM platforms, so it should work on most HW types. Please create an issue, if there is a platform for which it does not work.
 
 ### Docker Volume
 
