@@ -57,7 +57,7 @@ docker run -d \
 -e STATION_ID= \
 -e STATION_TOKEN= \
 -e FORECAST_INTERVAL=30 \
-ghcr.io/briis/hass-weatherflow2mqtt:latest
+briis/hass-weatherflow2mqtt:latest
 ```
 
 ### Docker Volume
