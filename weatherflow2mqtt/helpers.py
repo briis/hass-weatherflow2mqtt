@@ -196,11 +196,16 @@ class ConversionFunctions:
         mean_angle = degrees(phase(sum(rect(1, radians(d)) for d in bearing_arr)/len(bearing_arr)))
         return int(abs(mean_angle))
 
-    async def visibility(self, elevation):
-        """Returns the visibility."""
+    async def visibility(self, elevation, temp, dewpoint_c):
+        """Returns the visibility.
+           Input:
+               Elevation in Meters
+               Temperature in Celcius
+               Dewpoint in Celcius
+        """
         if self._unit_system == UNITS_IMPERIAL:
-            return round(1.22459 * math.sqrt(elevation * 3.2808), 1)
-        return round(3.56972 * math.sqrt(elevation), 1)
+            return round((1.22459 * math.sqrt(elevation * 3.2808))*((1.13*(temp - dewpoint_c)-1.15)/10), 1)
+        return round((3.56972 * math.sqrt(elevation))*((1.13*(temp - dewpoint_c)-1.15)/10), 1)
 
     async def wetbulb(self, temp, humidity, pressure):
         """Returns the Wel Bulb Temperature.
