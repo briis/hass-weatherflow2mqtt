@@ -1,5 +1,15 @@
 # Home Assistant WeatherFlow2MQTT Changelog
 
+## Version 2.0.10
+
+**Release Date**: July 20th, 2021
+
+### Changes in release 2.0.10
+
+`CHANGE`: To support multi platform docker containers the new home for the container is on Docker Hub with the name **briis/weatherflow2mqtt**. This is where future upgrades will land. So please change your docker command to use this location. README file is updated with the location.
+
+`FIX`: Visibility sensor now takes in to account current weather conditions. Thanks to @GlennGoddard for making this change. Fixing issue #29
+
 ## Version 2.0.9
 
 **Release Date**: July 6th, 2021
