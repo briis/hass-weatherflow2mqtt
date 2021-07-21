@@ -203,6 +203,9 @@ class ConversionFunctions:
                Temperature in Celcius
                Dewpoint in Celcius
         """
+        if temp is None or elevation is None or dewpoint_c is None:
+            return None
+
         if self._unit_system == UNITS_IMPERIAL:
             return round((1.22459 * math.sqrt(elevation * 3.2808))*((1.13*(temp - dewpoint_c)-1.15)/10), 1)
         return round((3.56972 * math.sqrt(elevation))*((1.13*(temp - dewpoint_c)-1.15)/10), 1)
