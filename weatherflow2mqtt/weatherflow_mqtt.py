@@ -302,7 +302,6 @@ async def main():
                 data["precipitation_type"] = await cnv.rain_type(obs[13])
                 data["battery"] = round(obs[16], 2)
                 data["rain_rate"] = await cnv.rain_rate(obs[12])
-                data["visibility"] = await cnv.visibility(elevation)
                 data["uv_description"] = await cnv.uv_level(obs[10])
                 bft_value, bft_text = await cnv.beaufort(obs[2])
                 data["beaufort"] = bft_value
@@ -337,6 +336,7 @@ async def main():
                 data["delta_t"] = await cnv.delta_t(obs[7], obs[8], obs[6])
                 data["dewpoint_description"] = await cnv.dewpoint_level(data["dewpoint"])
                 data["temperature_description"] = await cnv.temperature_level(obs[7])
+                data["visibility"] = await cnv.visibility(elevation, data["air_temperature"], data["dewpoint"])
                 client.publish(state_topic, json.dumps(data))
                 await sql.writePressure(data["sealevel_pressure"])
                 await sql.updateHighLow(data)
