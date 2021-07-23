@@ -154,7 +154,7 @@ class ConversionFunctions:
 
         _LOGGER.error("FUNC: sea_level_pressure ERROR: Temperature or Pressure value was reported as NoneType. Check the sensor")
 
-    async def dewpoint(self, temperature, humidity):
+    async def dewpoint(self, temperature, humidity, no_conversion = False):
         """Returns Dewpoint."""
         if temperature is not None and humidity is not None:
             dewpoint_c = round(
@@ -170,6 +170,8 @@ class ConversionFunctions:
                 ),
                 1,
             )
+            if no_conversion:
+                return dewpoint_c
             return await self.temperature(dewpoint_c)
 
         _LOGGER.error("FUNC: dewpoint ERROR: Temperature and/or Humidity value was reported as NoneType. Check the sensor")
@@ -196,15 +198,17 @@ class ConversionFunctions:
         mean_angle = degrees(phase(sum(rect(1, radians(d)) for d in bearing_arr)/len(bearing_arr)))
         return int(abs(mean_angle))
 
-    async def visibility(self, elevation, temp, dewpoint_c):
+    async def visibility(self, elevation, temp, humidity):
         """Returns the visibility.
            Input:
                Elevation in Meters
                Temperature in Celcius
-               Dewpoint in Celcius
+               Humidity in percent
         """
-        if temp is None or elevation is None or dewpoint_c is None:
+        if temp is None or elevation is None or humidity is None:
             return None
+
+        dewpoint_c = await self.dewpoint(temp, humidity, True)
 
         if self._unit_system == UNITS_IMPERIAL:
             return round((1.22459 * math.sqrt(elevation * 3.2808))*((1.13*(temp - dewpoint_c)-1.15)/10), 1)

@@ -432,7 +432,7 @@ WEATHERFLOW_SENSORS = [
         False,
         False
     ],
-    ["visibility", "Visibility", "km", "nmi", None, "eye", EVENT_SKY_DATA, False, False],
+    ["visibility", "Visibility", "km", "nmi", None, "eye", EVENT_AIR_DATA, False, False],
     [
         "wetbulb",
         "Wet Bulb Temperature",
