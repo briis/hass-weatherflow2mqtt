@@ -1,5 +1,13 @@
 # Home Assistant WeatherFlow2MQTT Changelog
 
+## Version 2.0.11
+
+**Release Date**: July 23rd, 2021
+
+### Changes in release 2.0.11
+
+`FIX`: Visibility sensor caused a crash after 2.0.10, due to missing vars. This is now fixed.
+
 ## Version 2.0.10
 
 **Release Date**: July 20th, 2021
