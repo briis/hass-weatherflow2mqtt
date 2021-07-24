@@ -121,7 +121,7 @@ class Forecast:
                 item = {
                     ATTR_FORECAST_TIME: datetime.utcfromtimestamp(row["time"]).replace(tzinfo=UTC).isoformat(),
                     "conditions": row["conditions"],
-                    ATTR_FORECAST_CONDITION: await self.ha_condition_value(row["icon"]),
+                    ATTR_FORECAST_CONDITION: await self.ha_condition_value(row.get("icon")),
                     ATTR_FORECAST_TEMP: await cnv.temperature(row["air_temperature"]),
                     ATTR_FORECAST_PRESSURE: await cnv.pressure(row["sea_level_pressure"]),
                     ATTR_FORECAST_HUMIDITY: row["relative_humidity"],
@@ -151,10 +151,14 @@ class Forecast:
 
     async def ha_condition_value(self, value):
         """Returns the Home Assistant Condition."""
-        return next(
-            (k for k, v in CONDITION_CLASSES.items() if value in v),
-            None,
-        )
+        try:
+            return next(
+                (k for k, v in CONDITION_CLASSES.items() if value in v),
+                None,
+            )
+        except Exception as e:
+            _LOGGER.debug("Could not find icon with value:  %s. Error message: %s", value, e)
+            return None
 
     async def async_request(self, method: str, endpoint: str) -> dict:
         """Make a request against the SmartWeather API."""
