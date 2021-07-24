@@ -15,6 +15,9 @@
 ### Changes in release 2.0.10
 
 `CHANGE`: To support multi platform docker containers the new home for the container is on Docker Hub with the name **briis/weatherflow2mqtt**. This is where future upgrades will land. So please change your docker command to use this location. README file is updated with the location.
+So please change your docker command to use this location. README file is updated with the location.
+With this change, you should no longer have to build the container yourself if you run on a non-Intel HW platform like a Raspberry PI.
+I recommend you delete the current container and image, and then re-load it using the new location.
 
 `FIX`: Visibility sensor now takes in to account current weather conditions. Thanks to @GlennGoddard for making this change. Fixing issue #29
 
