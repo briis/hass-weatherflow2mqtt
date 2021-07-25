@@ -140,3 +140,4 @@ weatherfunctions.js
 weatherflow2mqtt.db
 config_bck.yaml
 max_min_day.sql
+upload_docker.sh
