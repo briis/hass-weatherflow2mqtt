@@ -1,10 +1,10 @@
 # Home Assistant WeatherFlow2MQTT Changelog
 
-## Version 2.0.12
+## Version 2.0.14
 
-**Release Date**: NOT RELEASED YET
+**Release Date**: July 25th, 2021
 
-### Changes in release 2.0.12
+### Changes in release 2.0.14
 
 `FIX`: Issue #44. A user reported a wrong value for the Forecast Condition icon. It cannot be reproduced, but this version adds better error handling, and logging of the value that causes the error, should it occur again.
 
