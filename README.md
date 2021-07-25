@@ -94,6 +94,7 @@ Currently these languages are supported for Wind Cardinals and other Text state 
 
 - `en`: English
 - `da`: Danish
+- `fr`: French
 
 If you would like to assist in translating to a new language, do the following:
 
