@@ -238,6 +238,28 @@ WEATHERFLOW_SENSORS = [
     ],
     [
         "lightning_strike_count",
+        "Lightning Count",
+        None,
+        None,
+        None,
+        "weather-lightning",
+        EVENT_AIR_DATA,
+        False,
+        False
+    ],
+    [
+        "lightning_strike_count_1hr",
+        "Lightning Count (Last hour)",
+        None,
+        None,
+        None,
+        "weather-lightning",
+        EVENT_AIR_DATA,
+        False,
+        False
+    ],
+    [
+        "lightning_strike_count_3hr",
         "Lightning Count (3 hours)",
         None,
         None,

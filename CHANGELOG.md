@@ -1,5 +1,15 @@
 # Home Assistant WeatherFlow2MQTT Changelog
 
+## Version 2.0.15
+
+**Release Date**: NOT RELEASED YET
+
+### Changes in release 2.0.15
+
+`NEW`: **BREAKING CHANGE** 2 new Lightning sensors have been added, `lightning_strike_count_1hr` and `lightning_strike_count_3hr`. They represent the number of lightning strikes within the last hour and the last 3 hours. The 3 hour counter is in reality not new, as this was previously named `lightning_strike_count`, but has now been renamed. The `lightning_strike_count` now shows the number of lightning strikes in the last minute and can be used to give an indication of the severity of the thunderstorm.
+
+
+
 ## Version 2.0.14
 
 **Release Date**: July 25th, 2021

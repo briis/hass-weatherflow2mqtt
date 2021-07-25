@@ -206,10 +206,10 @@ class SQLFunctions:
             _LOGGER.error("Could write to Pressure Table. Error message: %s", e)
             return False
 
-    async def readLightningCount(self):
-        """Returns the number of Lightning Strikes in the last 3 hours."""
+    async def readLightningCount(self, hours: int):
+        """Returns the number of Lightning Strikes in the last x hours."""
         try:
-            time_point = time.time() - STRIKE_COUNT_TIMER
+            time_point = time.time() - hours * 60 * 60
             cursor = self.connection.cursor()
             cursor.execute(f"SELECT COUNT(*) FROM lightning WHERE timestamp > {time_point};")
             data = cursor.fetchone()[0]

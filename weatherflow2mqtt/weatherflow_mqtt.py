@@ -224,7 +224,9 @@ async def main():
                 data["station_pressure"] = await cnv.pressure(obs[1])
                 data["air_temperature"] = await cnv.temperature(obs[2])
                 data["relative_humidity"] = obs[3]
-                data["lightning_strike_count"] = await sql.readLightningCount()
+                data["lightning_strike_count"] = obs[4]
+                data["lightning_strike_count_1hr"] = await sql.readLightningCount(1)
+                data["lightning_strike_count_3hr"] = await sql.readLightningCount(3)
                 data["lightning_strike_count_today"] = storage["lightning_count_today"]
                 data["lightning_strike_distance"] = storage["last_lightning_distance"]
                 data["lightning_strike_energy"] = storage["last_lightning_energy"]
@@ -318,7 +320,9 @@ async def main():
                 data["station_pressure"] = await cnv.pressure(obs[6])
                 data["air_temperature"] = await cnv.temperature(obs[7])
                 data["relative_humidity"] = obs[8]
-                data["lightning_strike_count"] = await sql.readLightningCount()
+                data["lightning_strike_count"] = obs[15]
+                data["lightning_strike_count_1hr"] = await sql.readLightningCount(1)
+                data["lightning_strike_count_3hr"] = await sql.readLightningCount(3)
                 data["lightning_strike_count_today"] = storage["lightning_count_today"]
                 data["lightning_strike_distance"] = storage["last_lightning_distance"]
                 data["lightning_strike_energy"] = storage["last_lightning_energy"]

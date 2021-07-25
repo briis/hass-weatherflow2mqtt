@@ -119,7 +119,9 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | dewpoint_description | Dewpoint Comfort Level | Textual representation of the Dewpoint value | Yes |  |  |  |
 | feelslike | Feels Like Temperature | The apparent temperature, a mix of Heat Index and Wind Chill | Yes |  | C° |  |
 | illuminance | Illuminance | How much the incident light illuminates the surface | No | obs_st/9 | Lux |  |
-| lightning_strike_count | Lightning Count (3 hours) | Number of lightning strikes the last 3 hours | Yes |  |  |  |
+| lightning_strike_count | Lightning Count | Number of lightning strikes in the last minute | Yes |  |  |  |
+| lightning_strike_count_1hr | Lightning Count (Last hour) | Number of lightning strikes during the last hour | Yes |  |  |  |
+| lightning_strike_count_3hr | Lightning Count (3 hours) | Number of lightning strikes the last 3 hours | Yes |  |  |  |
 | lightning_strike_count_today | Lightning Count (Today) | Number of lightning strikes current day | Yes |  |  |  |
 | lightning_strike_distance | Lightning Distance | Distance of the last strike | No | obs_st/14 or evt_strike/1 | km |  |
 | lightning_strike_energy | Lightning Energy | Energy of the last strike | No | evt_strike/2 |  |  |
@@ -167,6 +169,8 @@ sensors:
   - feelslike
   - illuminance
   - lightning_strike_count
+  - lightning_strike_count_1hr
+  - lightning_strike_count_3hr
   - lightning_strike_count_today
   - lightning_strike_distance
   - lightning_strike_energy
