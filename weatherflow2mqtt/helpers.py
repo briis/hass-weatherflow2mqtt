@@ -264,12 +264,21 @@ class ConversionFunctions:
         return await self.temperature(twguess)
 
     async def delta_t(self, temp, humidity, pressure):
-        """Returns Delta T temperature."""
+        """Returns Delta T temperature.
+        Input:
+               Station Pressure in MB
+               Temperature in Celcius
+               Humidity in percent
+        """
         if temp is None or humidity is None or pressure is None:
             return None
 
         wb = await self.wetbulb(temp, humidity, pressure)
-        deltat = temp - wb
+
+        if self._unit_system == UNITS_IMPERIAL:
+            deltat = ((temp * 1.8) + 32) - wb
+        else:
+            deltat = temp - wb
 
         return await self.temperature(deltat)
 
