@@ -214,7 +214,7 @@ class ConversionFunctions:
             return round((1.22459 * math.sqrt(elevation * 3.2808))*((1.13*(temp - dewpoint_c)-1.15)/10), 1)
         return round((3.56972 * math.sqrt(elevation))*((1.13*(temp - dewpoint_c)-1.15)/10), 1)
 
-    async def wetbulb(self, temp, humidity, pressure, no_conversion = False):
+    async def wetbulb(self, temp, humidity, pressure):
         """Returns the Wel Bulb Temperature.
             Converted from a JS formula made by Gary W Funk
             Input:
@@ -261,8 +261,6 @@ class ConversionFunctions:
 
             twguess = twguess + incr * previoussign
 
-        if no_conversion:
-            return twguess
         return await self.temperature(twguess)
 
     async def delta_t(self, temp, humidity, pressure):
@@ -270,10 +268,13 @@ class ConversionFunctions:
         if temp is None or humidity is None or pressure is None:
             return None
 
-        wb = await self.wetbulb(temp, humidity, pressure, True)
-        deltat = temp - wb
+        # Ensure both Wetbulb and Temperature is same unit system
+        wb = await self.wetbulb(temp, humidity, pressure)
+        temp_u = await self.temperature(temp)
 
-        return await self.temperature(deltat)
+        deltat = temp_u - wb
+
+        return round(deltat, 1)
 
     async def beaufort(self, wind_speed):
         """Returns the Beaufort Scale value based on Wind Speed."""
