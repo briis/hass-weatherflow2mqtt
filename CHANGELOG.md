@@ -8,7 +8,7 @@
 
 `NEW`: **BREAKING CHANGE** 2 new Lightning sensors have been added, `lightning_strike_count_1hr` and `lightning_strike_count_3hr`. They represent the number of lightning strikes within the last hour and the last 3 hours. The 3 hour counter is in reality not new, as this was previously named `lightning_strike_count`, but has now been renamed. The `lightning_strike_count` now shows the number of lightning strikes in the last minute and can be used to give an indication of the severity of the thunderstorm.
 
-
+`FIX`: Issue #51. Delta_T value was wrong when using `imperial` units. The fix applied in 2.0.14 was not correct, but hopefully this works now.
 
 ## Version 2.0.14
 
