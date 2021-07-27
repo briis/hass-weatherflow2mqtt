@@ -34,6 +34,8 @@ If everything is setup correctly with MQTT and Home Assistant, you should now st
 
 The below command will pull the latest docker image and start WeatherFlow2MQTT for timezone Europe/Copenhagen and save data in the directory you are placed in when you launch the command. Ensure that you have replaced the Environment variables with your specific data. See description below.
 
+If you are using docker-compose you can use the docker-compose.yml file and make the modifications for your environment.  
+
 ```bash
 docker run -d \
 --name=weatherflow2mqtt --restart=unless-stopped \
