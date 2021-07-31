@@ -1,5 +1,6 @@
 """Constant file for weatherflow2mqtt."""
 import datetime
+import os
 
 ATTRIBUTION = "Powered by WeatherFlow2MQTT"
 BRAND = "WeatherFlow"
@@ -17,7 +18,7 @@ ATTR_FORECAST_WIND_BEARING = "wind_bearing"
 ATTR_FORECAST_WIND_SPEED = "wind_speed"
 ATTR_FORECAST_HUMIDITY = "humidity"
 
-EXTERNAL_DIRECTORY = "/usr/local/config"
+EXTERNAL_DIRECTORY = os.environ.get("EXTERNAL_DIRECTORY", "/usr/local/config")
 INTERNAL_DIRECTORY = "/app"
 STORAGE_FILE = f"{EXTERNAL_DIRECTORY}/.storage.json"
 DATABASE = f"{EXTERNAL_DIRECTORY}/weatherflow2mqtt.db"
@@ -77,6 +78,25 @@ TABLE_HIGH_LOW = """
                         min_all_time REAL
                     );
                   """
+
+TABLE_DAY_DATA = """ CREATE TABLE IF NOT EXISTS day_data (
+                    timestamp REAL PRIMARY KEY,
+                    air_temperature REAL,
+                    relative_humidity REAL,
+                    dewpoint REAL,
+                    illuminance REAL,
+                    rain_duration_today REAL,
+                    rain_rate REAL,
+                    wind_gust REAL,
+                    wind_lull REAL,
+                    wind_speed_avg REAL,
+                    lightning_strike_energy REAL,
+                    lightning_strike_count_today REAL,
+                    sealevel_pressure REAL,
+                    uv REAL,
+                    solar_radiation REAL
+                );"""
+
 COL_TEMPERATURE = "air_temperature"
 COL_HUMIDITY = "relative_humidity"
 COL_DEWPOINT = "dewpoint"
@@ -103,7 +123,6 @@ DEVICE_CLASS_TIMESTAMP = "timestamp"
 DEVICE_CLASS_VOLTAGE = "voltage"
 
 DEVICE_STATUS = [
-    "Sensors OK",
     "lightning failed",
     "lightning noise",
     "lightning disturber",
@@ -140,6 +159,7 @@ HIGH_LOW_TIMER = 10 * 60
 SUPPORTED_LANGUAGES = [
     "en",
     "da",
+    "fr",
 ]
 
 UNITS_IMPERIAL = "imperial"
@@ -218,6 +238,28 @@ WEATHERFLOW_SENSORS = [
     ],
     [
         "lightning_strike_count",
+        "Lightning Count",
+        None,
+        None,
+        None,
+        "weather-lightning",
+        EVENT_AIR_DATA,
+        False,
+        False
+    ],
+    [
+        "lightning_strike_count_1hr",
+        "Lightning Count (Last hour)",
+        None,
+        None,
+        None,
+        "weather-lightning",
+        EVENT_AIR_DATA,
+        False,
+        False
+    ],
+    [
+        "lightning_strike_count_3hr",
         "Lightning Count (3 hours)",
         None,
         None,
@@ -412,7 +454,7 @@ WEATHERFLOW_SENSORS = [
         False,
         False
     ],
-    ["visibility", "Visibility", "km", "nmi", None, "eye", EVENT_SKY_DATA, False, False],
+    ["visibility", "Visibility", "km", "nmi", None, "eye", EVENT_AIR_DATA, False, False],
     [
         "wetbulb",
         "Wet Bulb Temperature",

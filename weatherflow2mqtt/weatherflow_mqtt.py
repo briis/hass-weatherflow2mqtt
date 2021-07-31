@@ -13,11 +13,11 @@ from datetime import datetime
 import sys
 import os
 
-from aioudp import open_local_endpoint
-from helpers import ConversionFunctions, DataStorage
-from forecast import Forecast
-from sqlite import SQLFunctions
-from const import (
+from weatherflow2mqtt.aioudp import open_local_endpoint
+from weatherflow2mqtt.helpers import ConversionFunctions, DataStorage
+from weatherflow2mqtt.forecast import Forecast
+from weatherflow2mqtt.sqlite import SQLFunctions
+from weatherflow2mqtt.const import (
     ATTRIBUTION,
     ATTR_ATTRIBUTION,
     ATTR_BRAND,
@@ -97,7 +97,7 @@ async def main():
 
     # Setup and connect to MQTT Broker
     try:
-        client = mqtt.Client(client_id="weatherflow2mqtt")
+        client = mqtt.Client(client_id="")
         client.max_inflight_messages_set(240)
 
         if not mqtt_anonymous:
@@ -224,7 +224,9 @@ async def main():
                 data["station_pressure"] = await cnv.pressure(obs[1])
                 data["air_temperature"] = await cnv.temperature(obs[2])
                 data["relative_humidity"] = obs[3]
-                data["lightning_strike_count"] = await sql.readLightningCount()
+                data["lightning_strike_count"] = obs[4]
+                data["lightning_strike_count_1hr"] = await sql.readLightningCount(1)
+                data["lightning_strike_count_3hr"] = await sql.readLightningCount(3)
                 data["lightning_strike_count_today"] = storage["lightning_count_today"]
                 data["lightning_strike_distance"] = storage["last_lightning_distance"]
                 data["lightning_strike_energy"] = storage["last_lightning_energy"]
@@ -243,9 +245,11 @@ async def main():
                 data["delta_t"] = await cnv.delta_t(obs[2], obs[3], obs[1])
                 data["dewpoint_description"] = await cnv.dewpoint_level(data["dewpoint"])
                 data["temperature_description"] = await cnv.temperature_level(obs[2])
+                data["visibility"] = await cnv.visibility(elevation, obs[2], obs[3])
                 client.publish(state_topic, json.dumps(data))
                 await sql.writePressure(data["sealevel_pressure"])
                 await sql.updateHighLow(data)
+                # await sql.updateDayData(data)
                 await asyncio.sleep(0.01)
             if msg_type in EVENT_SKY_DATA:
                 obs = json_response["obs"][0]
@@ -266,13 +270,13 @@ async def main():
                 data["solar_radiation"] = obs[10]
                 data["precipitation_type"] = await cnv.rain_type(obs[12])
                 data["rain_rate"] = await cnv.rain_rate(obs[3])
-                data["visibility"] = await cnv.visibility(elevation)
                 data["uv_description"] = await cnv.uv_level(obs[2])
                 bft_value, bft_text = await cnv.beaufort(obs[5])
                 data["beaufort"] = bft_value
                 data["beaufort_text"] = bft_text
                 client.publish(state_topic, json.dumps(data))
                 await sql.updateHighLow(data)
+                # await sql.updateDayData(data)
                 await asyncio.sleep(0.01)
                 if obs[3] > 0:
                     storage["rain_duration_today"] += 1
@@ -300,13 +304,13 @@ async def main():
                 data["precipitation_type"] = await cnv.rain_type(obs[13])
                 data["battery"] = round(obs[16], 2)
                 data["rain_rate"] = await cnv.rain_rate(obs[12])
-                data["visibility"] = await cnv.visibility(elevation)
                 data["uv_description"] = await cnv.uv_level(obs[10])
                 bft_value, bft_text = await cnv.beaufort(obs[2])
                 data["beaufort"] = bft_value
                 data["beaufort_text"] = bft_text
                 client.publish(state_topic, json.dumps(data))
                 await sql.updateHighLow(data)
+                # await sql.updateDayData(data)
                 await asyncio.sleep(0.01)
 
                 state_topic = "homeassistant/sensor/{}/{}/state".format(
@@ -316,7 +320,9 @@ async def main():
                 data["station_pressure"] = await cnv.pressure(obs[6])
                 data["air_temperature"] = await cnv.temperature(obs[7])
                 data["relative_humidity"] = obs[8]
-                data["lightning_strike_count"] = await sql.readLightningCount()
+                data["lightning_strike_count"] = obs[15]
+                data["lightning_strike_count_1hr"] = await sql.readLightningCount(1)
+                data["lightning_strike_count_3hr"] = await sql.readLightningCount(3)
                 data["lightning_strike_count_today"] = storage["lightning_count_today"]
                 data["lightning_strike_distance"] = storage["last_lightning_distance"]
                 data["lightning_strike_energy"] = storage["last_lightning_energy"]
@@ -332,11 +338,13 @@ async def main():
                 data["feelslike"] = await cnv.feels_like(obs[7], obs[8], wind_speed)
                 data["wetbulb"] = await cnv.wetbulb(obs[7], obs[8], obs[6])
                 data["delta_t"] = await cnv.delta_t(obs[7], obs[8], obs[6])
+                data["visibility"] = await cnv.visibility(elevation, obs[7], obs[8])
                 data["dewpoint_description"] = await cnv.dewpoint_level(data["dewpoint"])
                 data["temperature_description"] = await cnv.temperature_level(obs[7])
                 client.publish(state_topic, json.dumps(data))
                 await sql.writePressure(data["sealevel_pressure"])
                 await sql.updateHighLow(data)
+                # await sql.updateDayData(data)
                 await asyncio.sleep(0.01)
 
                 if obs[12] > 0:
@@ -359,7 +367,8 @@ async def main():
                     )
                 if sensor_status is not None and sensor_status != 0:
                     device_status = await cnv.device_status(sensor_status)
-                    _LOGGER.debug("Device %s has reported a sensor fault. Reason: %s", serial_number, device_status)
+                    if device_status:
+                        _LOGGER.debug("Device %s has reported a sensor fault. Reason: %s", serial_number, device_status)
 
             if msg_type != EVENT_RAPID_WIND and msg_type != EVENT_HUB_STATUS:
                 # Update the Forecast State (Ensure there is data if HA restarts)

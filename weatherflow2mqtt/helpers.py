@@ -10,8 +10,9 @@ import yaml
 from cmath import rect, phase
 from math import gamma, radians, degrees
 
-from sqlite import SQLFunctions
-from const import (
+from weatherflow2mqtt.sqlite import SQLFunctions
+from weatherflow2mqtt.__version__ import DB_VERSION
+from weatherflow2mqtt.const import (
     DEVICE_STATUS,
     EXTERNAL_DIRECTORY,
     SUPPORTED_LANGUAGES,
@@ -153,7 +154,7 @@ class ConversionFunctions:
 
         _LOGGER.error("FUNC: sea_level_pressure ERROR: Temperature or Pressure value was reported as NoneType. Check the sensor")
 
-    async def dewpoint(self, temperature, humidity):
+    async def dewpoint(self, temperature, humidity, no_conversion = False):
         """Returns Dewpoint."""
         if temperature is not None and humidity is not None:
             dewpoint_c = round(
@@ -169,6 +170,8 @@ class ConversionFunctions:
                 ),
                 1,
             )
+            if no_conversion:
+                return dewpoint_c
             return await self.temperature(dewpoint_c)
 
         _LOGGER.error("FUNC: dewpoint ERROR: Temperature and/or Humidity value was reported as NoneType. Check the sensor")
@@ -195,11 +198,21 @@ class ConversionFunctions:
         mean_angle = degrees(phase(sum(rect(1, radians(d)) for d in bearing_arr)/len(bearing_arr)))
         return int(abs(mean_angle))
 
-    async def visibility(self, elevation):
-        """Returns the visibility."""
+    async def visibility(self, elevation, temp, humidity):
+        """Returns the visibility.
+           Input:
+               Elevation in Meters
+               Temperature in Celcius
+               Humidity in percent
+        """
+        if temp is None or elevation is None or humidity is None:
+            return None
+
+        dewpoint_c = await self.dewpoint(temp, humidity, True)
+
         if self._unit_system == UNITS_IMPERIAL:
-            return round(1.22459 * math.sqrt(elevation * 3.2808), 1)
-        return round(3.56972 * math.sqrt(elevation), 1)
+            return round((1.22459 * math.sqrt(elevation * 3.2808))*((1.13*(temp - dewpoint_c)-1.15)/10), 1)
+        return round((3.56972 * math.sqrt(elevation))*((1.13*(temp - dewpoint_c)-1.15)/10), 1)
 
     async def wetbulb(self, temp, humidity, pressure):
         """Returns the Wel Bulb Temperature.
@@ -209,6 +222,9 @@ class ConversionFunctions:
                 Humdity in Percent
                 Station Pressure in MB
         """
+        if temp is None or humidity is None or pressure is None:
+            return None
+
         t = float(temp)
         rh = float(humidity)
         p = float(pressure)
@@ -249,11 +265,16 @@ class ConversionFunctions:
 
     async def delta_t(self, temp, humidity, pressure):
         """Returns Delta T temperature."""
+        if temp is None or humidity is None or pressure is None:
+            return None
 
+        # Ensure both Wetbulb and Temperature is same unit system
         wb = await self.wetbulb(temp, humidity, pressure)
-        deltat = temp - wb
+        temp_u = await self.temperature(temp)
 
-        return await self.temperature(deltat)
+        deltat = temp_u - wb
+
+        return round(deltat, 1)
 
     async def beaufort(self, wind_speed):
         """Returns the Beaufort Scale value based on Wind Speed."""
@@ -387,11 +408,12 @@ class ConversionFunctions:
             return
             
         binvalue = str(bin(value))
-        binarr = binvalue[2:]
+        binarr = binvalue[::-1]
+        binarr = binarr[:len(DEVICE_STATUS)]
         return_value = []
-        for x in range(len(binarr)):
-            if binarr[x:x+1] == "1":
-                return_value.append(DEVICE_STATUS[len(binarr)-x])
+        for x in range(len(DEVICE_STATUS)):
+            if binarr[len(binarr) - 1 - x] == "1":
+                return_value.append(DEVICE_STATUS[x])
 
         return return_value
 
@@ -436,20 +458,5 @@ class DataStorage:
 
 
     def getVersion(self):
-        """Returns the version number stored in the VERSION file."""
-        try:
-            filepath = "/VERSION"
-            with open(filepath, "r") as file:
-                lines = file.readlines()
-                for line in lines:
-                    if line != "\n":
-                        return line.replace("\n", "")
-
-
-        except FileNotFoundError as e:
-            _LOGGER.error("Could not find VERSION File.")
-            return None
-        except Exception as e:
-            _LOGGER.debug("Could not read program version file. Error message: %s", e)
-            return None
-
+        """Returns the version number stored in the __version__.py file."""
+        return DB_VERSION

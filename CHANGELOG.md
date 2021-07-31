@@ -1,5 +1,58 @@
 # Home Assistant WeatherFlow2MQTT Changelog
 
+## Version 2.0.15
+
+**Release Date**: NOT RELEASED YET
+
+### Changes in release 2.0.15
+
+`NEW`: **BREAKING CHANGE** 2 new Lightning sensors have been added, `lightning_strike_count_1hr` and `lightning_strike_count_3hr`. They represent the number of lightning strikes within the last hour and the last 3 hours. The 3 hour counter is in reality not new, as this was previously named `lightning_strike_count`, but has now been renamed. The `lightning_strike_count` now shows the number of lightning strikes in the last minute and can be used to give an indication of the severity of the thunderstorm.
+
+`FIX`: Issue #51. Delta_T value was wrong when using `imperial` units. The fix applied in 2.0.14 was not correct, but hopefully this works now.
+
+## Version 2.0.14
+
+**Release Date**: July 25th, 2021
+
+### Changes in release 2.0.14
+
+`FIX`: Issue #44. A user reported a wrong value for the Forecast Condition icon. It cannot be reproduced, but this version adds better error handling, and logging of the value that causes the error, should it occur again.
+
+`FIX`: Issue #51. Delta_T value was wrong when using `imperial` units. Thanks to @GlennGoddard for spotting the issue, and suggesting the solution.
+
+## Version 2.0.11
+
+**Release Date**: July 23rd, 2021
+
+### Changes in release 2.0.11
+
+`FIX`: Visibility sensor caused a crash after 2.0.10, due to missing vars. This is now fixed.
+
+## Version 2.0.10
+
+**Release Date**: July 20th, 2021
+
+### Changes in release 2.0.10
+
+`CHANGE`: To support multi platform docker containers the new home for the container is on Docker Hub with the name **briis/weatherflow2mqtt**. This is where future upgrades will land. So please change your docker command to use this location. README file is updated with the location.
+So please change your docker command to use this location. README file is updated with the location.
+With this change, you should no longer have to build the container yourself if you run on a non-Intel HW platform like a Raspberry PI.
+I recommend you delete the current container and image, and then re-load it using the new location.
+
+`FIX`: Visibility sensor now takes in to account current weather conditions. Thanks to @GlennGoddard for making this change. Fixing issue #29
+
+## Version 2.0.9
+
+**Release Date**: July 6th, 2021
+
+### Changes in release 2.0.9
+
+`FIX`: Wetbulb Calculation crashed the system if one of the sensors had a NoneType value. Fixing issue #33
+
+`NEW`: Added French Tranlation, thanks to @titilambert.
+
+`FIX`: Issue #37, where the device status check could fail. thanks to @titilambert for fixing this.
+
 ## Version 2.0.8
 
 **Release Date**: June 24th, 2021

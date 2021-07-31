@@ -1,0 +1,80 @@
+{
+    "beaufort": {
+        "0": "Calme",
+        "1": "Petit air",
+        "2": "Brise légère",
+        "3": "Petite Brise",
+        "4": "Brise moyenne",
+        "5": "Brise fraîche",
+        "6": "Forte Brise",
+        "7": "Vent moyen",
+        "8": "Vent frais",
+        "9": "Fort vent",
+        "10": "Tempête",
+        "11": "Violente tempête",
+        "12": "Ouragan"
+    },
+    "wind_dir": {
+        "N": "N",
+        "NNE": "NNE",
+        "NE": "NE",
+        "ENE": "ENE",
+        "E": "E",
+        "ESE": "ESE",
+        "SE": "SE",
+        "SSE": "SSE",
+        "S": "S",
+        "SSW": "SSO",
+        "SW": "SO",
+        "WSW": "OSO",
+        "W": "O",
+        "WNW": "ONO",
+        "NW": "NO",
+        "NNW": "NNO"
+    },
+    "trend": {
+        "falling": "En baisse",
+        "rising": "En hausse",
+        "steady": "Stable"
+    },
+    "dewpoint": {
+        "severely-high": "Gravement haut",
+        "miserable": "Misérable",
+        "oppressive": "Oppressif",
+        "uncomfortable": "Inconfortable",
+        "ok-for-most": "Ok pour la plupart",
+        "comfortable": "Comfortable",
+        "very-comfortable": "Très agréable",
+        "somewhat-dry": "Un peu sec",
+        "dry": "Sec",
+        "very-dry": "Très sec",
+        "undefined": "Non défini"
+    },
+    "temperature": {
+        "inferno": "Inferno",
+        "very-hot": "Très chaud",
+        "hot": "Chaud",
+        "warm": "Un peu chaud",
+        "nice": "Agréable",
+        "cool": "Frais",
+        "chilly": "Froid",
+        "cold": "Cold",
+        "freezing": "Gelée",
+        "fridged": "Réfrigéré",
+        "undefined": "Non définie"
+    },
+    "uv": {
+        "extreme": "Extrême",
+        "very-high": "Très haut",
+        "high": "Haut",
+        "moderate": "Moyen",
+        "low": "Bas",
+        "none": "Rien"
+    },
+    "precip_type": {
+        "none": "Rien",
+        "rain": "Pluie",
+        "hail": "Grêle",
+        "heavy-rain": "Forte pluie"
+    }
+}

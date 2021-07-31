@@ -57,8 +57,9 @@ docker run -d \
 -e STATION_ID= \
 -e STATION_TOKEN= \
 -e FORECAST_INTERVAL=30 \
-ghcr.io/briis/hass-weatherflow2mqtt:latest
+briis/weatherflow2mqtt:latest
 ```
+The container is build for both Intel and ARM platforms, so it should work on most HW types. Please create an issue, if there is a platform for which it does not work.
 
 ### Docker Volume
 
@@ -93,6 +94,7 @@ Currently these languages are supported for Wind Cardinals and other Text state 
 
 - `en`: English
 - `da`: Danish
+- `fr`: French
 
 If you would like to assist in translating to a new language, do the following:
 
@@ -117,7 +119,9 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | dewpoint_description | Dewpoint Comfort Level | Textual representation of the Dewpoint value | Yes |  |  |  |
 | feelslike | Feels Like Temperature | The apparent temperature, a mix of Heat Index and Wind Chill | Yes |  | C° |  |
 | illuminance | Illuminance | How much the incident light illuminates the surface | No | obs_st/9 | Lux |  |
-| lightning_strike_count | Lightning Count (3 hours) | Number of lightning strikes the last 3 hours | Yes |  |  |  |
+| lightning_strike_count | Lightning Count | Number of lightning strikes in the last minute | Yes |  |  |  |
+| lightning_strike_count_1hr | Lightning Count (Last hour) | Number of lightning strikes during the last hour | Yes |  |  |  |
+| lightning_strike_count_3hr | Lightning Count (3 hours) | Number of lightning strikes the last 3 hours | Yes |  |  |  |
 | lightning_strike_count_today | Lightning Count (Today) | Number of lightning strikes current day | Yes |  |  |  |
 | lightning_strike_distance | Lightning Distance | Distance of the last strike | No | obs_st/14 or evt_strike/1 | km |  |
 | lightning_strike_energy | Lightning Energy | Energy of the last strike | No | evt_strike/2 |  |  |
@@ -165,6 +169,8 @@ sensors:
   - feelslike
   - illuminance
   - lightning_strike_count
+  - lightning_strike_count_1hr
+  - lightning_strike_count_3hr
   - lightning_strike_count_today
   - lightning_strike_distance
   - lightning_strike_energy
@@ -260,3 +266,40 @@ weather:
 
 - The weather entity expects km/h when having metric units, so the above example converts m/s to km/h. If you are using *imperial* units, the line should just be `{{ states('sensor.wf_wind_speed_avg') }}`
 - For the *forecast_template* you can either use `hourly_forecast` or `daily_forecast` to get Hourly or Day based forecast.
+
+
+## Setup Dev environment
+
+```bash
+virtualenv -p `which python3` env
+source env/bin/activate
+python setup.py install
+```
+
+Then you just need to export the configuration
+```
+export TZ="America/Toronto"
+export TEMPEST_DEVICE="True"
+export UNIT_SYSTEM="metric"
+export LANGUAGE="en"
+export RAPID_WIND_INTERVAL="0"
+export DEBUG="True"
+export EXTERNAL_DIRECTORY="."
+export ELEVATION="30"
+export WF_HOST="0.0.0.0"
+export WF_PORT="50222"
+export MQTT_HOST="..."
+export MQTT_PORT="1883"
+export MQTT_DEBUG="False"
+export ADD_FORECAST="True"
+export STATION_ID="..."
+export STATION_TOKEN="..."
+export FORECAST_INTERVAL="30"
+export MQTT_USERNAME="..."
+export MQTT_PASSWORD="..."
+```
+
+Then you can run the daemon with
+```
+weatherflow2mqt
+```
