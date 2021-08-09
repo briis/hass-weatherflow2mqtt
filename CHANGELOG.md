@@ -2,13 +2,19 @@
 
 ## Version 2.0.15
 
-**Release Date**: NOT RELEASED YET
+**Release Date**: August 9th, 2021
+
+Just back from vacation, I release what was is done now. There are more requests, which will be added in the following days.
 
 ### Changes in release 2.0.15
 
 `NEW`: **BREAKING CHANGE** 2 new Lightning sensors have been added, `lightning_strike_count_1hr` and `lightning_strike_count_3hr`. They represent the number of lightning strikes within the last hour and the last 3 hours. The 3 hour counter is in reality not new, as this was previously named `lightning_strike_count`, but has now been renamed. The `lightning_strike_count` now shows the number of lightning strikes in the last minute and can be used to give an indication of the severity of the thunderstorm.
 
 `FIX`: Issue #51. Delta_T value was wrong when using `imperial` units. The fix applied in 2.0.14 was not correct, but hopefully this works now.
+
+`NEW`: @crzykidd added a Docker Compose file, so if you are using Docker Compose, find the file `docker-compose.yml` and modify this with your own setup.
+
+`CHANGE`: @GlennGoddard fintuned the visibility calculation, so that sensor is now more accurate, taking more parameters in to account.
 
 ## Version 2.0.14
 
