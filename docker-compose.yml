@@ -1,0 +1,28 @@
+version: '2'
+services:
+  weatherflow2mqtt:
+    image: ghcr.io/briis/hass-weatherflow2mqtt:latest
+    restart: unless-stopped
+    environment:
+      - TZ=America/Los_Angeles
+      - TEMPEST_DEVICE=True
+      - UNIT_SYSTEM=imperial
+      - LANGUAGE=EN
+      - RAPID_WIND_INTERVAL=0
+      - DEBUG=False
+      - ELEVATION=0
+      - WF_HOST=0.0.0.0
+      - WF_PORT=50222
+      - MQTT_HOST=
+      - MQTT_PORT=1883
+      - MQTT_USERNAME=
+      - MQTT_PASSWORD=
+      - MQTT_DEBUG=False
+      - ADD_FORECAST=True
+      - STATION_ID=
+      - STATION_TOKEN=
+      - FORECAST_INTERVAL=30
+    volumes:
+      - /YOUR_STORAGE_AREA/PATH:/usr/local/config
+    ports:
+      - 0.0.0.0:50222:50222/udp
