@@ -210,7 +210,7 @@ class ConversionFunctions:
 
         dewpoint_c = await self.dewpoint(temp, humidity, True)
         # Set minimum elevation for cases of stations below sea level
-        if elvation > 2:
+        if elevation > 2:
             elv_min = float(elevation)
         else:
             elv_min = float(2)
