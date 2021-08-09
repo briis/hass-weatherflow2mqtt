@@ -1,5 +1,17 @@
 # Home Assistant WeatherFlow2MQTT Changelog
 
+## Version 2.0.16
+
+**Release Date**: August 9th, 2021
+
+Just back from vacation, I release what was is done now. There are more requests, which will be added in the following days.
+
+### Changes in release 2.0.16
+
+`CHANGE`: Issue #60. Renamed the state for Rain to `heavy` from `heavy rain`.
+
+`FIX`: Visibility calculation not working.
+
 ## Version 2.0.15
 
 **Release Date**: August 9th, 2021

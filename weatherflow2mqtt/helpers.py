@@ -78,7 +78,7 @@ class ConversionFunctions:
 
     async def rain_type(self, value) -> str:
         """Convert rain type."""
-        type_array = ["none", "rain", "hail", "heavy-rain"]
+        type_array = ["none", "rain", "hail", "heavy"]
         try:
             precip_type = type_array[int(value)]
             return self._translations["precip_type"][precip_type]
@@ -210,7 +210,7 @@ class ConversionFunctions:
 
         dewpoint_c = await self.dewpoint(temp, humidity, True)
         # Set minimum elevation for cases of stations below sea level
-        if elvation > 2:
+        if elevation > 2:
             elv_min = float(elevation)
         else:
             elv_min = float(2)
