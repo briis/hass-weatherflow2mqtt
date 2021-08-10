@@ -300,6 +300,54 @@ class ConversionFunctions:
 
         return round(deltat, 1)
 
+    async def battery_level(self, battery):
+        """Returns the battery percentage.
+           Input:
+               Voltage in Volts DC
+               is_tempest in Boolean
+           Tempest:
+             Battery voltage range is 1.8 to 2.85 Vdc
+               > 2.80 is capped at 100%
+               < 1.8 is capped at 0%
+           Air:
+             4 AA batteries (2 in series, then parallel for 2 sets)
+             Battery voltage range is 1.2(x2) => 2.4 to 1.8(x2) => 3.6 Vdc
+	           > 3.6 is capped at 100%
+	           < 2.4 is capped at 0%
+           Sky:
+             8 AA batteries (2 in series, then parallel for 4 sets)
+	         Battery voltage range is 1.2(x2) => 2.4 to 1.8(x2) => 3.6 Vdc
+	           > 3.6 is capped at 100%
+	           < 2.4 is capped at 0%
+        """
+        if battery is None:
+            return None
+
+        if is_tempest:
+             if battery > 2.80:
+                 # Cap max at 100%
+                 pb = int(100)
+             elif battery < 1.8:
+                 # Min voltage is 1.8
+                 pb = int(0)
+             else:
+	             # pb = battery - 1.8
+	             # Multiply by 100 to get in percentage
+                 pb = int((voltage - 1.8)*100)
+        else:
+            if battery > 3.60:
+                # Cap max at 100%
+                pb = int(100)
+            elif battery < 2.4:
+                # Min voltage is 2.4
+                pb = int(0)
+            else:
+	            # pb = (battery - 2.4)/1.2
+	            # Multiply by 100 to get in percentage
+                pb = int(((voltage - 2.4)/1.2)*100)
+
+        return pb
+    
     async def beaufort(self, wind_speed):
         """Returns the Beaufort Scale value based on Wind Speed."""
 
