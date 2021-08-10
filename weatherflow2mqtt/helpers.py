@@ -311,12 +311,12 @@ class ConversionFunctions:
                < 1.8 is capped at 0%
            Air:
              4 AA batteries (2 in series, then parallel for 2 sets)
-             Battery voltage range is 1.2(x2) => 2.4 to 1.8(x2) => 3.6 Vdc
+             Battery voltage range is 1.2(x2) => 2.4 to 1.8(x2) => 3.6 Vdc (lowered to 3.5 based on observation)
 	           > 3.6 is capped at 100%
 	           < 2.4 is capped at 0%
            Sky:
              8 AA batteries (2 in series, then parallel for 4 sets)
-	         Battery voltage range is 1.2(x2) => 2.4 to 1.8(x2) => 3.6 Vdc
+	         Battery voltage range is 1.2(x2) => 2.4 to 1.8(x2) => 3.6 Vdc (lowered to 3.5 based on observation)
 	           > 3.6 is capped at 100%
 	           < 2.4 is capped at 0%
         """
@@ -335,16 +335,16 @@ class ConversionFunctions:
 	             # Multiply by 100 to get in percentage
                  pb = int((voltage - 1.8)*100)
         else:
-            if battery > 3.60:
+            if battery > 3.50:
                 # Cap max at 100%
                 pb = int(100)
             elif battery < 2.4:
                 # Min voltage is 2.4
                 pb = int(0)
             else:
-	            # pb = (battery - 2.4)/1.2
+	            # pb = (battery - 2.4)/1.1
 	            # Multiply by 100 to get in percentage
-                pb = int(((voltage - 2.4)/1.2)*100)
+                pb = int(((voltage - 2.4)/1.1)*100)
 
         return pb
     
