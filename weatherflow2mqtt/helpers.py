@@ -238,8 +238,8 @@ class ConversionFunctions:
             return round(vis/1.609344, 1)
         return round(vis, 1)
 
-    async def wetbulb(self, temp, humidity, pressure):
-        """Returns the Wel Bulb Temperature.
+    async def wetbulb(self, temp, humidity, pressure, no_conversion = False):
+        """Returns the Wet Bulb Temperature.
             Converted from a JS formula made by Gary W Funk
             Input:
                 Temperature in Celcius
@@ -285,6 +285,8 @@ class ConversionFunctions:
 
             twguess = twguess + incr * previoussign
 
+        if no_conversion:
+            return twguess
         return await self.temperature(twguess)
     
     async def wbgt(self, temp, humidity, pressure, solar_radiation):
@@ -316,14 +318,16 @@ class ConversionFunctions:
             return None
 
         ta = float(temp)
-        twb = 
+        twb = await self.wetbulb(temp, humidity, pressure, True)
         rh = float(humidity)
         p = float(pressure)
         sr = float(solar_radiation)
         
-        wbgt = 0.7twb + 0.002996sr + 0.3368ta -0.01578rh - 0.5478
+        wbgt = round(0.7twb + 0.002996sr + 0.3368ta -0.01578rh - 0.5478, 1)
 
-        return round(wbgt, 1)
+        if self._unit_system == UNITS_IMPERIAL:
+            return await self.temperature(wbgt)
+        return wbgt
 
     async def delta_t(self, temp, humidity, pressure):
         """Returns Delta T temperature."""
