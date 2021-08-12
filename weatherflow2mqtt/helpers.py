@@ -306,22 +306,22 @@ class ConversionFunctions:
                Voltage in Volts DC (depends on the weather station type, see below)
                is_tempest in Boolean
            Tempest:
-	     # data["battery_level"] = await cnv.battery_level(obs[16])
+             # data["battery_level"] = await cnv.battery_level(obs[16])
              Battery voltage range is 1.8 to 2.85 Vdc
                > 2.80 is capped at 100%
                < 1.8 is capped at 0%
            Air:
-	     # data["battery_level"] = await cnv.battery_level(obs[6])
+             # data["battery_level"] = await cnv.battery_level(obs[6])
              4 AA batteries (2 in series, then parallel for 2 sets)
              Battery voltage range is 1.2(x2) => 2.4 to 1.8(x2) => 3.6 Vdc (lowered to 3.5 based on observation)
-	       > 3.5 is capped at 100%
-	       < 2.4 is capped at 0%
+               > 3.5 is capped at 100%
+               < 2.4 is capped at 0%
            Sky:
-	     # data["battery_level"] = await cnv.battery_level(obs[8])
+             # data["battery_level"] = await cnv.battery_level(obs[8])
              8 AA batteries (2 in series, then parallel for 4 sets)
 	     Battery voltage range is 1.2(x2) => 2.4 to 1.8(x2) => 3.6 Vdc (lowered to 3.5 based on observation)
-	       > 3.5 is capped at 100%
-	       < 2.4 is capped at 0%
+               > 3.5 is capped at 100%
+               < 2.4 is capped at 0%
         """
         if battery is None:
             return None
