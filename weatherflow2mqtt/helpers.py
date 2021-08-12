@@ -300,10 +300,10 @@ class ConversionFunctions:
 
         return round(deltat, 1)
 
-    async def battery_level(self, battery):
+    async def battery_level(self, battery, is_tempest):
         """Returns the battery percentage.
            Input:
-               Voltage in Volts DC
+               Voltage in Volts DC (depends on the weather station type, see below)
                is_tempest in Boolean
            Tempest:
 	     # data["battery_level"] = await cnv.battery_level(obs[16])
