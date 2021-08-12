@@ -345,8 +345,8 @@ class ConversionFunctions:
                 # Min voltage is 2.4
                 pb = int(0)
             else:
-	        # pb = (battery - 2.4)/1.1
-	        # Multiply by 100 to get in percentage
+                # pb = (battery - 2.4)/1.1
+                # Multiply by 100 to get in percentage
                 pb = int(((voltage - 2.4)/1.1)*100)
 
         return pb
