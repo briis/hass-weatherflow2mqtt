@@ -286,6 +286,44 @@ class ConversionFunctions:
             twguess = twguess + incr * previoussign
 
         return await self.temperature(twguess)
+    
+    async def wbgt(self, temp, humidity, pressure, solar_radiation):
+        """Returns the Wet Bulb Globe Temperature.
+            This is a way to show heat stress on the human body.
+            Input:
+                Temperature in Celcius
+                Humdity in Percent
+                Station Pressure in MB
+                Solar Radiation in Wm^2
+                  Sky: obs[10]
+                  Tempest: obs[11]
+            WBGT = 0.7Twb + 0.2Tg + 0.1Ta
+              where:
+                WBGT is Wet Bulb Globe Temperature in C
+                Twb is Wet Bulb Temperature in C
+                Tg is Black Globe Temperature in C (estimation)
+                Ta is Air Temperature (dry bulb)
+            Tg = 0.01498SR + 1.184Ta - 0.0789Rh - 2.739
+              where:
+                Tg is Black Globe Temperature in C (estimation)
+                SR is Solar Radiation in Wm^2
+                Ta is Air Temperature in C
+                Rh is Relative Humidity in %
+            WBGT = 0.7Twb + 0.002996SR + 0.3368Ta -0.01578Rh - 0.5478
+        """
+
+        if temp is None or humidity is None or pressure is None or solar_radiation is None:
+            return None
+
+        ta = float(temp)
+        twb = 
+        rh = float(humidity)
+        p = float(pressure)
+        sr = float(solar_radiation)
+        
+        wbgt = 0.7twb + 0.002996sr + 0.3368ta -0.01578rh - 0.5478
+
+        return round(wbgt, 1)
 
     async def delta_t(self, temp, humidity, pressure):
         """Returns Delta T temperature."""
