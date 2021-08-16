@@ -501,6 +501,17 @@ WEATHERFLOW_SENSORS = [
         False
     ],
     [
+        "wbgt",
+        "Wet Bulb Globe Temperature",
+        "˚C",
+        "˚F",
+        DEVICE_CLASS_TEMPERATURE,
+        None,
+        EVENT_AIR_DATA,
+        False,
+        False
+    ],
+    [
         "delta_t",
         "Delta T",
         "˚C",
