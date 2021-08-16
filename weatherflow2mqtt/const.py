@@ -115,6 +115,7 @@ COL_SOLARRAD = "solar_radiation"
 BASE_URL = "https://swd.weatherflow.com/swd/rest"
 
 DEFAULT_TIMEOUT = 10
+DEVICE_CLASS_BATTERY = "battery"
 DEVICE_CLASS_HUMIDITY = "humidity"
 DEVICE_CLASS_ILLUMINANCE = "illuminance"
 DEVICE_CLASS_PRESSURRE = "pressure"
@@ -288,6 +289,39 @@ WEATHERFLOW_SENSORS = [
         DEVICE_CLASS_VOLTAGE,
         None,
         EVENT_AIR_DATA,
+        False,
+        False
+    ],
+    [
+        "battery_level_air",
+        "Battery Level AIR",
+        "%",
+        "%",
+        DEVICE_CLASS_BATTERY,
+        None,
+        EVENT_AIR_DATA,
+        False,
+        False
+    ],
+    [
+        "battery_level_sky",
+        "Battery Level SKY",
+        "%",
+        "%",
+        DEVICE_CLASS_BATTERY,
+        None,
+        EVENT_SKY_DATA,
+        False,
+        False
+    ],
+    [
+        "battery_level_tempest",
+        "Battery Level TEMPEST",
+        "%",
+        "%",
+        DEVICE_CLASS_BATTERY,
+        None,
+        EVENT_TEMPEST_DATA,
         False,
         False
     ],

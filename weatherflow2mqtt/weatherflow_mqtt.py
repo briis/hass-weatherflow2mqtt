@@ -234,6 +234,7 @@ async def main():
                     storage["last_lightning_time"]
                 ).isoformat()
                 data["battery_air"] = round(obs[6], 2)
+                data["battery_level_air"] = await cnv.battery_level(obs[6], False)
                 data["sealevel_pressure"] = await cnv.sea_level_pressure(obs[1], elevation)
                 trend_text, trend_value = await sql.readPressureTrend(data["sealevel_pressure"], translations)
                 data["pressure_trend"] = trend_text
@@ -267,6 +268,7 @@ async def main():
                 data["wind_bearing_avg"] = obs[7]
                 data["wind_direction_avg"] = await cnv.direction(obs[7])
                 data["battery"] = round(obs[8], 2)
+                data["battery_level_sky"] = await cnv.battery_level(obs[8], False)
                 data["solar_radiation"] = obs[10]
                 data["precipitation_type"] = await cnv.rain_type(obs[12])
                 data["rain_rate"] = await cnv.rain_rate(obs[3])
@@ -303,6 +305,7 @@ async def main():
                 data["rain_start_time"] = datetime.fromtimestamp(storage["rain_start"]).isoformat()
                 data["precipitation_type"] = await cnv.rain_type(obs[13])
                 data["battery"] = round(obs[16], 2)
+                data["battery_level_tempest"] = await cnv.battery_level(obs[16], True)
                 data["rain_rate"] = await cnv.rain_rate(obs[12])
                 data["uv_description"] = await cnv.uv_level(obs[10])
                 bft_value, bft_text = await cnv.beaufort(obs[2])
@@ -408,8 +411,11 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
         if not add_forecast and sensor[SENSOR_DEVICE] == EVENT_FORECAST:
             _LOGGER.debug("Skipping Forecast sensor %s %s", add_forecast, sensor[SENSOR_DEVICE])
             continue
-        # Don't add the AIR Unit Battery if this is a Tempest Device
-        if is_tempest and sensor[SENSOR_ID] == "battery_air":
+        # Don't add the AIR & SKY Unit Battery sensors if this is a Tempest Device
+        if is_tempest and (sensor[SENSOR_ID] == "battery_air" or sensor[SENSOR_ID] == "battery_level_air" or sensor[SENSOR_ID] == "battery_level_sky"):
+            continue
+        # Don't add the TEMPEST Battery sensors if this is a AIR or SKY Device
+        if not is_tempest and sensor[SENSOR_ID] == "battery_level_tempest":
             continue
         # Modify name of Battery Device if Tempest Unit
         if is_tempest and sensor[SENSOR_ID] == "battery":
