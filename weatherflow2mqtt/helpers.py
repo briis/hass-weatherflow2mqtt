@@ -336,7 +336,7 @@ class ConversionFunctions:
              else:
                  # pb = battery - 1.8
                  # Multiply by 100 to get in percentage
-                 pb = int((voltage - 1.8)*100)
+                 pb = int((battery - 1.8)*100)
         else:
             if battery > 3.50:
                 # Cap max at 100%
@@ -347,7 +347,7 @@ class ConversionFunctions:
             else:
                 # pb = (battery - 2.4)/1.1
                 # Multiply by 100 to get in percentage
-                pb = int(((voltage - 2.4)/1.1)*100)
+                pb = int(((battery - 2.4)/1.1)*100)
 
         return pb
     
