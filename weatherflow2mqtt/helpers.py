@@ -323,7 +323,7 @@ class ConversionFunctions:
         p = float(pressure)
         sr = float(solar_radiation)
         
-        wbgt = round(0.7twb + 0.002996sr + 0.3368ta -0.01578rh - 0.5478, 1)
+        wbgt = round(0.7*twb + 0.002996*sr + 0.3368*ta -0.01578*rh - 0.5478, 1)
 
         if self._unit_system == UNITS_IMPERIAL:
             return await self.temperature(wbgt)
