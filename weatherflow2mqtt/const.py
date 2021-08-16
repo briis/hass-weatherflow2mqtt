@@ -321,7 +321,7 @@ WEATHERFLOW_SENSORS = [
         "%",
         DEVICE_CLASS_BATTERY,
         None,
-        EVENT_TEMPEST_DATA,
+        EVENT_SKY_DATA,
         False,
         False
     ],
