@@ -283,7 +283,7 @@ WEATHERFLOW_SENSORS = [
     ],
     [
         "battery_air",
-        "Battery AIR",
+        "Voltage AIR",
         "V",
         "V",
         DEVICE_CLASS_VOLTAGE,
@@ -294,7 +294,7 @@ WEATHERFLOW_SENSORS = [
     ],
     [
         "battery_level_air",
-        "Battery Level AIR",
+        "Battery AIR",
         "%",
         "%",
         DEVICE_CLASS_BATTERY,
@@ -305,7 +305,7 @@ WEATHERFLOW_SENSORS = [
     ],
     [
         "battery_level_sky",
-        "Battery Level SKY",
+        "Battery SKY",
         "%",
         "%",
         DEVICE_CLASS_BATTERY,
@@ -316,7 +316,7 @@ WEATHERFLOW_SENSORS = [
     ],
     [
         "battery_level_tempest",
-        "Battery Level TEMPEST",
+        "Battery TEMPEST",
         "%",
         "%",
         DEVICE_CLASS_BATTERY,
@@ -419,7 +419,7 @@ WEATHERFLOW_SENSORS = [
         False,
         False
     ],
-    ["battery", "Battery SKY", "V", "V", DEVICE_CLASS_VOLTAGE, None, EVENT_SKY_DATA, False, False],
+    ["battery", "Voltage SKY", "V", "V", DEVICE_CLASS_VOLTAGE, None, EVENT_SKY_DATA, False, False],
     [
         "solar_radiation",
         "Solar Radiation",

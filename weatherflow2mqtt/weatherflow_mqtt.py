@@ -419,7 +419,7 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
             continue
         # Modify name of Battery Device if Tempest Unit
         if is_tempest and sensor[SENSOR_ID] == "battery":
-            sensor_name = "Battery TEMPEST"
+            sensor_name = "Voltage TEMPEST"
         state_topic = "homeassistant/sensor/{}/{}/state".format(
             DOMAIN, sensor[SENSOR_DEVICE]
         )
