@@ -123,30 +123,18 @@ DEVICE_CLASS_TEMPERATURE = "temperature"
 DEVICE_CLASS_TIMESTAMP = "timestamp"
 DEVICE_CLASS_VOLTAGE = "voltage"
 
-DEVICE_STATUS = [
-    "lightning failed",
-    "lightning noise",
-    "lightning disturber",
-    "pressure failed",
-    "temperature failed",
-    "rh failed",
-    "wind failed",
-    "precip failed",
-    "light/uv failed",
-]
-
 DEVICE_STATUS_MASKS = {
         0b000000001: 'Lightning',
-        0b000000010: 'LightningNoise',
-        0b000000100: 'LightningDisturber',
+        0b000000010: 'Lightning Noise',
+        0b000000100: 'Lightning Disturber',
         0b000001000: 'Pressure',
         0b000010000: 'Temperature',
         0b000100000: 'Humidity',
         0b001000000: 'Wind',
         0b010000000: 'Precipitation',
         0b100000000: 'Light/UV',
-        0x00008000: 'power booster depleted',
-        0x00010000: 'power booster shore power'
+        0x00008000: 'Power Booster Depleted',
+        0b00010000: 'Power Booster Shore Power'
 }
 
 DOMAIN = "weatherflow2mqtt"
