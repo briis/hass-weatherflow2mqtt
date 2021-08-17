@@ -89,6 +89,7 @@ A description of the Environment Variables available for this container. All of 
 - `STATION_ID`: Enter your Station ID for your WeatherFlow Station. Default value is *blank*.
 - `STATION_TOKEN`: Enter your personal access Token to allow retrieval of data. If you don't have the token [login with your account](https://tempestwx.com/settings/tokens) and create the token. **NOTE** You must own a WeatherFlow station to get this token. Default value is *blank*
 - `FORECAST_INTERVAL`: The interval in minutes, between updates of the Forecast data. Default value is *30* minutes.
+- `briis/weatherflow2mqtt:<tag>`: *latest* for the latest stable build, *dev* for the latest build (may not be stable due to development/testing build). Once dev build is verified latest build and dev will be identical.  Latest features will be tested in dev build before released to latest.
 
 ### Supported Languages
 
@@ -146,6 +147,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | uv_description | UV Level | Textual representation of the UV Index value | Yes | obs[10] |  |  | obs[2] |
 | visibility | Visibility | Distance to the horizon | Yes | elevation, obs[7], obs[8] | elevation, obs[2], obs[3] |  | km |
 | wetbulb | Wet Bulb Temperature | Temperature of a parcel of air cooled to saturation (100% relative humidity) | Yes | obs[7], obs[8], obs[6] | obs[2], obs[3], obs[1] |  | C° |
+| wet_bulb_globe_temperature | Wet Bulb Globe Temperature | The WetBulb Globe Temperature (WBGT) is a measure of the heat stress in direct sunlight, which takes into account: temperature, humidity, wind speed, sun angle and cloud cover (solar radiation). | Yes | obs[7], obs[8], obs[6], obs[11] |  |  | C° |
 | wind_bearing | Wind Bearing | Current measured Wind bearing in degrees | No |  |  |  | Degrees |
 | wind_bearing_avg | Wind Bearing Avg | The average wind bearing in degrees | No | obs[4] |  | obs[7] | Degrees |
 | wind_direction | Wind Direction | Current measured Wind bearing as compass symbol | Yes |  |  |  | Cardinal |
