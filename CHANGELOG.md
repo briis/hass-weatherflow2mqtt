@@ -10,6 +10,8 @@
 
 `NEW`: Wet Bulb Globe Temperature. The WetBulb Globe Temperature (WBGT) is a measure of the heat stress in direct sunlight. Thanks to @GlennGoddard for creating the formula
 
+`FIX`: Fixing issue #71. Device status was reported wrong. Thank you to @WM for catching this and proposing the fix.
+
 ## Version 2.0.16
 
 **Release Date**: August 9th, 2021

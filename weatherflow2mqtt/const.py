@@ -135,6 +135,20 @@ DEVICE_STATUS = [
     "light/uv failed",
 ]
 
+DEVICE_STATUS_MASKS = {
+        0b000000001: 'Lightning',
+        0b000000010: 'LightningNoise',
+        0b000000100: 'LightningDisturber',
+        0b000001000: 'Pressure',
+        0b000010000: 'Temperature',
+        0b000100000: 'Humidity',
+        0b001000000: 'Wind',
+        0b010000000: 'Precipitation',
+        0b100000000: 'Light/UV',
+        0x00008000: 'power booster depleted',
+        0x00010000: 'power booster shore power'
+}
+
 DOMAIN = "weatherflow2mqtt"
 
 EVENT_RAPID_WIND = "rapid_wind"

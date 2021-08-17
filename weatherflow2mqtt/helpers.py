@@ -14,6 +14,7 @@ from weatherflow2mqtt.sqlite import SQLFunctions
 from weatherflow2mqtt.__version__ import DB_VERSION
 from weatherflow2mqtt.const import (
     DEVICE_STATUS,
+    DEVICE_STATUS_MASKS,
     EXTERNAL_DIRECTORY,
     SUPPORTED_LANGUAGES,
     UNITS_IMPERIAL,
@@ -523,16 +524,24 @@ class ConversionFunctions:
         """Return device status as string."""
         if value is None:
             return
-            
-        binvalue = str(bin(value))
-        binarr = binvalue[::-1]
-        binarr = binarr[:len(DEVICE_STATUS)]
-        return_value = []
-        for x in range(len(DEVICE_STATUS)):
-            if binarr[len(binarr) - 1 - x] == "1":
-                return_value.append(DEVICE_STATUS[x])
 
-        return return_value
+        failed = []
+
+        for mask in DEVICE_STATUS_MASKS:
+            if mask & value:
+                failed.append(DEVICE_STATUS_MASKS[mask])
+        
+        return failed
+
+        # binvalue = str(bin(value))
+        # binarr = binvalue[::-1]
+        # binarr = binarr[:len(DEVICE_STATUS)]
+        # return_value = []
+        # for x in range(len(DEVICE_STATUS)):
+        #     if binarr[len(binarr) - 1 - x] == "1":
+        #         return_value.append(DEVICE_STATUS[x])
+
+        # return return_value
 
 class DataStorage:
     """Handles reading and writing of the external storage file."""
