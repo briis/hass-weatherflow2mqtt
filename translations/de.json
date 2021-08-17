@@ -1,0 +1,80 @@
+{
+    "beaufort": {
+        "0": "Windstille",
+        "1": "Leiser Zug",
+        "2": "Leichte Brise",
+        "3": "Schwache Brise",
+        "4": "Mäßige Brise",
+        "5": "Frische Brise",
+        "6": "Starker Wind",
+        "7": "Steifer Wind",
+        "8": "Stürmischer Wind",
+        "9": "Sturm",
+        "10": "Schwerer Sturm",
+        "11": "Orkanartiger Sturm",
+        "12": "Orkan"
+    },
+    "wind_dir": {
+        "N": "N",
+        "NNE": "NNO",
+        "NE": "NO",
+        "ENE": "ONO",
+        "E": "O",
+        "ESE": "OSO",
+        "SE": "SO",
+        "SSE": "SSO",
+        "S": "S",
+        "SSW": "SSW",
+        "SW": "SW",
+        "WSW": "WSW",
+        "W": "W",
+        "WNW": "WNW",
+        "NW": "NW",
+        "NNW": "NNW"
+    },
+    "trend": {
+        "falling": "Fallend",
+        "rising": "Steigend",
+        "steady": "Stabil"
+    },
+    "dewpoint": {
+        "severely-high": "Ernsthaft hoch",
+        "miserable": "Miserabel",
+        "oppressive": "Drückend",
+        "uncomfortable": "Unangenehm",
+        "ok-for-most": "Großteils okay",
+        "comfortable": "Angenehm",
+        "very-comfortable": "Sehr angenehm",
+        "somewhat-dry": "Etwas trocken",
+        "dry": "Trocken",
+        "very-dry": "Sehr trocken",
+        "undefined": "Undefiniert"
+    },
+    "temperature": {
+        "inferno": "Inferno",
+        "very-hot": "Sehr heiß",
+        "hot": "Heiß",
+        "warm": "Warm",
+        "nice": "Angenehm",
+        "cool": "Frisch",
+        "chilly": "Kühl",
+        "cold": "Kalt",
+        "freezing": "Eiskalt",
+        "fridged": "Gefroren",
+        "undefined": "Undefiniert"
+    },
+    "uv": {
+        "extreme": "Extrem",
+        "very-high": "Sehr hoch",
+        "high": "Hoch",
+        "moderate": "Mäßig",
+        "low": "Niedrig",
+        "none": "Keines"
+    },
+    "precip_type": {
+        "none": "Keiner",
+        "rain": "Regen",
+        "hail": "Hagel",
+        "heavy-rain": "Starkregen"
+    }
+}
