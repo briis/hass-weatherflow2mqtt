@@ -92,7 +92,8 @@ async def main():
     # MQTT
     mqtt_anonymous = False
     if not mqtt_username or not mqtt_password:
-        _LOGGER.debug("MQTT Credentials not needed")
+        if mqtt_debug:
+            _LOGGER.debug("MQTT Credentials not needed")
         mqtt_anonymous = True
 
     # Setup and connect to MQTT Broker
@@ -374,7 +375,7 @@ async def main():
                     )
                 if sensor_status is not None and sensor_status != 0:
                     device_status = await cnv.device_status(sensor_status)
-                    if device_status:
+                    if device_status and show_debug:
                         _LOGGER.debug("Device %s has reported a sensor fault. Reason: %s", serial_number, device_status)
 
             if msg_type != EVENT_RAPID_WIND and msg_type != EVENT_HUB_STATUS:
