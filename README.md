@@ -1,6 +1,6 @@
 # WeatherFlow-2-MQTT for Home Assistant
 
-![](https://img.shields.io/github/workflow/status/briis/hass-weatherflow2mqtt/publish?style=flat-square)  [![](https://img.shields.io/badge/COMMUNITY-FORUM-success?style=flat-square)](https://community.weatherflow.com/t/weatherflow2mqtt-for-home-assistant/13718)
+![](https://img.shields.io/docker/v/briis/weatherflow2mqtt/latest?style=flat-square)  [![](https://img.shields.io/badge/COMMUNITY-FORUM-success?style=flat-square)](https://community.weatherflow.com/t/weatherflow2mqtt-for-home-assistant/13718)
 
 This project monitors the UDP socket (50222) from a WeatherFlow Hub, and publishes the data to a MQTT Server. Data is formatted in a way that, it supports the [MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/) format for Home Assistant, so a sensor will created for each entity that WeatherFlow sends out, if you have MQTT Discovery enabled.
 
