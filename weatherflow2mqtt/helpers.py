@@ -83,7 +83,7 @@ class ConversionFunctions:
             precip_type = type_array[int(value)]
             return self._translations["precip_type"][precip_type]
         except IndexError as e:
-            _LOGGER.debug("VALUE is: %s", value)
+            _LOGGER.warning("VALUE is: %s", value)
             return f"Unknown - {value}"
 
     async def direction(self, value) -> str:
@@ -550,7 +550,7 @@ class DataStorage:
         except FileNotFoundError as e:
             return None
         except Exception as e:
-            _LOGGER.debug("Could not read config.yaml file. Error message: %s", e)
+            _LOGGER.error("Could not read config.yaml file. Error message: %s", e)
             return None
 
     async def getLanguageFile(self, language: str):
@@ -565,10 +565,10 @@ class DataStorage:
                 return json.load(json_file)
 
         except FileNotFoundError as e:
-            _LOGGER.debug("Could not read language file. Error message: %s", e)
+            _LOGGER.error("Could not read language file. Error message: %s", e)
             return None
         except Exception as e:
-            _LOGGER.debug("Could not read language file. Error message: %s", e)
+            _LOGGER.error("Could not read language file. Error message: %s", e)
             return None
 
 
