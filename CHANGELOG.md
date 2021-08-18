@@ -14,6 +14,8 @@
 
 `CHANGE`: Ensure SHOW_DEBUG flag is used everywhere.
 
+`NEW`: Added German Translation. Thank you to @The-Deep-Sea for doing this.
+
 ## Version 2.0.16
 
 **Release Date**: August 9th, 2021
