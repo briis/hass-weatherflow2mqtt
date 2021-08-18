@@ -2,7 +2,7 @@
 
 ## Version 2.0.17
 
-**Release Date**: RELEASED WITH `dev` TAG
+**Release Date**: August 18th, 2021
 
 ### Changes in release 2.0.17
 
