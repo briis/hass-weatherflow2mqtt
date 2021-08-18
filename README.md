@@ -115,8 +115,11 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | air_density | Air Density | The Air density | Yes | obs[7], obs[6] | obs[2], obs[1] |  | kg/m^3 |
 | air_temperature | Temperature | Outside Temperature | No | obs[7] | obs[2] |  | C° |
-| battery | Battery SKY or TEMPEST | If this is a TEMPEST unit this is where the Voltage is displayed. Else it will be the Voltage of the SKY unit | No | obs[16] |  | obs[8] | Volts |
+| battery | Battery SKY | voltage on the SKY unit (If present) | No | obs[16] |  | obs[8] | Volts |
 | battery_air | Battery AIR | The voltage on the AIR unit (If present) | No |  | obs[6] |  | Volts |
+| battery_level_sky | Battery SKY | The battery level on the SKY unit (If present) | No | obs[16] |  | obs[8] | Volts |
+| battery_tempest | Voltage TEMPEST | The voltage on the TEMPEST unit (If present) | No |  | obs[16] |  | Volts |
+| battery_tempest_2 | Battery TEMPEST | The battery level on the TEMPEST unit (If present) | No |  | obs[16] |  | % |
 | beaufort | Beaufort Scale | Beaufort scale is an empirical measure that relates wind speed to observed conditions at sea or on land | Yes | obs[2] |  | obs[5] | # |
 | delta_t | Delta T | Difference between Air Temperature and Wet Bulb Temperature | Yes | obs[7], obs[8], obs[6] | obs[2], obs[3], obs[1] |  | C° |
 | dewpoint | Dew Point | Dewpoint in degrees | Yes | obs[7], obs[8] | obs{2], obs[3] |  | C° |
@@ -165,8 +168,10 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 sensors:
   - air_density
   - air_temperature
-  - battery
   - battery_air
+  - battery_sky
+  - battery_tempest (voltage)
+  - battery_tempest_2 (%)
   - beaufort
   - dewpoint
   - dewpoint_description
@@ -198,6 +203,7 @@ sensors:
   - uv_description
   - visibility
   - wetbulb
+  - wet_bulb_globe_temperature
   - wind_bearing
   - wind_bearing_avg
   - wind_direction
