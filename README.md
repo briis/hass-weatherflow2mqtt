@@ -115,12 +115,12 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | air_density | Air Density | The Air density | Yes | obs[7], obs[6] | obs[2], obs[1] |  | kg/m^3 |
 | air_temperature | Temperature | Outside Temperature | No | obs[7] | obs[2] |  | C° |
-| battery_air | Battery AIR | The voltage on the AIR unit (If present) | No |  | obs[6] |  | Volts |
-| ??battery_level_air?? | Battery AIR | The battery level on the AIR unit (If present) | No |  | obs[6] |  | % |
-| battery_sky | Battery SKY | voltage on the SKY unit (If present) | No |  |  | obs[8] | Volts |
-| ??battery_level_sky?? | Battery SKY | The battery level on the SKY unit (If present) | No |  |  | obs[8] | % |
-| battery_tempest | Voltage TEMPEST | The voltage on the TEMPEST unit (If present) | No | obs[16] |  |  | Volts |
-| ??battery_tempest_2?? | Battery TEMPEST | The battery level on the TEMPEST unit (If present) | No | obs[16] |  |  | % |
+| voltage_air | Voltage AIR | The voltage on the AIR unit (If present) | No |  | obs[6] |  | Volts |
+| battery_air | Battery AIR | The battery level on the AIR unit (If present) | No |  | obs[6] |  | % |
+| voltage_sky | Voltage SKY | voltage on the SKY unit (If present) | No |  |  | obs[8] | Volts |
+| battery_sky | Battery SKY | The battery level on the SKY unit (If present) | No |  |  | obs[8] | % |
+| voltage_tempest | Voltage TEMPEST | The voltage on the TEMPEST unit (If present) | No | obs[16] |  |  | Volts |
+| battery_tempest | Battery TEMPEST | The battery level on the TEMPEST unit (If present) | No | obs[16] |  |  | % |
 | beaufort | Beaufort Scale | Beaufort scale is an empirical measure that relates wind speed to observed conditions at sea or on land | Yes | obs[2] |  | obs[5] | # |
 | delta_t | Delta T | Difference between Air Temperature and Wet Bulb Temperature | Yes | obs[7], obs[8], obs[6] | obs[2], obs[3], obs[1] |  | C° |
 | dewpoint | Dew Point | Dewpoint in degrees | Yes | obs[7], obs[8] | obs{2], obs[3] |  | C° |
@@ -169,12 +169,12 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 sensors:
   - air_density
   - air_temperature
-  - battery_air (voltage)
-  - ?? battery_level_air (%)
-  - battery_sky (voltage)
-  - ?? battery_level_sky (%)
-  - battery_tempest (voltage)
-  - ?? battery_tempest_2 (%)
+  - voltage_air (voltage)
+  - battery_air (%)
+  - voltage_sky (voltage)
+  - battery_sky (%)
+  - voltage_tempest (voltage)
+  - battery_tempest (%)
   - beaufort
   - dewpoint
   - dewpoint_description
