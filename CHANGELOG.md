@@ -6,7 +6,8 @@
 
 ### Changes in release 2.0.17
 
-`NEW`: Battery Percent sensors added. There will 2 new sensors if using AIR & SKY devices and 1 new if using the Tempest device. At the same time, the previous `battery` sensor name is now renamed to `voltage` as this is a more correct description of the value. Thanks to @GlennGoddard for creating the formula to do the conversion.
+`NEW`: Battery Percent sensors added. There will 2 new sensors if using AIR & SKY devices and 1 new if using the Tempest device. At the same time, the previous `battery` sensor name is now renamed to `voltage` as this is a more correct description of the value. Thanks to @GlennGoddard for creating the formula to do the conversion.<br>
+**BREAKING** If you already have a running installation, you will have to manually rename two sensors entity_id, to correspond to the new naming: If you have a Tempest device rename `sensor.wf_battery_tempest` to `sensor.wf_voltage_tempest` and `sensor.wf_battery_tempest_2` to `sensor.wf_battery_tempest`. If you have AIR and SKY devices rename `sensor.wf_battery_sky` to `sensor.wf_voltage_sky` and `sensor.wf_battery_sky_2` to `sensor.wf_battery_sky`
 
 `NEW`: Wet Bulb Globe Temperature. The WetBulb Globe Temperature (WBGT) is a measure of the heat stress in direct sunlight. Thanks to @GlennGoddard for creating the formula
 
