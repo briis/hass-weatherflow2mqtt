@@ -1,5 +1,13 @@
 # Home Assistant WeatherFlow2MQTT Changelog
 
+## Version 2.0.18
+
+**Release Date**: RELEASED WITH `dev` TAG
+
+### Changes in release 2.0.18
+
+`FIX`: Issue #78, wrong Hex code used for decimal symbols.
+
 ## Version 2.0.17
 
 **Release Date**: August 18th, 2021
