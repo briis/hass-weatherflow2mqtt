@@ -392,6 +392,47 @@ class ConversionFunctions:
                 pb = int(((battery - 2.4)/1.1)*100)
 
         return pb
+******************************************************************************************************************
+    async def battery_mode(self, battery, is_tempest):
+        """Returns the battery operating mode.
+           Input:
+               Voltage in Volts DC (depends on the weather station type, see below)
+               is_tempest in Boolean
+           Tempest:
+             # data["battery_level"] = await cnv.battery_level(obs[16])
+             # https://help.weatherflow.com/hc/en-us/articles/360048877194-Solar-Power-Rechargeable-Battery
+           Air:
+             # data["battery_level"] = await cnv.battery_level(obs[6])
+             No Battery Operating Mode
+           Sky:
+             # data["battery_level"] = await cnv.battery_level(obs[8])
+             No Battery Operating Mode
+
+        """
+        if battery is None:
+            return None
+
+        if is_tempest:
+             if battery > 2.455:
+                 # Mode 0
+                 batt_mode = int(0)
+             elif battery > 2.40:
+                 # Mode 1
+                 # Simplication of voltage range
+                 batt_mode = int(1)
+             elif battery > 2.355:
+                 # Mode 2
+                 # Simplication of voltage range
+                 batt_mode = int(2)
+             else:
+                 # Mode 3
+                 batt_mode = int(3)
+        else:
+            # No Modes on Air & Sky, so if a voltage then default is mode 0
+            # This function should not be call for Air & Sky but in case it is there is an output
+            batt_mode = int(0)
+            
+        return batt_mode
     
     async def beaufort(self, wind_speed):
         """Returns the Beaufort Scale value based on Wind Speed."""
