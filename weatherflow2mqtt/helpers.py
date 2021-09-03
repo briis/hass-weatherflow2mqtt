@@ -392,7 +392,7 @@ class ConversionFunctions:
                 pb = int(((battery - 2.4)/1.1)*100)
 
         return pb
-******************************************************************************************************************
+
     async def battery_mode(self, battery, is_tempest, SR):
         """Returns the battery operating mode.
            Input:
