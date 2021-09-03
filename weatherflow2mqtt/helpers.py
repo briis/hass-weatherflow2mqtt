@@ -418,11 +418,11 @@ class ConversionFunctions:
                  batt_mode = int(0)
              elif battery > 2.40:
                  # Mode 1
-                 # Simplication of voltage range
+                 # Simplification of voltage range
                  batt_mode = int(1)
              elif battery > 2.355:
                  # Mode 2
-                 # Simplication of voltage range
+                 # Simplification of voltage range
                  batt_mode = int(2)
              else:
                  # Mode 3
