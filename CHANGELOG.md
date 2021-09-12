@@ -6,8 +6,8 @@
 
 ### Changes in release 2.0.18
 
-`FIX`: Issue #78, wrong Hex code used for decimal symbols.
-`NEW`: Issue #77. Added new sensor called `sensor.wf_battery_mode`. This sensor reports a mode between 0 and 3, and the description for the mode as added as an attribute to the sensor. Basically it shows how the Tempest device operates with the current Voltage. You can read more about this on the [WeatherFlow Website](https://help.weatherflow.com/hc/en-us/articles/360048877194-Solar-Power-Rechargeable-Battery). **This sensor is only available for Tempest devices** Thank you to @GlennGoddard for creating the formula.
+* `FIX`: Issue #78, wrong Hex code used for decimal symbols.
+* `NEW`: Issue #77. Added new sensor called `sensor.wf_battery_mode`. This sensor reports a mode between 0 and 3, and the description for the mode as added as an attribute to the sensor. Basically it shows how the Tempest device operates with the current Voltage. You can read more about this on the [WeatherFlow Website](https://help.weatherflow.com/hc/en-us/articles/360048877194-Solar-Power-Rechargeable-Battery). **This sensor is only available for Tempest devices** <br>Thank you to @GlennGoddard for creating the formula.
 
 ## Version 2.0.17
 
