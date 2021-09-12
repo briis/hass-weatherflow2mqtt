@@ -329,6 +329,17 @@ WEATHERFLOW_SENSORS = [
         False
     ],
     [
+        "battery_mode",
+        "Battery Mode",
+        "",
+        "",
+        None,
+        "information-outline",
+        EVENT_SKY_DATA,
+        False,
+        False
+    ],
+    [
         "lightning_strike_distance",
         "Lightning Distance",
         "km",

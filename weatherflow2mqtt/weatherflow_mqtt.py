@@ -310,7 +310,7 @@ async def main():
                 data["precipitation_type"] = await cnv.rain_type(obs[13])
                 data["battery"] = round(obs[16], 2)
                 data["battery_level_tempest"] = await cnv.battery_level(obs[16], True)
-                data["battery_mode_tempest"] = await cnv.battery_level(obs[16], True, obs[11])
+                data["battery_mode"] = await cnv.battery_mode(obs[16], obs[11])
                 data["rain_rate"] = await cnv.rain_rate(obs[12])
                 data["uv_description"] = await cnv.uv_level(obs[10])
                 bft_value, bft_text = await cnv.beaufort(obs[2])
@@ -420,8 +420,8 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
         # Don't add the AIR & SKY Unit Battery sensors if this is a Tempest Device
         if is_tempest and (sensor[SENSOR_ID] == "battery_air" or sensor[SENSOR_ID] == "battery_level_air" or sensor[SENSOR_ID] == "battery_level_sky"):
             continue
-        # Don't add the TEMPEST Battery sensors if this is a AIR or SKY Device
-        if not is_tempest and sensor[SENSOR_ID] == "battery_level_tempest":
+        # Don't add the TEMPEST Battery sensor and Battery Mode if this is a AIR or SKY Device
+        if not is_tempest and (sensor[SENSOR_ID] == "battery_level_tempest" or sensor[SENSOR_ID] == "battery_mode"):
             continue
         # Modify name of Battery Device if Tempest Unit
         if is_tempest and sensor[SENSOR_ID] == "battery":

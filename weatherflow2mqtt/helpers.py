@@ -393,61 +393,53 @@ class ConversionFunctions:
 
         return pb
 
-    async def battery_mode(self, battery, is_tempest, SR):
+    async def battery_mode(self, voltage, solar_radiation):
         """Returns the battery operating mode.
            Input:
                Voltage in Volts DC (depends on the weather station type, see below)
                is_tempest in Boolean
-	       SR in W/M^2 (used to determine if battery is in a charging state)
+	       solar_radiation in W/M^2 (used to determine if battery is in a charging state)
            Tempest:
-               # data["battery_level"] = await cnv.battery_level(obs[16])
+               # data["battery_level"] = await cnv.battery_mode(obs[16], True, obs[11])
                # https://help.weatherflow.com/hc/en-us/articles/360048877194-Solar-Power-Rechargeable-Battery
-           Air:
-               # data["battery_level"] = await cnv.battery_level(obs[6])
-               No Battery Operating Mode
-           Sky:
-               # data["battery_level"] = await cnv.battery_level(obs[8])
-               No Battery Operating Mode
+           AIR & SKY:
+               The battery mode does not apply to AIR & SKY Units
         """
-        if battery is None or SR is None:
+        if voltage is None or solar_radiation is None:
             return None
 
-        if is_tempest:
-            if battery >= 2.455:
-                # Mode 0 (independent of charging or discharging at this voltage)
-                batt_mode = int(0)
-            elif battery <= 2.355:
-                # Mode 3 (independent of charging or discharging at this voltage)
-                batt_mode = int(3)
-            elif SR > 100:
-		# Assume charging and voltage is raising
-                if battery >= 2.41:
-                    # Mode 1
-                    batt_mode = int(1)
-                elif battery > 2.375:
-                    # Mode 2
-                    batt_mode = int(2)
-                else:
-                    # Mode 3
-                    batt_mode = int(3)
-            else:
-		# Assume discharging and voltage is lowering
-                if battery > 2.415:
-                    # Mode 0
-                    batt_mode = int(0)
-                elif battery > 2.39:
-                    # Mode 1
-                    batt_mode = int(1)
-                elif battery > 2.355:
-                    # Mode 2
-                    batt_mode = int(2)
-                else:
-                    # Mode 3
-                    batt_mode = int(3)
-        else:
-            # No Modes on Air & Sky, so if a voltage then default is mode 0
-            # This function should not be called for Air & Sky but in case it is, there is an output
+
+        if voltage >= 2.455:
+            # Mode 0 (independent of charging or discharging at this voltage)
             batt_mode = int(0)
+        elif voltage <= 2.355:
+            # Mode 3 (independent of charging or discharging at this voltage)
+            batt_mode = int(3)
+        elif solar_radiation > 100:
+        # Assume charging and voltage is raising
+            if voltage >= 2.41:
+                # Mode 1
+                batt_mode = int(1)
+            elif voltage > 2.375:
+                # Mode 2
+                batt_mode = int(2)
+            else:
+                # Mode 3
+                batt_mode = int(3)
+        else:
+        # Assume discharging and voltage is lowering
+            if voltage > 2.415:
+                # Mode 0
+                batt_mode = int(0)
+            elif voltage > 2.39:
+                # Mode 1
+                batt_mode = int(1)
+            elif voltage > 2.355:
+                # Mode 2
+                batt_mode = int(2)
+            else:
+                # Mode 3
+                batt_mode = int(3)
 
         return batt_mode
     
