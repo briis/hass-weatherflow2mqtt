@@ -310,7 +310,9 @@ async def main():
                 data["precipitation_type"] = await cnv.rain_type(obs[13])
                 data["battery"] = round(obs[16], 2)
                 data["battery_level_tempest"] = await cnv.battery_level(obs[16], True)
-                data["battery_mode"] = await cnv.battery_mode(obs[16], obs[11])
+                bat_mode, bat_desc = await cnv.battery_mode(obs[16], obs[11])
+                data["battery_mode"] = bat_mode
+                data["battery_desc"] = bat_desc
                 data["rain_rate"] = await cnv.rain_rate(obs[12])
                 data["uv_description"] = await cnv.uv_level(obs[10])
                 bft_value, bft_text = await cnv.beaufort(obs[2])
@@ -475,6 +477,12 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
                 template = OrderedDict()
                 template = attribution
                 template["trend_value"] = "{{ value_json.pressure_trend_value }}"
+                payload["json_attributes_template"] = json.dumps(template)
+            if sensor[SENSOR_ID] == "battery_mode":
+                payload["json_attributes_topic"] = state_topic
+                template = OrderedDict()
+                template = attribution
+                template["description"] = "{{ value_json.battery_desc }}"
                 payload["json_attributes_template"] = json.dumps(template)
             if sensor[SENSOR_ID] == "beaufort":
                 payload["json_attributes_topic"] = state_topic

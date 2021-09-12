@@ -114,6 +114,13 @@ COL_SOLARRAD = "solar_radiation"
 
 BASE_URL = "https://swd.weatherflow.com/swd/rest"
 
+BATTERY_MODE_DESCRIPTION = [
+    "All sensors enabled and operating at full performance. Wind sampling interval every 3 seconds",
+    "Wind sampling interval set to 6 seconds",
+    "Wind sampling interval set to one minute",
+    "Wind sampling interval set to 5 minutes. All other sensors sampling interval set to 5 minutes. Haptic Rain sensor disabled from active listening"
+]
+
 DEFAULT_TIMEOUT = 10
 DEVICE_CLASS_BATTERY = "battery"
 DEVICE_CLASS_HUMIDITY = "humidity"

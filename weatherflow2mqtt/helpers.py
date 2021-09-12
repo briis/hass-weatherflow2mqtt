@@ -13,6 +13,7 @@ from math import gamma, radians, degrees
 from weatherflow2mqtt.sqlite import SQLFunctions
 from weatherflow2mqtt.__version__ import DB_VERSION
 from weatherflow2mqtt.const import (
+    BATTERY_MODE_DESCRIPTION,
     DEVICE_STATUS_MASKS,
     EXTERNAL_DIRECTORY,
     SUPPORTED_LANGUAGES,
@@ -441,7 +442,8 @@ class ConversionFunctions:
                 # Mode 3
                 batt_mode = int(3)
 
-        return batt_mode
+        mode_description = BATTERY_MODE_DESCRIPTION[batt_mode]
+        return batt_mode, mode_description
     
     async def beaufort(self, wind_speed):
         """Returns the Beaufort Scale value based on Wind Speed."""
