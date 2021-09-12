@@ -310,6 +310,7 @@ async def main():
                 data["precipitation_type"] = await cnv.rain_type(obs[13])
                 data["battery"] = round(obs[16], 2)
                 data["battery_level_tempest"] = await cnv.battery_level(obs[16], True)
+                data["battery_mode_tempest"] = await cnv.battery_level(obs[16], True, obs[11])
                 data["rain_rate"] = await cnv.rain_rate(obs[12])
                 data["uv_description"] = await cnv.uv_level(obs[10])
                 bft_value, bft_text = await cnv.beaufort(obs[2])
