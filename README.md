@@ -121,7 +121,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | battery_sky | Battery SKY | The battery level on the SKY unit (If present) | Yes |  |  | obs[8] | % |
 | voltage_tempest | Voltage TEMPEST | The voltage on the TEMPEST unit (If present) | No | obs[16] |  |  | Volts |
 | battery_tempest | Battery TEMPEST | The battery level on the TEMPEST unit (If present) | Yes | obs[16] |  |  | % |
-| battery_mode_tempest | Battery Mode TEMPEST| The battery operating mode on the TEMPEST unit (If present) | Yes | obs[16], obs[11] |  |  | https://help.weatherflow.com/hc/en-us/articles/360048877194-Solar-Power-Rechargeable-Battery |
+| battery_mode | Battery Mode| The battery operating mode on the TEMPEST unit (If present) | Yes | obs[16], obs[11] |  |  | https://help.weatherflow.com/hc/en-us/articles/360048877194-Solar-Power-Rechargeable-Battery |
 | beaufort | Beaufort Scale | Beaufort scale is an empirical measure that relates wind speed to observed conditions at sea or on land | Yes | obs[2] |  | obs[5] | # |
 | delta_t | Delta T | Difference between Air Temperature and Wet Bulb Temperature | Yes | obs[7], obs[8], obs[6] | obs[2], obs[3], obs[1] |  | C° |
 | dewpoint | Dew Point | Dewpoint in degrees | Yes | obs[7], obs[8] | obs{2], obs[3] |  | C° |
@@ -176,7 +176,7 @@ sensors:
   - battery_sky
   - voltage_tempest
   - battery_tempest
-  - battery_mode_tempest
+  - battery_mode # Only for Tempest Devices
   - beaufort
   - dewpoint
   - dewpoint_description
