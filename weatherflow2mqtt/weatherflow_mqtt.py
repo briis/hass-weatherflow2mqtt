@@ -41,8 +41,10 @@ from weatherflow2mqtt.const import (
     SENSOR_EXTRA_ATT,
     SENSOR_ICON,
     SENSOR_ID,
+    SENSOR_LAST_RESET,
     SENSOR_NAME,
     SENSOR_SHOW_MIN_ATT,
+    SENSOR_STATE_CLASS,
     SENSOR_UNIT_I,
     SENSOR_UNIT_M,
     UNITS_IMPERIAL,
@@ -147,6 +149,7 @@ async def main():
     storage = await sql.readStorage()
     wind_speed = None
     solar_radiation = None
+    last_midnight = await cnv.utc_last_midnight()
 
     # Watch for message from the UDP socket
     while True:
@@ -161,6 +164,7 @@ async def main():
             storage["rain_today"] = 0
             storage["rain_duration_today"] = 0
             storage["lightning_count_today"] = 0
+            last_midnight = await cnv.utc_from_timestamp(datetime.now().timestamp())
             await sql.writeStorage(storage)
             await sql.dailyHousekeeping()
             current_day = datetime.today().weekday()
@@ -250,6 +254,7 @@ async def main():
                 data["temperature_description"] = await cnv.temperature_level(obs[2])
                 data["visibility"] = await cnv.visibility(elevation, obs[2], obs[3])
                 data["wbgt"] = await cnv.wbgt(obs[2], obs[3], obs[1], solar_radiation)
+                data["last_reset_midnight"] = last_midnight
                 client.publish(state_topic, json.dumps(data))
                 await sql.writePressure(data["sealevel_pressure"])
                 await sql.updateHighLow(data)
@@ -280,6 +285,7 @@ async def main():
                 bft_value, bft_text = await cnv.beaufort(obs[5])
                 data["beaufort"] = bft_value
                 data["beaufort_text"] = bft_text
+                data["last_reset_midnight"] = last_midnight
                 client.publish(state_topic, json.dumps(data))
                 await sql.updateHighLow(data)
                 # await sql.updateDayData(data)
@@ -318,6 +324,7 @@ async def main():
                 bft_value, bft_text = await cnv.beaufort(obs[2])
                 data["beaufort"] = bft_value
                 data["beaufort_text"] = bft_text
+                data["last_reset_midnight"] = last_midnight
                 client.publish(state_topic, json.dumps(data))
                 await sql.updateHighLow(data)
                 # await sql.updateDayData(data)
@@ -352,6 +359,7 @@ async def main():
                 data["wbgt"] = await cnv.wbgt(obs[7], obs[8], obs[6], obs[11])
                 data["dewpoint_description"] = await cnv.dewpoint_level(data["dewpoint"])
                 data["temperature_description"] = await cnv.temperature_level(obs[7])
+                data["last_reset_midnight"] = last_midnight
                 client.publish(state_topic, json.dumps(data))
                 await sql.writePressure(data["sealevel_pressure"])
                 await sql.updateHighLow(data)
@@ -428,6 +436,7 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
         # Modify name of Battery Device if Tempest Unit
         if is_tempest and sensor[SENSOR_ID] == "battery":
             sensor_name = "Voltage TEMPEST"
+
         state_topic = "homeassistant/sensor/{}/{}/state".format(
             DOMAIN, sensor[SENSOR_DEVICE]
         )
@@ -435,6 +444,9 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
             DOMAIN, sensor[SENSOR_ID]
         )
         discovery_topic = "homeassistant/sensor/{}/{}/config".format(
+            DOMAIN, sensor[SENSOR_ID]
+        )
+        last_reset_topic = "homeassistant/sensor/{}/{}/last_reset_topic".format(
             DOMAIN, sensor[SENSOR_ID]
         )
         highlow_topic = "homeassistant/sensor/{}/{}/attributes".format(DOMAIN, EVENT_HIGH_LOW)
@@ -452,6 +464,8 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
                 payload["unit_of_measurement"] = sensor[units]
             if sensor[SENSOR_CLASS] is not None:
                 payload["device_class"] = sensor[SENSOR_CLASS]
+            if sensor[SENSOR_STATE_CLASS] is not None:
+                payload["state_class"] = sensor[SENSOR_STATE_CLASS]
             if sensor[SENSOR_ICON] is not None:
                 payload["icon"] = f"mdi:{sensor[SENSOR_ICON]}"
             payload["state_topic"] = state_topic
@@ -459,6 +473,9 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
                 sensor[SENSOR_ID]
             )
             payload["json_attributes_topic"] = attr_topic
+            if sensor[SENSOR_LAST_RESET]:
+                payload["last_reset_topic"] = state_topic
+                payload["last_reset_value_template"] = "{{ value_json.last_reset_midnight }}"
             payload["device"] = {
                 "identifiers": ["WeatherFlow_{}".format(serial_number)],
                 "connections": [["mac", serial_number]],
@@ -508,7 +525,11 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
                     template["min_all"] = "{{{{ value_json.{}['min_all'] }}}}".format(sensor[SENSOR_ID])
                     template["min_all_time"] = "{{{{ value_json.{}['min_all_time'] }}}}".format(sensor[SENSOR_ID])
                 payload["json_attributes_template"] = json.dumps(template)
-
+            # if sensor[SENSOR_LAST_RESET]:
+            #     payload["last_reset_topic"] = state_topic
+            #     template = OrderedDict()
+            #     template["last_reset"] = "{{ value_json.last_reset_midnight }}"
+            #     payload["last_reset_value_template"] = json.dumps(template)
 
         try:
             mqtt_client.publish(

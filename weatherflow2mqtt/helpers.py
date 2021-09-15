@@ -1,7 +1,7 @@
 """Several Helper Functions."""
 
 import datetime
-import time
+import pytz
 import json
 import math
 from typing import OrderedDict
@@ -19,6 +19,8 @@ from weatherflow2mqtt.const import (
     SUPPORTED_LANGUAGES,
     UNITS_IMPERIAL,
 )
+
+UTC = pytz.utc
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -583,6 +585,17 @@ class ConversionFunctions:
                 failed.append(DEVICE_STATUS_MASKS[mask])
         
         return failed
+
+    async def utc_from_timestamp(self, timestamp: float) -> datetime.datetime:
+        """Return a UTC time from a timestamp."""
+        return UTC.localize(datetime.datetime.utcfromtimestamp(timestamp))
+
+    async def utc_last_midnight(self) -> str:
+        """Return UTC Time for last midnight."""
+        midnight = datetime.datetime.combine(datetime.datetime.today(), datetime.time.min)
+        midnight_ts = datetime.datetime.timestamp(midnight)
+        midnight_dt = await self.utc_from_timestamp(midnight_ts)
+        return midnight_dt.isoformat()
 
 class DataStorage:
     """Handles reading and writing of the external storage file."""
