@@ -473,9 +473,9 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
                 sensor[SENSOR_ID]
             )
             payload["json_attributes_topic"] = attr_topic
-            if sensor[SENSOR_LAST_RESET]:
-                payload["last_reset_topic"] = state_topic
-                payload["last_reset_value_template"] = "{{ value_json.last_reset_midnight }}"
+            # if sensor[SENSOR_LAST_RESET]:
+            #     payload["last_reset_topic"] = state_topic
+            #     payload["last_reset_value_template"] = "{{ value_json.last_reset_midnight }}"
             payload["device"] = {
                 "identifiers": ["WeatherFlow_{}".format(serial_number)],
                 "connections": [["mac", serial_number]],
@@ -525,11 +525,6 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
                     template["min_all"] = "{{{{ value_json.{}['min_all'] }}}}".format(sensor[SENSOR_ID])
                     template["min_all_time"] = "{{{{ value_json.{}['min_all_time'] }}}}".format(sensor[SENSOR_ID])
                 payload["json_attributes_template"] = json.dumps(template)
-            # if sensor[SENSOR_LAST_RESET]:
-            #     payload["last_reset_topic"] = state_topic
-            #     template = OrderedDict()
-            #     template["last_reset"] = "{{ value_json.last_reset_midnight }}"
-            #     payload["last_reset_value_template"] = json.dumps(template)
 
         try:
             mqtt_client.publish(

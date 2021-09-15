@@ -183,7 +183,7 @@ UTC = datetime.timezone.utc
 # Sensor ID, Sensor Name, Unit Metric, Unit Imperial, Device Class, State Class, Icon, Update Event, Extra Attributes, Show Min Values, Show Last Reset
 WEATHERFLOW_SENSORS = [
     ["wind_speed", "Wind Speed", "m/s", "mph", None, None, "weather-windy", EVENT_RAPID_WIND, False, False, False],
-    ["wind_bearing", "Wind Bearing", "˚", "˚", None, None, "compass", EVENT_RAPID_WIND, False, False, False],
+    ["wind_bearing", "Wind Bearing", "°", "°", None, None, "compass", EVENT_RAPID_WIND, False, False, False],
     [
         "wind_direction",
         "Wind Direction",
@@ -474,11 +474,10 @@ WEATHERFLOW_SENSORS = [
         False
     ],
     ["wind_gust", "Wind Gust", "m/s", "mph", None, None, "weather-windy", EVENT_SKY_DATA, True, False, False],
-    ["wind_bearing_avg", "Wind Bearing Avg", "˚", "˚", None, None, "compass", EVENT_SKY_DATA, False, False, False],
+    ["wind_bearing_avg", "Wind Bearing Avg", "°", "°", None, None, "compass", EVENT_SKY_DATA, False, False, False],
     [
         "wind_direction_avg",
         "Wind Direction Avg",
-        None,
         None,
         None,
         None,
