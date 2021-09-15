@@ -131,6 +131,7 @@ DEVICE_CLASS_TIMESTAMP = "timestamp"
 DEVICE_CLASS_VOLTAGE = "voltage"
 
 STATE_CLASS_MEASUREMENT = "measurement"
+STATE_CLASS_INCREASING = "total_increasing"
 
 DEVICE_STATUS_MASKS = {
         0b000000001: 'Lightning',
@@ -306,7 +307,7 @@ WEATHERFLOW_SENSORS = [
         None,
         None,
         None,
-        STATE_CLASS_MEASUREMENT,
+        STATE_CLASS_INCREASING,
         "weather-lightning",
         EVENT_AIR_DATA,
         True,
@@ -430,7 +431,7 @@ WEATHERFLOW_SENSORS = [
         False
     ],
     ["uv", "UV Index", "UVI", "UVI", None, None, "weather-sunny-alert", EVENT_SKY_DATA, True, False, False],
-    ["rain_today", "Rain Today", "mm", "in", None, STATE_CLASS_MEASUREMENT, "weather-pouring", EVENT_SKY_DATA, False, False, True],
+    ["rain_today", "Rain Today", "mm", "in", None, STATE_CLASS_INCREASING, "weather-pouring", EVENT_SKY_DATA, False, False, True],
     [
         "rain_yesterday",
         "Rain Yesterday",
@@ -444,7 +445,7 @@ WEATHERFLOW_SENSORS = [
         False,
         False
     ],
-    ["rain_duration_today", "Rain Duration (Today)", "min", "min", None, STATE_CLASS_MEASUREMENT, "timeline-clock-outline", EVENT_SKY_DATA, True, False, True],
+    ["rain_duration_today", "Rain Duration (Today)", "min", "min", None, STATE_CLASS_INCREASING, "timeline-clock-outline", EVENT_SKY_DATA, True, False, True],
     ["rain_duration_yesterday", "Rain Duration (Yesterday)", "min", "min", None, None, "timeline-clock-outline", EVENT_SKY_DATA, False, False, False],
     [
         "wind_lull",
