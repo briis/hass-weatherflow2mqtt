@@ -76,5 +76,14 @@
         "rain": "Regen",
         "hail": "Hagel",
         "heavy-rain": "Starkregen"
+    },
+    "rain_intensity": {
+        "NONE": "KEINER",
+        "VERYLIGHT": "SEHR LEICHT",
+        "LIGHT": "LEICHT",
+        "MODERATE": "MÄßIG",
+        "HEAVY": "SCHWER",
+        "VERYHEAVY": "SEHR SCHWER",
+        "EXTREME": "EXTREM"
     }
 }

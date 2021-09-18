@@ -136,6 +136,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | lightning_strike_energy | Lightning Energy | Energy of the last strike | No |  |  |  |  |
 | lightning_strike_time | Last Lightning Strike | When the last lightning strike occurred | Yes |  | seconds |  |  |
 | precipitation_type | Precipitation Type | Can be one of None, Rain or Hail | No | obs[13] |  |  | 0 = none, 1 = rain, 2 = hail, 3 = rain + hail (heavy rain) |
+| rain_intensity | Rain Intensity | A descriptive text of how much is it raining right now | Yes | rain_rate |  | rain_rate |  |
 | rain_rate | Rain Rate | How much is it raining right now | Yes | obs[12] |  | obs[3] | mm/h |
 | rain_start_time | Last Rain | When was the last time it rained | No | rain_start |  | rain_start | seconds |
 | rain_today | Rain Today | Total rain for the current day. (Reset at midnight) | Yes | rain_today |  | rain_today | mm |
@@ -192,6 +193,7 @@ sensors:
   - lightning_strike_time
   - precipitation_type
   - pressure_trend
+  - rain_intensity
   - rain_rate
   - rain_start_time
   - rain_today

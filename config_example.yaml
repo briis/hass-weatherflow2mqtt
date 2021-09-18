@@ -1,8 +1,13 @@
 sensors:
   - air_density
   - air_temperature
-  - battery
+  - voltage_air
   - battery_air
+  - voltage_sky
+  - battery_sky
+  - voltage_tempest
+  - battery_tempest
+  - battery_mode # Only for Tempest Devices
   - beaufort
   - dewpoint
   - dewpoint_description
@@ -10,12 +15,15 @@ sensors:
   - feelslike
   - illuminance
   - lightning_strike_count
+  - lightning_strike_count_1hr
+  - lightning_strike_count_3hr
   - lightning_strike_count_today
   - lightning_strike_distance
   - lightning_strike_energy
   - lightning_strike_time
   - precipitation_type
   - pressure_trend
+  - rain_intensity
   - rain_rate
   - rain_start_time
   - rain_today
@@ -32,6 +40,7 @@ sensors:
   - uv_description
   - visibility
   - wetbulb
+  - wet_bulb_globe_temperature
   - wind_bearing
   - wind_bearing_avg
   - wind_direction
@@ -40,4 +49,5 @@ sensors:
   - wind_lull
   - wind_speed
   - wind_speed_avg
+  - weather
   

@@ -555,6 +555,7 @@ WEATHERFLOW_SENSORS = [
         False
     ],
     ["rain_rate", "Rain Rate", "mm/h", "in/h", None, None, "weather-pouring", EVENT_SKY_DATA, True, False, False],
+    ["rain_intensity", "Rain Intensity", None, None, None, None, "text-box-outline", EVENT_SKY_DATA, False, False, False],
     ["uptime", "Uptime", None, None, None, None, "clock-outline", EVENT_HUB_STATUS, False, False, False],
     [
         "feelslike",

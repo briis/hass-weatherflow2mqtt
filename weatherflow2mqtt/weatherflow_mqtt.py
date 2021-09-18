@@ -320,6 +320,7 @@ async def main():
                 data["battery_mode"] = bat_mode
                 data["battery_desc"] = bat_desc
                 data["rain_rate"] = await cnv.rain_rate(obs[12])
+                data["rain_intensity"] = await cnv.rain_intensity(data["rain_rate"])
                 data["uv_description"] = await cnv.uv_level(obs[10])
                 bft_value, bft_text = await cnv.beaufort(obs[2])
                 data["beaufort"] = bft_value
