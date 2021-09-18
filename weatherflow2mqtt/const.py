@@ -182,8 +182,8 @@ UTC = datetime.timezone.utc
 
 # Sensor ID, Sensor Name, Unit Metric, Unit Imperial, Device Class, State Class, Icon, Update Event, Extra Attributes, Show Min Values, Show Last Reset
 WEATHERFLOW_SENSORS = [
-    ["wind_speed", "Wind Speed", "m/s", "mph", None, None, "weather-windy", EVENT_RAPID_WIND, False, False, False],
-    ["wind_bearing", "Wind Bearing", "°", "°", None, None, "compass", EVENT_RAPID_WIND, False, False, False],
+    ["wind_speed", "Wind Speed", "m/s", "mph", None, STATE_CLASS_MEASUREMENT, "weather-windy", EVENT_RAPID_WIND, False, False, False],
+    ["wind_bearing", "Wind Bearing", "°", "°", None, STATE_CLASS_MEASUREMENT, "compass", EVENT_RAPID_WIND, False, False, False],
     [
         "wind_direction",
         "Wind Direction",
@@ -430,7 +430,7 @@ WEATHERFLOW_SENSORS = [
         False,
         False
     ],
-    ["uv", "UV Index", "UVI", "UVI", None, None, "weather-sunny-alert", EVENT_SKY_DATA, True, False, False],
+    ["uv", "UV Index", "UVI", "UVI", None, STATE_CLASS_MEASUREMENT, "weather-sunny-alert", EVENT_SKY_DATA, True, False, False],
     ["rain_today", "Rain Today", "mm", "in", None, STATE_CLASS_INCREASING, "weather-pouring", EVENT_SKY_DATA, False, False, True],
     [
         "rain_yesterday",
@@ -453,7 +453,7 @@ WEATHERFLOW_SENSORS = [
         "m/s",
         "mph",
         None,
-        None,
+        STATE_CLASS_MEASUREMENT,
         "weather-windy-variant",
         EVENT_SKY_DATA,
         True,
@@ -466,15 +466,15 @@ WEATHERFLOW_SENSORS = [
         "m/s",
         "mph",
         None,
-        None,
+        STATE_CLASS_MEASUREMENT,
         "weather-windy-variant",
         EVENT_SKY_DATA,
         True,
         False,
         False
     ],
-    ["wind_gust", "Wind Gust", "m/s", "mph", None, None, "weather-windy", EVENT_SKY_DATA, True, False, False],
-    ["wind_bearing_avg", "Wind Bearing Avg", "°", "°", None, None, "compass", EVENT_SKY_DATA, False, False, False],
+    ["wind_gust", "Wind Gust", "m/s", "mph", None, STATE_CLASS_MEASUREMENT, "weather-windy", EVENT_SKY_DATA, True, False, False],
+    ["wind_bearing_avg", "Wind Bearing Avg", "°", "°", None, STATE_CLASS_MEASUREMENT, "compass", EVENT_SKY_DATA, False, False, False],
     [
         "wind_direction_avg",
         "Wind Direction Avg",
@@ -495,7 +495,7 @@ WEATHERFLOW_SENSORS = [
         "W/m^2",
         "W/m^2",
         None,
-        None,
+        STATE_CLASS_MEASUREMENT,
         "solar-power",
         EVENT_SKY_DATA,
         True,
@@ -534,7 +534,7 @@ WEATHERFLOW_SENSORS = [
         "kg/m^3",
         "lb/ft^3",
         None,
-        None,
+        STATE_CLASS_MEASUREMENT,
         "air-filter",
         EVENT_AIR_DATA,
         False,
@@ -554,7 +554,7 @@ WEATHERFLOW_SENSORS = [
         True,
         False
     ],
-    ["rain_rate", "Rain Rate", "mm/h", "in/h", None, None, "weather-pouring", EVENT_SKY_DATA, True, False, False],
+    ["rain_rate", "Rain Rate", "mm/h", "in/h", None, STATE_CLASS_MEASUREMENT, "weather-pouring", EVENT_SKY_DATA, True, False, False],
     ["rain_intensity", "Rain Intensity", None, None, None, None, "text-box-outline", EVENT_SKY_DATA, False, False, False],
     ["uptime", "Uptime", None, None, None, None, "clock-outline", EVENT_HUB_STATUS, False, False, False],
     [
@@ -570,7 +570,7 @@ WEATHERFLOW_SENSORS = [
         False,
         False
     ],
-    ["visibility", "Visibility", "km", "nmi", None, None, "eye", EVENT_AIR_DATA, False, False, False],
+    ["visibility", "Visibility", "km", "nmi", None, STATE_CLASS_MEASUREMENT, "eye", EVENT_AIR_DATA, False, False, False],
     [
         "wetbulb",
         "Wet Bulb Temperature",
@@ -655,7 +655,7 @@ WEATHERFLOW_SENSORS = [
         None,
         None,
         None,
-        None,
+        STATE_CLASS_MEASUREMENT,
         "tailwind",
         EVENT_SKY_DATA,
         False,
