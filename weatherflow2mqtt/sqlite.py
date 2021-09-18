@@ -42,7 +42,7 @@ _LOGGER = logging.getLogger(__name__)
 class SQLFunctions:
     """Class to handle SQLLite functions."""
 
-    def __init__(self, unit_system, debug = False):
+    def __init__(self, unit_system, debug=False):
         self.connection = None
         self._unit_system = unit_system
         self._debug = debug
@@ -55,9 +55,8 @@ class SQLFunctions:
         except SQLError as e:
             _LOGGER.error("Could not create SQL Database. Error: %s", e)
 
-
     async def create_table(self, create_table_sql):
-        """ create a table from the create_table_sql statement
+        """create a table from the create_table_sql statement
         :param conn: Connection object
         :param create_table_sql: a CREATE TABLE statement
         :return:
@@ -75,10 +74,10 @@ class SQLFunctions:
         :param rowdata:
         :return: project id
         """
-        sql = '''   INSERT INTO storage(id, rain_today, rain_yesterday, rain_start, rain_duration_today,
+        sql = """   INSERT INTO storage(id, rain_today, rain_yesterday, rain_start, rain_duration_today,
                     rain_duration_yesterday, lightning_count, lightning_count_today, last_lightning_time,
                     last_lightning_distance, last_lightning_energy)
-                    VALUES(?, ?,?,?,?,?,?,?,?,?,?) '''
+                    VALUES(?, ?,?,?,?,?,?,?,?,?,?) """
         try:
             cur = self.connection.cursor()
             cur.execute(sql, rowdata)
@@ -93,7 +92,7 @@ class SQLFunctions:
             cursor = self.connection.cursor()
             cursor.execute(f"SELECT * FROM storage WHERE id = {STORAGE_ID};")
             data = cursor.fetchall()
-            
+
             for row in data:
                 storage_json = {
                     "rain_today": row[1],
@@ -108,7 +107,7 @@ class SQLFunctions:
                     "last_lightning_energy": row[10],
                 }
 
-            return storage_json         
+            return storage_json
 
         except SQLError as e:
             _LOGGER.error("Could not access storage data. Error: %s", e)
@@ -132,10 +131,19 @@ class SQLFunctions:
                                 WHERE ID = ?
                                 """
 
-            rowdata = (json_data["rain_today"],json_data["rain_yesterday"],json_data["rain_start"],json_data["rain_duration_today"],
-                        json_data["rain_duration_yesterday"],json_data["lightning_count"],json_data["lightning_count_today"],
-                        json_data["last_lightning_time"],json_data["last_lightning_distance"],json_data["last_lightning_energy"], 
-                        STORAGE_ID)
+            rowdata = (
+                json_data["rain_today"],
+                json_data["rain_yesterday"],
+                json_data["rain_start"],
+                json_data["rain_duration_today"],
+                json_data["rain_duration_yesterday"],
+                json_data["lightning_count"],
+                json_data["lightning_count_today"],
+                json_data["last_lightning_time"],
+                json_data["last_lightning_distance"],
+                json_data["last_lightning_energy"],
+                STORAGE_ID,
+            )
 
             cursor.execute(sql_statement, rowdata)
             self.connection.commit()
@@ -147,11 +155,13 @@ class SQLFunctions:
         """Returns the Pressure Trend."""
         if new_pressure is None:
             return "Steady", 0
-            
+
         try:
             time_point = time.time() - PRESSURE_TREND_TIMER
             cursor = self.connection.cursor()
-            cursor.execute(f"SELECT pressure FROM pressure WHERE timestamp < {time_point} ORDER BY timestamp DESC LIMIT 1;")
+            cursor.execute(
+                f"SELECT pressure FROM pressure WHERE timestamp < {time_point} ORDER BY timestamp DESC LIMIT 1;"
+            )
             old_pressure = cursor.fetchone()
             if old_pressure is None:
                 old_pressure = new_pressure
@@ -196,7 +206,9 @@ class SQLFunctions:
 
         try:
             cur = self.connection.cursor()
-            cur.execute(f"INSERT INTO pressure(timestamp, pressure) VALUES({time.time()}, {pressure});")
+            cur.execute(
+                f"INSERT INTO pressure(timestamp, pressure) VALUES({time.time()}, {pressure});"
+            )
             self.connection.commit()
             return True
         except SQLError as e:
@@ -211,9 +223,11 @@ class SQLFunctions:
         try:
             time_point = time.time() - hours * 60 * 60
             cursor = self.connection.cursor()
-            cursor.execute(f"SELECT COUNT(*) FROM lightning WHERE timestamp > {time_point};")
+            cursor.execute(
+                f"SELECT COUNT(*) FROM lightning WHERE timestamp > {time_point};"
+            )
             data = cursor.fetchone()[0]
-            
+
             return data
 
         except SQLError as e:
@@ -244,7 +258,10 @@ class SQLFunctions:
             wspeed = data.get("wind_speed_avg")
 
             cursor = self.connection.cursor()
-            cursor.execute(f"INSERT INTO daily_log(timestamp, temperature, pressure, windspeed) VALUES({time.time()}, ?, ?, ?)", (temp, pres, wspeed))
+            cursor.execute(
+                f"INSERT INTO daily_log(timestamp, temperature, pressure, windspeed) VALUES({time.time()}, ?, ?, ?)",
+                (temp, pres, wspeed),
+            )
             self.connection.commit()
 
         except SQLError as e:
@@ -278,7 +295,25 @@ class SQLFunctions:
             sql_columns += "illuminance, rain_duration_today, rain_rate, wind_gust, wind_lull, lightning_strike_energy,"
             sql_columns += "lightning_strike_count_today, uv, solar_radiation"
             sql_columns += ")"
-            cursor.execute(f"{sql_columns} VALUES({time.time()}, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (temp, pres, wspeed, hum, dew, illum, rain_dur, rain_rate, wgust, wlull, strike_e, strike_c, uv, solrad))
+            cursor.execute(
+                f"{sql_columns} VALUES({time.time()}, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    temp,
+                    pres,
+                    wspeed,
+                    hum,
+                    dew,
+                    illum,
+                    rain_dur,
+                    rain_rate,
+                    wgust,
+                    wlull,
+                    strike_e,
+                    strike_c,
+                    uv,
+                    solrad,
+                ),
+            )
             self.connection.commit()
 
         except SQLError as e:
@@ -307,11 +342,15 @@ class SQLFunctions:
 
                 # If we have a value, check if min/max changes
                 if sensor_value != None:
-                    if  sensor_value > row["max_day"]:
-                        max_sql = f" max_day = {sensor_value}, max_day_time = {time.time()} "
+                    if sensor_value > row["max_day"]:
+                        max_sql = (
+                            f" max_day = {sensor_value}, max_day_time = {time.time()} "
+                        )
                         do_update = True
                     if sensor_value < row["min_day"]:
-                        min_sql = f" min_day = {sensor_value}, min_day_time = {time.time()} "
+                        min_sql = (
+                            f" min_day = {sensor_value}, min_day_time = {time.time()} "
+                        )
                         do_update = True
 
                 # If min/max changes, update the record
@@ -349,22 +388,50 @@ class SQLFunctions:
             cursor = self.connection.cursor()
             cursor.execute(f"SELECT * FROM high_low")
             data = cursor.fetchall()
-            
+
             sensor_json = {}
             for row in data:
                 sensor_json[row["sensorid"]] = {
                     "max_day": row["max_day"],
-                    "max_day_time": None if not row["max_day_time"] else datetime.datetime.utcfromtimestamp(round(row["max_day_time"])).replace(tzinfo=UTC).isoformat(),
+                    "max_day_time": None
+                    if not row["max_day_time"]
+                    else datetime.datetime.utcfromtimestamp(round(row["max_day_time"]))
+                    .replace(tzinfo=UTC)
+                    .isoformat(),
                     "max_month": row["max_month"],
-                    "max_month_time": None if not row["max_month_time"] else datetime.datetime.utcfromtimestamp(round(row["max_month_time"])).replace(tzinfo=UTC).isoformat(),
+                    "max_month_time": None
+                    if not row["max_month_time"]
+                    else datetime.datetime.utcfromtimestamp(
+                        round(row["max_month_time"])
+                    )
+                    .replace(tzinfo=UTC)
+                    .isoformat(),
                     "max_all": row["max_all"],
-                    "max_all_time": None if not row["max_all_time"] else datetime.datetime.utcfromtimestamp(round(row["max_all_time"])).replace(tzinfo=UTC).isoformat(),
+                    "max_all_time": None
+                    if not row["max_all_time"]
+                    else datetime.datetime.utcfromtimestamp(round(row["max_all_time"]))
+                    .replace(tzinfo=UTC)
+                    .isoformat(),
                     "min_day": row["min_day"],
-                    "min_day_time": None if not row["min_day_time"] else datetime.datetime.utcfromtimestamp(round(row["min_day_time"])).replace(tzinfo=UTC).isoformat(),
+                    "min_day_time": None
+                    if not row["min_day_time"]
+                    else datetime.datetime.utcfromtimestamp(round(row["min_day_time"]))
+                    .replace(tzinfo=UTC)
+                    .isoformat(),
                     "min_month": row["min_month"],
-                    "min_month_time": None if not row["min_month_time"] else datetime.datetime.utcfromtimestamp(round(row["min_month_time"])).replace(tzinfo=UTC).isoformat(),
+                    "min_month_time": None
+                    if not row["min_month_time"]
+                    else datetime.datetime.utcfromtimestamp(
+                        round(row["min_month_time"])
+                    )
+                    .replace(tzinfo=UTC)
+                    .isoformat(),
                     "min_all": row["min_all"],
-                    "min_all_time": None if not row["min_all_time"] else datetime.datetime.utcfromtimestamp(round(row["min_all_time"])).replace(tzinfo=UTC).isoformat()
+                    "min_all_time": None
+                    if not row["min_all_time"]
+                    else datetime.datetime.utcfromtimestamp(round(row["min_all_time"]))
+                    .replace(tzinfo=UTC)
+                    .isoformat(),
                 }
             return sensor_json
 
@@ -381,9 +448,11 @@ class SQLFunctions:
         try:
             with open(STORAGE_FILE, "r") as jsonFile:
                 old_data = json.load(jsonFile)
-                
+
                 # We need to convert the Rain Start to timestamp
-                dt = datetime.datetime.strptime(old_data["rain_start"], "%Y-%m-%dT%H:%M:%S")
+                dt = datetime.datetime.strptime(
+                    old_data["rain_start"], "%Y-%m-%dT%H:%M:%S"
+                )
                 timestamp = dt.replace(tzinfo=timezone.utc).timestamp()
 
                 storage_json = {
@@ -398,7 +467,7 @@ class SQLFunctions:
                     "last_lightning_distance": old_data["last_lightning_distance"],
                     "last_lightning_energy": old_data["last_lightning_energy"],
                 }
-                
+
                 await self.writeStorage(storage_json)
 
         except FileNotFoundError as e:
@@ -418,7 +487,7 @@ class SQLFunctions:
                 await self.create_table(TABLE_HIGH_LOW)
 
                 # Store Initial Data
-                storage = (STORAGE_ID,0,0,0,0,0,0,0,0,0,0)
+                storage = (STORAGE_ID, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
                 await self.create_storage_row(storage)
                 await self.initializeHighLow()
 
@@ -433,7 +502,6 @@ class SQLFunctions:
         except Exception as e:
             _LOGGER.error("Could not Read storage file. Error message: %s", e)
 
-    
     async def upgradeDatabase(self):
         """Upgrade the Database to ensure tables and columns are correct."""
 
@@ -459,17 +527,17 @@ class SQLFunctions:
 
                 self.connection.commit()
 
-            # if db_version < 2:
-            #     _LOGGER.info("Upgrading the database to version 2")
-            #     cursor.execute("ALTER TABLE high_low ADD max_yday REAL")
-            #     cursor.execute("ALTER TABLE high_low ADD max_yday_time REAL")
-            #     cursor.execute("ALTER TABLE high_low ADD min_yday REAL")
-            #     cursor.execute("ALTER TABLE high_low ADD min_yday_time REAL")
+                # if db_version < 2:
+                #     _LOGGER.info("Upgrading the database to version 2")
+                #     cursor.execute("ALTER TABLE high_low ADD max_yday REAL")
+                #     cursor.execute("ALTER TABLE high_low ADD max_yday_time REAL")
+                #     cursor.execute("ALTER TABLE high_low ADD min_yday REAL")
+                #     cursor.execute("ALTER TABLE high_low ADD min_yday_time REAL")
 
-            # if db_version < DATABASE_VERSION:
-            #     _LOGGER.info("Upgrading the database to version %s...", DATABASE_VERSION)
-            #     await self.create_table(TABLE_DAY_DATA)
-            #     self.connection.commit()
+                # if db_version < DATABASE_VERSION:
+                #     _LOGGER.info("Upgrading the database to version %s...", DATABASE_VERSION)
+                #     await self.create_table(TABLE_DAY_DATA)
+                #     self.connection.commit()
 
                 # Finally update the version number
                 cursor.execute(f"PRAGMA main.user_version = {DATABASE_VERSION};")
@@ -483,20 +551,48 @@ class SQLFunctions:
 
         try:
             cursor = self.connection.cursor()
-            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_DEWPOINT}', -9999, 9999);")
-            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_HUMIDITY}', -9999, 9999);")
-            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_ILLUMINANCE}', 0, 0);")
-            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_PRESSURE}', -9999, 9999);")
-            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_RAINDURATION}', 0, 0);")
-            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_RAINRATE}', 0, 0);")
-            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_SOLARRAD}', 0, 0);")
-            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_STRIKECOUNT}', 0, 0);")
-            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_STRIKEENERGY}', 0, 0);")
-            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_TEMPERATURE}', -9999, 9999);")
-            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_UV}', 0, 0);")
-            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_WINDGUST}', 0, 0);")
-            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_WINDLULL}', 0, 0);")
-            cursor.execute(f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_WINDSPEED}', 0, 0);")
+            cursor.execute(
+                f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_DEWPOINT}', -9999, 9999);"
+            )
+            cursor.execute(
+                f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_HUMIDITY}', -9999, 9999);"
+            )
+            cursor.execute(
+                f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_ILLUMINANCE}', 0, 0);"
+            )
+            cursor.execute(
+                f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_PRESSURE}', -9999, 9999);"
+            )
+            cursor.execute(
+                f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_RAINDURATION}', 0, 0);"
+            )
+            cursor.execute(
+                f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_RAINRATE}', 0, 0);"
+            )
+            cursor.execute(
+                f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_SOLARRAD}', 0, 0);"
+            )
+            cursor.execute(
+                f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_STRIKECOUNT}', 0, 0);"
+            )
+            cursor.execute(
+                f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_STRIKEENERGY}', 0, 0);"
+            )
+            cursor.execute(
+                f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_TEMPERATURE}', -9999, 9999);"
+            )
+            cursor.execute(
+                f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_UV}', 0, 0);"
+            )
+            cursor.execute(
+                f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_WINDGUST}', 0, 0);"
+            )
+            cursor.execute(
+                f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_WINDLULL}', 0, 0);"
+            )
+            cursor.execute(
+                f"INSERT INTO high_low(sensorid, max_day, min_day) VALUES('{COL_WINDSPEED}', 0, 0);"
+            )
             self.connection.commit()
 
         except SQLError as e:
@@ -515,36 +611,72 @@ class SQLFunctions:
 
             # Cleanup the Lightning Table
             strike_time_point = time.time() - STRIKE_COUNT_TIMER - 60
-            cursor.execute(f"DELETE FROM lightning WHERE timestamp < {strike_time_point};")
+            cursor.execute(
+                f"DELETE FROM lightning WHERE timestamp < {strike_time_point};"
+            )
 
             # Update All Time Values values
-            cursor.execute(f"UPDATE high_low SET max_all = max_day, max_all_time = max_day_time WHERE max_day > max_all or max_all IS NULL")
-            cursor.execute(f"UPDATE high_low SET min_all = min_day, min_all_time = min_day_time WHERE (min_day < min_all or min_all IS NULL) and min_day_time IS NOT NULL")
+            cursor.execute(
+                f"UPDATE high_low SET max_all = max_day, max_all_time = max_day_time WHERE max_day > max_all or max_all IS NULL"
+            )
+            cursor.execute(
+                f"UPDATE high_low SET min_all = min_day, min_all_time = min_day_time WHERE (min_day < min_all or min_all IS NULL) and min_day_time IS NOT NULL"
+            )
 
             # Update or Reset Year Values
-            cursor.execute(f"UPDATE high_low SET max_year = max_day, max_year_time = max_day_time WHERE (max_day > max_year or max_year IS NULL) AND strftime('%Y', 'now') = strftime('%Y', datetime(max_day_time, 'unixepoch', 'localtime'))")
-            cursor.execute(f"UPDATE high_low SET min_year = min_day, min_year_time = min_day_time WHERE ((min_day < min_year or min_year IS NULL) AND min_day_time IS NOT NULL) AND strftime('%Y', 'now') = strftime('%Y', datetime(min_day_time, 'unixepoch', 'localtime'))")
-            cursor.execute(f"UPDATE high_low SET max_year = latest, max_year_time = {time.time()}, min_year = latest, min_year_time = {time.time()} WHERE min_day <> 0 AND strftime('%Y', 'now') <> strftime('%Y', datetime(max_day_time, 'unixepoch', 'localtime'))")
-            cursor.execute(f"UPDATE high_low SET max_year = 0, max_year_time = {time.time()} WHERE min_day = 0 AND strftime('%Y', 'now') <> strftime('%Y', datetime(max_day_time, 'unixepoch', 'localtime'))")
+            cursor.execute(
+                f"UPDATE high_low SET max_year = max_day, max_year_time = max_day_time WHERE (max_day > max_year or max_year IS NULL) AND strftime('%Y', 'now') = strftime('%Y', datetime(max_day_time, 'unixepoch', 'localtime'))"
+            )
+            cursor.execute(
+                f"UPDATE high_low SET min_year = min_day, min_year_time = min_day_time WHERE ((min_day < min_year or min_year IS NULL) AND min_day_time IS NOT NULL) AND strftime('%Y', 'now') = strftime('%Y', datetime(min_day_time, 'unixepoch', 'localtime'))"
+            )
+            cursor.execute(
+                f"UPDATE high_low SET max_year = latest, max_year_time = {time.time()}, min_year = latest, min_year_time = {time.time()} WHERE min_day <> 0 AND strftime('%Y', 'now') <> strftime('%Y', datetime(max_day_time, 'unixepoch', 'localtime'))"
+            )
+            cursor.execute(
+                f"UPDATE high_low SET max_year = 0, max_year_time = {time.time()} WHERE min_day = 0 AND strftime('%Y', 'now') <> strftime('%Y', datetime(max_day_time, 'unixepoch', 'localtime'))"
+            )
 
             # Update or Reset Month Values
-            cursor.execute(f"UPDATE high_low SET max_month = max_day, max_month_time = max_day_time WHERE (max_day > max_month or max_month IS NULL) AND strftime('%m', 'now') = strftime('%m', datetime(max_day_time, 'unixepoch', 'localtime'))")
-            cursor.execute(f"UPDATE high_low SET min_month = min_day, min_month_time = min_day_time WHERE ((min_day < min_month or min_month IS NULL) AND min_day_time IS NOT NULL) AND strftime('%m', 'now') = strftime('%m', datetime(min_day_time, 'unixepoch', 'localtime'))")
-            cursor.execute(f"UPDATE high_low SET max_month = latest, max_month_time = {time.time()}, min_month = latest, min_month_time = {time.time()} WHERE min_day <> 0 AND strftime('%m', 'now') <> strftime('%m', datetime(max_day_time, 'unixepoch', 'localtime'))")
-            cursor.execute(f"UPDATE high_low SET max_month = 0, max_month_time = {time.time()} WHERE min_day = 0 AND strftime('%m', 'now') <> strftime('%m', datetime(max_day_time, 'unixepoch', 'localtime'))")
+            cursor.execute(
+                f"UPDATE high_low SET max_month = max_day, max_month_time = max_day_time WHERE (max_day > max_month or max_month IS NULL) AND strftime('%m', 'now') = strftime('%m', datetime(max_day_time, 'unixepoch', 'localtime'))"
+            )
+            cursor.execute(
+                f"UPDATE high_low SET min_month = min_day, min_month_time = min_day_time WHERE ((min_day < min_month or min_month IS NULL) AND min_day_time IS NOT NULL) AND strftime('%m', 'now') = strftime('%m', datetime(min_day_time, 'unixepoch', 'localtime'))"
+            )
+            cursor.execute(
+                f"UPDATE high_low SET max_month = latest, max_month_time = {time.time()}, min_month = latest, min_month_time = {time.time()} WHERE min_day <> 0 AND strftime('%m', 'now') <> strftime('%m', datetime(max_day_time, 'unixepoch', 'localtime'))"
+            )
+            cursor.execute(
+                f"UPDATE high_low SET max_month = 0, max_month_time = {time.time()} WHERE min_day = 0 AND strftime('%m', 'now') <> strftime('%m', datetime(max_day_time, 'unixepoch', 'localtime'))"
+            )
 
             # Update or Reset Week Values
-            cursor.execute(f"UPDATE high_low SET max_week = max_day, max_week_time = max_day_time WHERE (max_day > max_week or max_week IS NULL) AND strftime('%W', 'now') = strftime('%W', datetime(max_day_time, 'unixepoch', 'localtime'))")
-            cursor.execute(f"UPDATE high_low SET min_week = min_day, min_week_time = min_day_time WHERE ((min_day < min_week or min_week IS NULL) AND min_day_time IS NOT NULL) AND strftime('%W', 'now') = strftime('%W', datetime(min_day_time, 'unixepoch', 'localtime'))")
-            cursor.execute(f"UPDATE high_low SET max_week = latest, max_week_time = {time.time()}, min_week = latest, min_week_time = {time.time()} WHERE min_day <> 0 AND strftime('%W', 'now') <> strftime('%W', datetime(max_day_time, 'unixepoch', 'localtime'))")
-            cursor.execute(f"UPDATE high_low SET max_week = 0, max_week_time = {time.time()} WHERE min_day = 0 AND strftime('%W', 'now') <> strftime('%W', datetime(max_day_time, 'unixepoch', 'localtime'))")
+            cursor.execute(
+                f"UPDATE high_low SET max_week = max_day, max_week_time = max_day_time WHERE (max_day > max_week or max_week IS NULL) AND strftime('%W', 'now') = strftime('%W', datetime(max_day_time, 'unixepoch', 'localtime'))"
+            )
+            cursor.execute(
+                f"UPDATE high_low SET min_week = min_day, min_week_time = min_day_time WHERE ((min_day < min_week or min_week IS NULL) AND min_day_time IS NOT NULL) AND strftime('%W', 'now') = strftime('%W', datetime(min_day_time, 'unixepoch', 'localtime'))"
+            )
+            cursor.execute(
+                f"UPDATE high_low SET max_week = latest, max_week_time = {time.time()}, min_week = latest, min_week_time = {time.time()} WHERE min_day <> 0 AND strftime('%W', 'now') <> strftime('%W', datetime(max_day_time, 'unixepoch', 'localtime'))"
+            )
+            cursor.execute(
+                f"UPDATE high_low SET max_week = 0, max_week_time = {time.time()} WHERE min_day = 0 AND strftime('%W', 'now') <> strftime('%W', datetime(max_day_time, 'unixepoch', 'localtime'))"
+            )
 
             # Update Yesterday Values
-            cursor.execute(f"UPDATE high_low SET max_yday = max_day, max_yday_time = max_day_time, min_yday = min_day, min_yday_time = min_day_time")
+            cursor.execute(
+                f"UPDATE high_low SET max_yday = max_day, max_yday_time = max_day_time, min_yday = min_day, min_yday_time = min_day_time"
+            )
 
             # Reset Day High and Low values
-            cursor.execute(f"UPDATE high_low SET max_day = latest, max_day_time = {time.time()}, min_day = latest, min_day_time = {time.time()} WHERE min_day <> 0")
-            cursor.execute(f"UPDATE high_low SET max_day = 0, max_day_time = {time.time()} WHERE min_day = 0")
+            cursor.execute(
+                f"UPDATE high_low SET max_day = latest, max_day_time = {time.time()}, min_day = latest, min_day_time = {time.time()} WHERE min_day <> 0"
+            )
+            cursor.execute(
+                f"UPDATE high_low SET max_day = 0, max_day_time = {time.time()} WHERE min_day = 0"
+            )
             self.connection.commit()
 
             return True

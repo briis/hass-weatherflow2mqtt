@@ -34,9 +34,16 @@ from weatherflow2mqtt.helpers import ConversionFunctions
 
 _LOGGER = logging.getLogger(__name__)
 
-class Forecast:
 
-    def __init__(self, station_id, unit_system, translations, token, session: Optional[ClientSession] = None,):
+class Forecast:
+    def __init__(
+        self,
+        station_id,
+        unit_system,
+        translations,
+        token,
+        session: Optional[ClientSession] = None,
+    ):
         self._station_id = station_id
         self._token = token
         self._unit_system = unit_system
@@ -65,8 +72,12 @@ class Forecast:
             forecast_data = json_data.get("forecast")
 
             # We also need Day hign and low Temp from Today
-            temp_high_today = await cnv.temperature(forecast_data[FORECAST_TYPE_DAILY][0]["air_temp_high"])
-            temp_low_today = await cnv.temperature(forecast_data[FORECAST_TYPE_DAILY][0]["air_temp_low"])
+            temp_high_today = await cnv.temperature(
+                forecast_data[FORECAST_TYPE_DAILY][0]["air_temp_high"]
+            )
+            temp_low_today = await cnv.temperature(
+                forecast_data[FORECAST_TYPE_DAILY][0]["air_temp_low"]
+            )
 
             # Process Daily Forecast
             fcst_data = OrderedDict()
@@ -77,7 +88,9 @@ class Forecast:
 
             for row in forecast_data[FORECAST_TYPE_DAILY]:
                 # Skip over past forecasts - seems the API sometimes returns old forecasts
-                forecast_time = datetime.date(datetime.fromtimestamp(row["day_start_local"]))
+                forecast_time = datetime.date(
+                    datetime.fromtimestamp(row["day_start_local"])
+                )
                 if today > forecast_time:
                     continue
 
@@ -94,7 +107,11 @@ class Forecast:
                 sum_wind_bearing = sum(wind_bearing) / len(wind_bearing) % 360
 
                 item = {
-                    ATTR_FORECAST_TIME: datetime.utcfromtimestamp(row["day_start_local"]).replace(tzinfo=UTC).isoformat(),
+                    ATTR_FORECAST_TIME: datetime.utcfromtimestamp(
+                        row["day_start_local"]
+                    )
+                    .replace(tzinfo=UTC)
+                    .isoformat(),
                     "conditions": row["conditions"],
                     ATTR_FORECAST_CONDITION: await self.ha_condition_value(row["icon"]),
                     ATTR_FORECAST_TEMP: await cnv.temperature(row["air_temp_high"]),
@@ -105,7 +122,9 @@ class Forecast:
                     "precip_type": row.get("precip_type", ""),
                     ATTR_FORECAST_WIND_SPEED: await cnv.speed(sum_wind_avg, True),
                     ATTR_FORECAST_WIND_BEARING: int(sum_wind_bearing),
-                    "wind_direction_cardinal": await cnv.direction(int(sum_wind_bearing)),
+                    "wind_direction_cardinal": await cnv.direction(
+                        int(sum_wind_bearing)
+                    ),
                 }
                 items.append(item)
             fcst_data["daily_forecast"] = items
@@ -119,11 +138,17 @@ class Forecast:
                     continue
 
                 item = {
-                    ATTR_FORECAST_TIME: datetime.utcfromtimestamp(row["time"]).replace(tzinfo=UTC).isoformat(),
+                    ATTR_FORECAST_TIME: datetime.utcfromtimestamp(row["time"])
+                    .replace(tzinfo=UTC)
+                    .isoformat(),
                     "conditions": row["conditions"],
-                    ATTR_FORECAST_CONDITION: await self.ha_condition_value(row.get("icon")),
+                    ATTR_FORECAST_CONDITION: await self.ha_condition_value(
+                        row.get("icon")
+                    ),
                     ATTR_FORECAST_TEMP: await cnv.temperature(row["air_temperature"]),
-                    ATTR_FORECAST_PRESSURE: await cnv.pressure(row["sea_level_pressure"]),
+                    ATTR_FORECAST_PRESSURE: await cnv.pressure(
+                        row["sea_level_pressure"]
+                    ),
                     ATTR_FORECAST_HUMIDITY: row["relative_humidity"],
                     ATTR_FORECAST_PRECIPITATION: await cnv.rain(row["precip"]),
                     ATTR_FORECAST_PRECIPITATION_PROBABILITY: row["precip_probability"],
@@ -132,7 +157,9 @@ class Forecast:
                     ATTR_FORECAST_WIND_SPEED: await cnv.speed(row["wind_avg"], True),
                     "wind_gust": await cnv.speed(row["wind_gust"], True),
                     ATTR_FORECAST_WIND_BEARING: row["wind_direction"],
-                    "wind_direction_cardinal": self._translations["wind_dir"][row["wind_direction_cardinal"]],
+                    "wind_direction_cardinal": self._translations["wind_dir"][
+                        row["wind_direction_cardinal"]
+                    ],
                     "uv": row["uv"],
                     "feels_like": await cnv.temperature(row["feels_like"]),
                 }
@@ -144,7 +171,7 @@ class Forecast:
             fcst_data["hourly_forecast"] = items
 
             return condition_data, fcst_data
-        
+
         # Return None if we could not retrieve data
         _LOGGER.warning("Forecast Server was unresponsive. Skipping forecast update")
         return None, None
@@ -157,7 +184,9 @@ class Forecast:
                 None,
             )
         except Exception as e:
-            _LOGGER.debug("Could not find icon with value:  %s. Error message: %s", value, e)
+            _LOGGER.debug(
+                "Could not find icon with value:  %s. Error message: %s", value, e
+            )
             return None
 
     async def async_request(self, method: str, endpoint: str) -> dict:
@@ -179,7 +208,9 @@ class Forecast:
             _LOGGER.debug("Request to endpoint timed out: %s", endpoint)
         except ClientError as err:
             if "Unauthorized" in str(err):
-                _LOGGER.debug("Your API Key is invalid or does not support this operation")
+                _LOGGER.debug(
+                    "Your API Key is invalid or does not support this operation"
+                )
             if "Not Found" in str(err):
                 _LOGGER.debug("The Station ID does not exis")
         except Exception as e:

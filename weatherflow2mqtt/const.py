@@ -108,7 +108,7 @@ COL_WINDLULL = "wind_lull"
 COL_WINDSPEED = "wind_speed_avg"
 COL_STRIKEENERGY = "lightning_strike_energy"
 COL_STRIKECOUNT = "lightning_strike_count_today"
-COL_PRESSURE= "sealevel_pressure"
+COL_PRESSURE = "sealevel_pressure"
 COL_UV = "uv"
 COL_SOLARRAD = "solar_radiation"
 
@@ -118,7 +118,7 @@ BATTERY_MODE_DESCRIPTION = [
     "All sensors enabled and operating at full performance. Wind sampling interval every 3 seconds",
     "Wind sampling interval set to 6 seconds",
     "Wind sampling interval set to one minute",
-    "Wind sampling interval set to 5 minutes. All other sensors sampling interval set to 5 minutes. Haptic Rain sensor disabled from active listening"
+    "Wind sampling interval set to 5 minutes. All other sensors sampling interval set to 5 minutes. Haptic Rain sensor disabled from active listening",
 ]
 
 DEFAULT_TIMEOUT = 10
@@ -134,17 +134,17 @@ STATE_CLASS_MEASUREMENT = "measurement"
 STATE_CLASS_INCREASING = "total_increasing"
 
 DEVICE_STATUS_MASKS = {
-        0b000000001: 'Lightning',
-        0b000000010: 'Lightning Noise',
-        0b000000100: 'Lightning Disturber',
-        0b000001000: 'Pressure',
-        0b000010000: 'Temperature',
-        0b000100000: 'Humidity',
-        0b001000000: 'Wind',
-        0b010000000: 'Precipitation',
-        0b100000000: 'Light/UV',
-        0x00008000: 'Power Booster Depleted',
-        0b00010000: 'Power Booster Shore Power'
+    0b000000001: "Lightning",
+    0b000000010: "Lightning Noise",
+    0b000000100: "Lightning Disturber",
+    0b000001000: "Pressure",
+    0b000010000: "Temperature",
+    0b000100000: "Humidity",
+    0b001000000: "Wind",
+    0b010000000: "Precipitation",
+    0b100000000: "Light/UV",
+    0x00008000: "Power Booster Depleted",
+    0b00010000: "Power Booster Shore Power",
 }
 
 DOMAIN = "weatherflow2mqtt"
@@ -169,12 +169,7 @@ STRIKE_COUNT_TIMER = 3 * 60 * 60
 PRESSURE_TREND_TIMER = 3 * 60 * 60
 HIGH_LOW_TIMER = 10 * 60
 
-SUPPORTED_LANGUAGES = [
-    "en",
-    "da",
-    "de",
-    "fr"
-]
+SUPPORTED_LANGUAGES = ["en", "da", "de", "fr"]
 
 UNITS_IMPERIAL = "imperial"
 
@@ -182,8 +177,32 @@ UTC = datetime.timezone.utc
 
 # Sensor ID, Sensor Name, Unit Metric, Unit Imperial, Device Class, State Class, Icon, Update Event, Extra Attributes, Show Min Values, Show Last Reset
 WEATHERFLOW_SENSORS = [
-    ["wind_speed", "Wind Speed", "m/s", "mph", None, STATE_CLASS_MEASUREMENT, "weather-windy", EVENT_RAPID_WIND, False, False, False],
-    ["wind_bearing", "Wind Bearing", "°", "°", None, STATE_CLASS_MEASUREMENT, "compass", EVENT_RAPID_WIND, False, False, False],
+    [
+        "wind_speed",
+        "Wind Speed",
+        "m/s",
+        "mph",
+        None,
+        STATE_CLASS_MEASUREMENT,
+        "weather-windy",
+        EVENT_RAPID_WIND,
+        False,
+        False,
+        False,
+    ],
+    [
+        "wind_bearing",
+        "Wind Bearing",
+        "°",
+        "°",
+        None,
+        STATE_CLASS_MEASUREMENT,
+        "compass",
+        EVENT_RAPID_WIND,
+        False,
+        False,
+        False,
+    ],
     [
         "wind_direction",
         "Wind Direction",
@@ -195,7 +214,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_RAPID_WIND,
         False,
         False,
-        False
+        False,
     ],
     [
         "station_pressure",
@@ -208,7 +227,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_AIR_DATA,
         False,
         False,
-        False
+        False,
     ],
     [
         "sealevel_pressure",
@@ -221,7 +240,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_AIR_DATA,
         True,
         True,
-        False
+        False,
     ],
     [
         "pressure_trend",
@@ -234,7 +253,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_AIR_DATA,
         False,
         False,
-        False
+        False,
     ],
     [
         "air_temperature",
@@ -247,7 +266,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_AIR_DATA,
         True,
         True,
-        False
+        False,
     ],
     [
         "relative_humidity",
@@ -260,7 +279,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_AIR_DATA,
         True,
         True,
-        False
+        False,
     ],
     [
         "lightning_strike_count",
@@ -273,7 +292,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_AIR_DATA,
         False,
         False,
-        False
+        False,
     ],
     [
         "lightning_strike_count_1hr",
@@ -286,7 +305,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_AIR_DATA,
         False,
         False,
-        False
+        False,
     ],
     [
         "lightning_strike_count_3hr",
@@ -299,7 +318,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_AIR_DATA,
         False,
         False,
-        False
+        False,
     ],
     [
         "lightning_strike_count_today",
@@ -312,7 +331,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_AIR_DATA,
         True,
         False,
-        True
+        True,
     ],
     [
         "battery_air",
@@ -325,7 +344,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_AIR_DATA,
         False,
         False,
-        False
+        False,
     ],
     [
         "battery_level_air",
@@ -338,7 +357,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_AIR_DATA,
         False,
         False,
-        False
+        False,
     ],
     [
         "battery_level_sky",
@@ -350,7 +369,7 @@ WEATHERFLOW_SENSORS = [
         None,
         EVENT_SKY_DATA,
         False,
-        False
+        False,
     ],
     [
         "battery_level_tempest",
@@ -363,7 +382,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_SKY_DATA,
         False,
         False,
-        False
+        False,
     ],
     [
         "battery_mode",
@@ -376,7 +395,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_SKY_DATA,
         False,
         False,
-        False
+        False,
     ],
     [
         "lightning_strike_distance",
@@ -389,7 +408,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_AIR_DATA,
         False,
         False,
-        False
+        False,
     ],
     [
         "lightning_strike_energy",
@@ -402,7 +421,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_AIR_DATA,
         True,
         False,
-        False
+        False,
     ],
     [
         "lightning_strike_time",
@@ -415,7 +434,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_AIR_DATA,
         False,
         False,
-        False
+        False,
     ],
     [
         "illuminance",
@@ -428,10 +447,34 @@ WEATHERFLOW_SENSORS = [
         EVENT_SKY_DATA,
         True,
         False,
-        False
+        False,
     ],
-    ["uv", "UV Index", "UVI", "UVI", None, STATE_CLASS_MEASUREMENT, "weather-sunny-alert", EVENT_SKY_DATA, True, False, False],
-    ["rain_today", "Rain Today", "mm", "in", None, STATE_CLASS_INCREASING, "weather-pouring", EVENT_SKY_DATA, False, False, True],
+    [
+        "uv",
+        "UV Index",
+        "UVI",
+        "UVI",
+        None,
+        STATE_CLASS_MEASUREMENT,
+        "weather-sunny-alert",
+        EVENT_SKY_DATA,
+        True,
+        False,
+        False,
+    ],
+    [
+        "rain_today",
+        "Rain Today",
+        "mm",
+        "in",
+        None,
+        STATE_CLASS_INCREASING,
+        "weather-pouring",
+        EVENT_SKY_DATA,
+        False,
+        False,
+        True,
+    ],
     [
         "rain_yesterday",
         "Rain Yesterday",
@@ -443,10 +486,34 @@ WEATHERFLOW_SENSORS = [
         EVENT_SKY_DATA,
         False,
         False,
-        False
+        False,
     ],
-    ["rain_duration_today", "Rain Duration (Today)", "min", "min", None, STATE_CLASS_INCREASING, "timeline-clock-outline", EVENT_SKY_DATA, True, False, True],
-    ["rain_duration_yesterday", "Rain Duration (Yesterday)", "min", "min", None, None, "timeline-clock-outline", EVENT_SKY_DATA, False, False, False],
+    [
+        "rain_duration_today",
+        "Rain Duration (Today)",
+        "min",
+        "min",
+        None,
+        STATE_CLASS_INCREASING,
+        "timeline-clock-outline",
+        EVENT_SKY_DATA,
+        True,
+        False,
+        True,
+    ],
+    [
+        "rain_duration_yesterday",
+        "Rain Duration (Yesterday)",
+        "min",
+        "min",
+        None,
+        None,
+        "timeline-clock-outline",
+        EVENT_SKY_DATA,
+        False,
+        False,
+        False,
+    ],
     [
         "wind_lull",
         "Wind Lull",
@@ -458,7 +525,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_SKY_DATA,
         True,
         False,
-        False
+        False,
     ],
     [
         "wind_speed_avg",
@@ -471,10 +538,34 @@ WEATHERFLOW_SENSORS = [
         EVENT_SKY_DATA,
         True,
         False,
-        False
+        False,
     ],
-    ["wind_gust", "Wind Gust", "m/s", "mph", None, STATE_CLASS_MEASUREMENT, "weather-windy", EVENT_SKY_DATA, True, False, False],
-    ["wind_bearing_avg", "Wind Bearing Avg", "°", "°", None, STATE_CLASS_MEASUREMENT, "compass", EVENT_SKY_DATA, False, False, False],
+    [
+        "wind_gust",
+        "Wind Gust",
+        "m/s",
+        "mph",
+        None,
+        STATE_CLASS_MEASUREMENT,
+        "weather-windy",
+        EVENT_SKY_DATA,
+        True,
+        False,
+        False,
+    ],
+    [
+        "wind_bearing_avg",
+        "Wind Bearing Avg",
+        "°",
+        "°",
+        None,
+        STATE_CLASS_MEASUREMENT,
+        "compass",
+        EVENT_SKY_DATA,
+        False,
+        False,
+        False,
+    ],
     [
         "wind_direction_avg",
         "Wind Direction Avg",
@@ -486,9 +577,21 @@ WEATHERFLOW_SENSORS = [
         EVENT_SKY_DATA,
         False,
         False,
-        False
+        False,
     ],
-    ["battery", "Voltage SKY", "V", "V", DEVICE_CLASS_VOLTAGE, STATE_CLASS_MEASUREMENT, None, EVENT_SKY_DATA, False, False, False],
+    [
+        "battery",
+        "Voltage SKY",
+        "V",
+        "V",
+        DEVICE_CLASS_VOLTAGE,
+        STATE_CLASS_MEASUREMENT,
+        None,
+        EVENT_SKY_DATA,
+        False,
+        False,
+        False,
+    ],
     [
         "solar_radiation",
         "Solar Radiation",
@@ -500,7 +603,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_SKY_DATA,
         True,
         False,
-        False
+        False,
     ],
     [
         "precipitation_type",
@@ -513,7 +616,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_SKY_DATA,
         False,
         False,
-        False
+        False,
     ],
     [
         "rain_start_time",
@@ -526,7 +629,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_SKY_DATA,
         False,
         False,
-        False
+        False,
     ],
     [
         "air_density",
@@ -539,7 +642,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_AIR_DATA,
         False,
         False,
-        False
+        False,
     ],
     [
         "dewpoint",
@@ -552,11 +655,47 @@ WEATHERFLOW_SENSORS = [
         EVENT_AIR_DATA,
         True,
         True,
-        False
+        False,
     ],
-    ["rain_rate", "Rain Rate", "mm/h", "in/h", None, STATE_CLASS_MEASUREMENT, "weather-pouring", EVENT_SKY_DATA, True, False, False],
-    ["rain_intensity", "Rain Intensity", None, None, None, None, "text-box-outline", EVENT_SKY_DATA, False, False, False],
-    ["uptime", "Uptime", None, None, None, None, "clock-outline", EVENT_HUB_STATUS, False, False, False],
+    [
+        "rain_rate",
+        "Rain Rate",
+        "mm/h",
+        "in/h",
+        None,
+        STATE_CLASS_MEASUREMENT,
+        "weather-pouring",
+        EVENT_SKY_DATA,
+        True,
+        False,
+        False,
+    ],
+    [
+        "rain_intensity",
+        "Rain Intensity",
+        None,
+        None,
+        None,
+        None,
+        "text-box-outline",
+        EVENT_SKY_DATA,
+        False,
+        False,
+        False,
+    ],
+    [
+        "uptime",
+        "Uptime",
+        None,
+        None,
+        None,
+        None,
+        "clock-outline",
+        EVENT_HUB_STATUS,
+        False,
+        False,
+        False,
+    ],
     [
         "feelslike",
         "Feels Like Temperature",
@@ -568,9 +707,21 @@ WEATHERFLOW_SENSORS = [
         EVENT_AIR_DATA,
         False,
         False,
-        False
+        False,
     ],
-    ["visibility", "Visibility", "km", "nmi", None, STATE_CLASS_MEASUREMENT, "eye", EVENT_AIR_DATA, False, False, False],
+    [
+        "visibility",
+        "Visibility",
+        "km",
+        "nmi",
+        None,
+        STATE_CLASS_MEASUREMENT,
+        "eye",
+        EVENT_AIR_DATA,
+        False,
+        False,
+        False,
+    ],
     [
         "wetbulb",
         "Wet Bulb Temperature",
@@ -582,7 +733,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_AIR_DATA,
         False,
         False,
-        False
+        False,
     ],
     [
         "wbgt",
@@ -595,7 +746,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_AIR_DATA,
         False,
         False,
-        False
+        False,
     ],
     [
         "delta_t",
@@ -608,7 +759,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_AIR_DATA,
         False,
         False,
-        False
+        False,
     ],
     [
         "dewpoint_description",
@@ -621,7 +772,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_AIR_DATA,
         False,
         False,
-        False
+        False,
     ],
     [
         "temperature_description",
@@ -634,7 +785,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_AIR_DATA,
         False,
         False,
-        False
+        False,
     ],
     [
         "uv_description",
@@ -647,7 +798,7 @@ WEATHERFLOW_SENSORS = [
         EVENT_SKY_DATA,
         False,
         False,
-        False
+        False,
     ],
     [
         "beaufort",
@@ -660,9 +811,21 @@ WEATHERFLOW_SENSORS = [
         EVENT_SKY_DATA,
         False,
         False,
-        False
+        False,
     ],
-    [FORECAST_ENTITY, "Weather", None, None, None, None, "chart-box-outline", EVENT_FORECAST, False, False, False],
+    [
+        FORECAST_ENTITY,
+        "Weather",
+        None,
+        None,
+        None,
+        None,
+        "chart-box-outline",
+        EVENT_FORECAST,
+        False,
+        False,
+        False,
+    ],
 ]
 
 SENSOR_ID = 0

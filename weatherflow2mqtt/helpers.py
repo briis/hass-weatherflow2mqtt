@@ -39,7 +39,9 @@ class ConversionFunctions:
                 return round((value * 9 / 5) + 32, 1)
             return round(value, 1)
 
-        _LOGGER.error("FUNC: temperature ERROR: Temperature value was reported as NoneType. Check the sensor")
+        _LOGGER.error(
+            "FUNC: temperature ERROR: Temperature value was reported as NoneType. Check the sensor"
+        )
 
     async def pressure(self, value) -> float:
         """Convert Pressure Value."""
@@ -48,7 +50,9 @@ class ConversionFunctions:
                 return round(value * 0.02953, 3)
             return round(value, 2)
 
-        _LOGGER.error("FUNC: pressure ERROR: Pressure value was reported as NoneType. Check the sensor")
+        _LOGGER.error(
+            "FUNC: pressure ERROR: Pressure value was reported as NoneType. Check the sensor"
+        )
 
     async def speed(self, value, kmh=False) -> float:
         """Convert Wind Speed."""
@@ -59,7 +63,9 @@ class ConversionFunctions:
                 return round((value * 18 / 5), 1)
             return round(value, 1)
 
-        _LOGGER.error("FUNC: speed ERROR: Wind value was reported as NoneType. Check the sensor")
+        _LOGGER.error(
+            "FUNC: speed ERROR: Wind value was reported as NoneType. Check the sensor"
+        )
 
     async def distance(self, value) -> float:
         """Convert distance."""
@@ -68,7 +74,9 @@ class ConversionFunctions:
                 return round(value / 1.609344, 2)
             return value
 
-        _LOGGER.error("FUNC: distance ERROR: Lightning Distance value was reported as NoneType. Check the sensor")
+        _LOGGER.error(
+            "FUNC: distance ERROR: Lightning Distance value was reported as NoneType. Check the sensor"
+        )
 
     async def rain(self, value) -> float:
         """Convert rain."""
@@ -77,7 +85,9 @@ class ConversionFunctions:
                 return round(value * 0.0393700787, 2)
             return round(value, 2)
 
-        _LOGGER.error("FUNC: rain ERROR: Rain value was reported as NoneType. Check the sensor")
+        _LOGGER.error(
+            "FUNC: rain ERROR: Rain value was reported as NoneType. Check the sensor"
+        )
 
     async def rain_type(self, value) -> str:
         """Convert rain type."""
@@ -132,11 +142,13 @@ class ConversionFunctions:
 
             return round(air_dens, decimals)
 
-        _LOGGER.error("FUNC: air_density ERROR: Temperature or Pressure value was reported as NoneType. Check the sensor")
+        _LOGGER.error(
+            "FUNC: air_density ERROR: Temperature or Pressure value was reported as NoneType. Check the sensor"
+        )
 
     async def sea_level_pressure(self, station_press, elevation):
         """Returns Sea Level pressure.
-            Converted from a JS formula made by Gary W Funk
+        Converted from a JS formula made by Gary W Funk
         """
         if station_press is not None:
             elev = float(elevation)
@@ -150,14 +162,18 @@ class ConversionFunctions:
             # Sub Calculation
             l = gravity / (gas_constant * atm_rate)
             c = gas_constant * atm_rate / gravity
-            u = math.pow(1 + math.pow(std_pressure / press, c) * (atm_rate * elev / std_temp), l)
-            sea_pressure = (press * u)
+            u = math.pow(
+                1 + math.pow(std_pressure / press, c) * (atm_rate * elev / std_temp), l
+            )
+            sea_pressure = press * u
 
             return await self.pressure(sea_pressure)
 
-        _LOGGER.error("FUNC: sea_level_pressure ERROR: Temperature or Pressure value was reported as NoneType. Check the sensor")
+        _LOGGER.error(
+            "FUNC: sea_level_pressure ERROR: Temperature or Pressure value was reported as NoneType. Check the sensor"
+        )
 
-    async def dewpoint(self, temperature, humidity, no_conversion = False):
+    async def dewpoint(self, temperature, humidity, no_conversion=False):
         """Returns Dewpoint."""
         if temperature is not None and humidity is not None:
             dewpoint_c = round(
@@ -177,7 +193,9 @@ class ConversionFunctions:
                 return dewpoint_c
             return await self.temperature(dewpoint_c)
 
-        _LOGGER.error("FUNC: dewpoint ERROR: Temperature and/or Humidity value was reported as NoneType. Check the sensor")
+        _LOGGER.error(
+            "FUNC: dewpoint ERROR: Temperature and/or Humidity value was reported as NoneType. Check the sensor"
+        )
 
     async def rain_rate(self, value):
         """Returns rain rate per hour."""
@@ -187,12 +205,12 @@ class ConversionFunctions:
 
     async def rain_intensity(self, rain_rate) -> str:
         """Returns a descriptive value of the rain rate.
-           VERY LIGHT: < 0.25 mm/hour
-           LIGHT: ≥ 0.25, < 1.0 mm/hour
-           MODERATE: ≥ 1.0, < 4.0 mm/hour
-           HEAVY: ≥ 4.0, < 16.0 mm/hour
-           VERY HEAVY: ≥ 16.0, < 50 mm/hour
-           EXTREME: > 50.0 mm/hour
+        VERY LIGHT: < 0.25 mm/hour
+        LIGHT: ≥ 0.25, < 1.0 mm/hour
+        MODERATE: ≥ 1.0, < 4.0 mm/hour
+        HEAVY: ≥ 4.0, < 16.0 mm/hour
+        VERY HEAVY: ≥ 16.0, < 50 mm/hour
+        EXTREME: > 50.0 mm/hour
         """
         if rain_rate == 0:
             intensity = "NONE"
@@ -224,15 +242,17 @@ class ConversionFunctions:
 
     async def average_bearing(self, bearing_arr) -> int:
         """Returns the average Wind Bearing from an array of bearings."""
-        mean_angle = degrees(phase(sum(rect(1, radians(d)) for d in bearing_arr)/len(bearing_arr)))
+        mean_angle = degrees(
+            phase(sum(rect(1, radians(d)) for d in bearing_arr) / len(bearing_arr))
+        )
         return int(abs(mean_angle))
 
     async def visibility(self, elevation, temp, humidity):
         """Returns the visibility.
-           Input:
-               Elevation in Meters
-               Temperature in Celcius
-               Humidity in percent
+        Input:
+            Elevation in Meters
+            Temperature in Celcius
+            Humidity in percent
         """
         if temp is None or elevation is None or humidity is None:
             return None
@@ -249,7 +269,7 @@ class ConversionFunctions:
 
         # Percent reduction based on quatity of water in air (no units)
         # 76 percent of visibility variation can be accounted for by humidity accourding to US-NOAA.
-        pr_a = float((1.13 * abs(temp - dewpoint_c)-1.15)/10)
+        pr_a = float((1.13 * abs(temp - dewpoint_c) - 1.15) / 10)
         if pr_a > 1:
             # Prevent visibility exceeding maximum distance
             pr = float(1)
@@ -264,16 +284,16 @@ class ConversionFunctions:
 
         if self._unit_system == UNITS_IMPERIAL:
             # Originally was in nautical miles; HA displays miles as imperial, therfore converted to miles
-            return round(vis/1.609344, 1)
+            return round(vis / 1.609344, 1)
         return round(vis, 1)
 
-    async def wetbulb(self, temp, humidity, pressure, no_conversion = False):
+    async def wetbulb(self, temp, humidity, pressure, no_conversion=False):
         """Returns the Wet Bulb Temperature.
-            Converted from a JS formula made by Gary W Funk
-            Input:
-                Temperature in Celcius
-                Humdity in Percent
-                Station Pressure in MB
+        Converted from a JS formula made by Gary W Funk
+        Input:
+            Temperature in Celcius
+            Humdity in Percent
+            Station Pressure in MB
         """
         if temp is None or humidity is None or pressure is None:
             return None
@@ -290,7 +310,7 @@ class ConversionFunctions:
         es = 6.112 * math.exp(17.67 * t / (t + 243.5))
         e2 = es * (rh / 100)
 
-        while (abs(edifference) > 0.005):
+        while abs(edifference) > 0.005:
             ewguess = 6.112 * math.exp((17.67 * twguess) / (twguess + 243.5))
             eguess = ewguess - p * (t - twguess) * 0.00066 * (1 + (0.00115 * twguess))
             edifference = e2 - eguess
@@ -299,14 +319,14 @@ class ConversionFunctions:
 
             if edifference < 0:
                 cursign = -1
-                if (cursign != previoussign):
+                if cursign != previoussign:
                     previoussign = cursign
                     incr = incr / 10
                 else:
                     incr = incr
             else:
                 cursign = 1
-                if (cursign != previoussign):
+                if cursign != previoussign:
                     previoussign = cursign
                     incr = incr / 10
                 else:
@@ -317,33 +337,38 @@ class ConversionFunctions:
         if no_conversion:
             return twguess
         return await self.temperature(twguess)
-    
+
     async def wbgt(self, temp, humidity, pressure, solar_radiation):
         """Returns the Wet Bulb Globe Temperature.
-            This is a way to show heat stress on the human body.
-            Input:
-                Temperature in Celcius
-                Humdity in Percent
-                Station Pressure in MB
-                Solar Radiation in Wm^2
-                  Sky: obs[10]
-                  Tempest: obs[11]
-            WBGT = 0.7Twb + 0.2Tg + 0.1Ta
-              where:
-                WBGT is Wet Bulb Globe Temperature in C
-                Twb is Wet Bulb Temperature in C
-                Tg is Black Globe Temperature in C (estimation)
-                Ta is Air Temperature (dry bulb)
-            Tg = 0.01498SR + 1.184Ta - 0.0789Rh - 2.739
-              where:
-                Tg is Black Globe Temperature in C (estimation)
-                SR is Solar Radiation in Wm^2
-                Ta is Air Temperature in C
-                Rh is Relative Humidity in %
-            WBGT = 0.7Twb + 0.002996SR + 0.3368Ta -0.01578Rh - 0.5478
+        This is a way to show heat stress on the human body.
+        Input:
+            Temperature in Celcius
+            Humdity in Percent
+            Station Pressure in MB
+            Solar Radiation in Wm^2
+              Sky: obs[10]
+              Tempest: obs[11]
+        WBGT = 0.7Twb + 0.2Tg + 0.1Ta
+          where:
+            WBGT is Wet Bulb Globe Temperature in C
+            Twb is Wet Bulb Temperature in C
+            Tg is Black Globe Temperature in C (estimation)
+            Ta is Air Temperature (dry bulb)
+        Tg = 0.01498SR + 1.184Ta - 0.0789Rh - 2.739
+          where:
+            Tg is Black Globe Temperature in C (estimation)
+            SR is Solar Radiation in Wm^2
+            Ta is Air Temperature in C
+            Rh is Relative Humidity in %
+        WBGT = 0.7Twb + 0.002996SR + 0.3368Ta -0.01578Rh - 0.5478
         """
 
-        if temp is None or humidity is None or pressure is None or solar_radiation is None:
+        if (
+            temp is None
+            or humidity is None
+            or pressure is None
+            or solar_radiation is None
+        ):
             return None
 
         ta = float(temp)
@@ -351,8 +376,8 @@ class ConversionFunctions:
         rh = float(humidity)
         p = float(pressure)
         sr = float(solar_radiation)
-        
-        wbgt = round(0.7*twb + 0.002996*sr + 0.3368*ta -0.01578*rh - 0.5478, 1)
+
+        wbgt = round(0.7 * twb + 0.002996 * sr + 0.3368 * ta - 0.01578 * rh - 0.5478, 1)
 
         if self._unit_system == UNITS_IMPERIAL:
             return await self.temperature(wbgt)
@@ -373,26 +398,26 @@ class ConversionFunctions:
 
     async def battery_level(self, battery, is_tempest):
         """Returns the battery percentage.
-           Input:
-               Voltage in Volts DC (depends on the weather station type, see below)
-               is_tempest in Boolean
-           Tempest:
-               # data["battery_level"] = await cnv.battery_level(obs[16])
-               Battery voltage range is 1.8 to 2.85 Vdc
-                   > 2.80 is capped at 100%
-                   < 1.8 is capped at 0%
-           Air:
-               # data["battery_level"] = await cnv.battery_level(obs[6])
-               4 AA batteries (2 in series, then parallel for 2 sets)
-               Battery voltage range is 1.2(x2) => 2.4 to 1.8(x2) => 3.6 Vdc (lowered to 3.5 based on observation)
-                   > 3.5 is capped at 100%
-                   < 2.4 is capped at 0%
-           Sky:
-               # data["battery_level"] = await cnv.battery_level(obs[8])
-               8 AA batteries (2 in series, then parallel for 4 sets)
-	       Battery voltage range is 1.2(x2) => 2.4 to 1.8(x2) => 3.6 Vdc (lowered to 3.5 based on observation)
-                   > 3.5 is capped at 100%
-                   < 2.4 is capped at 0%
+        Input:
+            Voltage in Volts DC (depends on the weather station type, see below)
+            is_tempest in Boolean
+        Tempest:
+            # data["battery_level"] = await cnv.battery_level(obs[16])
+            Battery voltage range is 1.8 to 2.85 Vdc
+                > 2.80 is capped at 100%
+                < 1.8 is capped at 0%
+        Air:
+            # data["battery_level"] = await cnv.battery_level(obs[6])
+            4 AA batteries (2 in series, then parallel for 2 sets)
+            Battery voltage range is 1.2(x2) => 2.4 to 1.8(x2) => 3.6 Vdc (lowered to 3.5 based on observation)
+                > 3.5 is capped at 100%
+                < 2.4 is capped at 0%
+        Sky:
+            # data["battery_level"] = await cnv.battery_level(obs[8])
+            8 AA batteries (2 in series, then parallel for 4 sets)
+            Battery voltage range is 1.2(x2) => 2.4 to 1.8(x2) => 3.6 Vdc (lowered to 3.5 based on observation)
+                > 3.5 is capped at 100%
+                < 2.4 is capped at 0%
         """
         if battery is None:
             return None
@@ -407,7 +432,7 @@ class ConversionFunctions:
             else:
                 # pb = battery - 1.8
                 # Multiply by 100 to get in percentage
-                pb = int((battery - 1.8)*100)
+                pb = int((battery - 1.8) * 100)
         else:
             if battery > 3.50:
                 # Cap max at 100%
@@ -418,25 +443,24 @@ class ConversionFunctions:
             else:
                 # pb = (battery - 2.4)/1.1
                 # Multiply by 100 to get in percentage
-                pb = int(((battery - 2.4)/1.1)*100)
+                pb = int(((battery - 2.4) / 1.1) * 100)
 
         return pb
 
     async def battery_mode(self, voltage, solar_radiation):
         """Returns the battery operating mode.
-           Input:
-               Voltage in Volts DC (depends on the weather station type, see below)
-               is_tempest in Boolean
-	       solar_radiation in W/M^2 (used to determine if battery is in a charging state)
-           Tempest:
-               # data["battery_level"] = await cnv.battery_mode(obs[16], True, obs[11])
-               # https://help.weatherflow.com/hc/en-us/articles/360048877194-Solar-Power-Rechargeable-Battery
-           AIR & SKY:
-               The battery mode does not apply to AIR & SKY Units
+        Input:
+            Voltage in Volts DC (depends on the weather station type, see below)
+            is_tempest in Boolean
+            solar_radiation in W/M^2 (used to determine if battery is in a charging state)
+        Tempest:
+            # data["battery_level"] = await cnv.battery_mode(obs[16], True, obs[11])
+            # https://help.weatherflow.com/hc/en-us/articles/360048877194-Solar-Power-Rechargeable-Battery
+        AIR & SKY:
+            The battery mode does not apply to AIR & SKY Units
         """
         if voltage is None or solar_radiation is None:
             return None
-
 
         if voltage >= 2.455:
             # Mode 0 (independent of charging or discharging at this voltage)
@@ -445,7 +469,7 @@ class ConversionFunctions:
             # Mode 3 (independent of charging or discharging at this voltage)
             batt_mode = int(3)
         elif solar_radiation > 100:
-        # Assume charging and voltage is raising
+            # Assume charging and voltage is raising
             if voltage >= 2.41:
                 # Mode 1
                 batt_mode = int(1)
@@ -456,7 +480,7 @@ class ConversionFunctions:
                 # Mode 3
                 batt_mode = int(3)
         else:
-        # Assume discharging and voltage is lowering
+            # Assume discharging and voltage is lowering
             if voltage > 2.415:
                 # Mode 0
                 batt_mode = int(0)
@@ -472,7 +496,7 @@ class ConversionFunctions:
 
         mode_description = BATTERY_MODE_DESCRIPTION[batt_mode]
         return batt_mode, mode_description
-    
+
     async def beaufort(self, wind_speed):
         """Returns the Beaufort Scale value based on Wind Speed."""
 
@@ -505,7 +529,7 @@ class ConversionFunctions:
             bft_value = 1
         else:
             bft_value = 0
-        
+
         bft_text = self._translations["beaufort"][str(bft_value)]
 
         return bft_value, bft_text
@@ -540,7 +564,7 @@ class ConversionFunctions:
             return self._translations["dewpoint"]["dry"]
         if dewpoint >= 0:
             return self._translations["dewpoint"]["very-dry"]
-        
+
         return self._translations["dewpoint"]["undefined"]
 
     async def temperature_level(self, temperature_c):
@@ -570,9 +594,8 @@ class ConversionFunctions:
             return self._translations["temperature"]["freezing"]
         if temperature <= 20:
             return self._translations["temperature"]["fridged"]
-        
-        return self._translations["temperature"]["undefined"]
 
+        return self._translations["temperature"]["undefined"]
 
     async def uv_level(self, uvi):
         """Returns a text based UV Description."""
@@ -590,7 +613,7 @@ class ConversionFunctions:
             return self._translations["uv"]["moderate"]
         if uvi > 0:
             return self._translations["uv"]["low"]
-            
+
         return self._translations["uv"]["none"]
 
     async def humanize_time(self, value):
@@ -609,7 +632,7 @@ class ConversionFunctions:
         for mask in DEVICE_STATUS_MASKS:
             if mask & value:
                 failed.append(DEVICE_STATUS_MASKS[mask])
-        
+
         return failed
 
     async def utc_from_timestamp(self, timestamp: float) -> datetime.datetime:
@@ -618,10 +641,13 @@ class ConversionFunctions:
 
     async def utc_last_midnight(self) -> str:
         """Return UTC Time for last midnight."""
-        midnight = datetime.datetime.combine(datetime.datetime.today(), datetime.time.min)
+        midnight = datetime.datetime.combine(
+            datetime.datetime.today(), datetime.time.min
+        )
         midnight_ts = datetime.datetime.timestamp(midnight)
         midnight_dt = await self.utc_from_timestamp(midnight_ts)
         return midnight_dt.isoformat()
+
 
 class DataStorage:
     """Handles reading and writing of the external storage file."""
@@ -661,7 +687,6 @@ class DataStorage:
         except Exception as e:
             _LOGGER.error("Could not read language file. Error message: %s", e)
             return None
-
 
     def getVersion(self):
         """Returns the version number stored in the __version__.py file."""

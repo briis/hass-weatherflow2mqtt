@@ -128,7 +128,15 @@ async def main():
 
     # Configure Sensors in MQTT
     _LOGGER.info("Defining Sensors for Home Assistant")
-    await setup_sensors(endpoint, client, unit_system, sensors, is_tempest, add_forecast, program_version)
+    await setup_sensors(
+        endpoint,
+        client,
+        unit_system,
+        sensors,
+        is_tempest,
+        add_forecast,
+        program_version,
+    )
 
     # Set timer variables
     rapid_last_run = 1621229580.583215  # A time in the past
@@ -172,7 +180,9 @@ async def main():
         # Update High and Low values if it is time
         now = datetime.now().timestamp()
         if (now - high_low_last_run) >= HIGH_LOW_TIMER:
-            highlow_topic = "homeassistant/sensor/{}/{}/attributes".format(DOMAIN, EVENT_HIGH_LOW)
+            highlow_topic = "homeassistant/sensor/{}/{}/attributes".format(
+                DOMAIN, EVENT_HIGH_LOW
+            )
             high_low_data = await sql.readHighLow()
             client.publish(highlow_topic, json.dumps(high_low_data), qos=1, retain=True)
             high_low_last_run = datetime.now().timestamp()
@@ -180,10 +190,14 @@ async def main():
         # Update the Forecast if it is time and enabled
         if add_forecast:
             now = datetime.now().timestamp()
-            fcst_state_topic = "homeassistant/sensor/{}/{}/state".format(DOMAIN, FORECAST_ENTITY)
-            fcst_attr_topic = "homeassistant/sensor/{}/{}/attributes".format(DOMAIN, FORECAST_ENTITY)
+            fcst_state_topic = "homeassistant/sensor/{}/{}/state".format(
+                DOMAIN, FORECAST_ENTITY
+            )
+            fcst_attr_topic = "homeassistant/sensor/{}/{}/attributes".format(
+                DOMAIN, FORECAST_ENTITY
+            )
             if (now - forecast_last_run) >= forecast_interval:
-                condition_data, fcst_data  = await forecast.update_forecast()
+                condition_data, fcst_data = await forecast.update_forecast()
                 if condition_data is not None:
                     client.publish(fcst_state_topic, json.dumps(condition_data))
                     await asyncio.sleep(0.01)
@@ -211,7 +225,9 @@ async def main():
                 client.publish(state_topic, json.dumps(data))
                 await asyncio.sleep(0.01)
                 if show_debug:
-                    _LOGGER.debug("HUB Reset Flags: %s", json_response.get("reset_flags"))
+                    _LOGGER.debug(
+                        "HUB Reset Flags: %s", json_response.get("reset_flags")
+                    )
             if msg_type in EVENT_PRECIP_START:
                 obs = json_response["evt"]
                 storage["rain_start"] = obs[0]
@@ -241,8 +257,12 @@ async def main():
                 ).isoformat()
                 data["battery_air"] = round(obs[6], 2)
                 data["battery_level_air"] = await cnv.battery_level(obs[6], False)
-                data["sealevel_pressure"] = await cnv.sea_level_pressure(obs[1], elevation)
-                trend_text, trend_value = await sql.readPressureTrend(data["sealevel_pressure"], translations)
+                data["sealevel_pressure"] = await cnv.sea_level_pressure(
+                    obs[1], elevation
+                )
+                trend_text, trend_value = await sql.readPressureTrend(
+                    data["sealevel_pressure"], translations
+                )
                 data["pressure_trend"] = trend_text
                 data["pressure_trend_value"] = trend_value
                 data["air_density"] = await cnv.air_density(obs[2], obs[1])
@@ -250,7 +270,9 @@ async def main():
                 data["feelslike"] = await cnv.feels_like(obs[2], obs[3], wind_speed)
                 data["wetbulb"] = await cnv.wetbulb(obs[2], obs[3], obs[1])
                 data["delta_t"] = await cnv.delta_t(obs[2], obs[3], obs[1])
-                data["dewpoint_description"] = await cnv.dewpoint_level(data["dewpoint"])
+                data["dewpoint_description"] = await cnv.dewpoint_level(
+                    data["dewpoint"]
+                )
                 data["temperature_description"] = await cnv.temperature_level(obs[2])
                 data["visibility"] = await cnv.visibility(elevation, obs[2], obs[3])
                 data["wbgt"] = await cnv.wbgt(obs[2], obs[3], obs[1], solar_radiation)
@@ -269,7 +291,9 @@ async def main():
                 data["rain_yesterday"] = await cnv.rain(storage["rain_yesterday"])
                 data["rain_duration_today"] = storage["rain_duration_today"]
                 data["rain_duration_yesterday"] = storage["rain_duration_yesterday"]
-                data["rain_start_time"] = datetime.fromtimestamp(storage["rain_start"]).isoformat()
+                data["rain_start_time"] = datetime.fromtimestamp(
+                    storage["rain_start"]
+                ).isoformat()
                 data["wind_lull"] = await cnv.speed(obs[4])
                 data["wind_speed_avg"] = await cnv.speed(obs[5])
                 data["wind_gust"] = await cnv.speed(obs[6])
@@ -312,7 +336,9 @@ async def main():
                 data["rain_yesterday"] = await cnv.rain(storage["rain_yesterday"])
                 data["rain_duration_today"] = storage["rain_duration_today"]
                 data["rain_duration_yesterday"] = storage["rain_duration_yesterday"]
-                data["rain_start_time"] = datetime.fromtimestamp(storage["rain_start"]).isoformat()
+                data["rain_start_time"] = datetime.fromtimestamp(
+                    storage["rain_start"]
+                ).isoformat()
                 data["precipitation_type"] = await cnv.rain_type(obs[13])
                 data["battery"] = round(obs[16], 2)
                 data["battery_level_tempest"] = await cnv.battery_level(obs[16], True)
@@ -347,8 +373,12 @@ async def main():
                 data["lightning_strike_time"] = datetime.fromtimestamp(
                     storage["last_lightning_time"]
                 ).isoformat()
-                data["sealevel_pressure"] = await cnv.sea_level_pressure(obs[6], elevation)
-                trend_text, trend_value = await sql.readPressureTrend(data["sealevel_pressure"], translations)
+                data["sealevel_pressure"] = await cnv.sea_level_pressure(
+                    obs[6], elevation
+                )
+                trend_text, trend_value = await sql.readPressureTrend(
+                    data["sealevel_pressure"], translations
+                )
                 data["pressure_trend"] = trend_text
                 data["pressure_trend_value"] = trend_value
                 data["air_density"] = await cnv.air_density(obs[7], obs[6])
@@ -358,7 +388,9 @@ async def main():
                 data["delta_t"] = await cnv.delta_t(obs[7], obs[8], obs[6])
                 data["visibility"] = await cnv.visibility(elevation, obs[7], obs[8])
                 data["wbgt"] = await cnv.wbgt(obs[7], obs[8], obs[6], obs[11])
-                data["dewpoint_description"] = await cnv.dewpoint_level(data["dewpoint"])
+                data["dewpoint_description"] = await cnv.dewpoint_level(
+                    data["dewpoint"]
+                )
                 data["temperature_description"] = await cnv.temperature_level(obs[7])
                 data["last_reset_midnight"] = last_midnight
                 client.publish(state_topic, json.dumps(data))
@@ -388,7 +420,11 @@ async def main():
                 if sensor_status is not None and sensor_status != 0:
                     device_status = await cnv.device_status(sensor_status)
                     if device_status and show_debug:
-                        _LOGGER.debug("Device %s has reported a sensor fault. Reason: %s", serial_number, device_status)
+                        _LOGGER.debug(
+                            "Device %s has reported a sensor fault. Reason: %s",
+                            serial_number,
+                            device_status,
+                        )
 
             if msg_type != EVENT_RAPID_WIND and msg_type != EVENT_HUB_STATUS:
                 # Update the Forecast State (Ensure there is data if HA restarts)
@@ -407,7 +443,9 @@ async def main():
                 )
 
 
-async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest, add_forecast, version):
+async def setup_sensors(
+    endpoint, mqtt_client, unit_system, sensors, is_tempest, add_forecast, version
+):
     """Setup the Sensors in Home Assistant."""
 
     # Get Hub Information
@@ -426,13 +464,22 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
         sensor_name = sensor[SENSOR_NAME]
         # Don't add the Weather Sensor if forecast disabled
         if not add_forecast and sensor[SENSOR_DEVICE] == EVENT_FORECAST:
-            _LOGGER.debug("Skipping Forecast sensor %s %s", add_forecast, sensor[SENSOR_DEVICE])
+            _LOGGER.debug(
+                "Skipping Forecast sensor %s %s", add_forecast, sensor[SENSOR_DEVICE]
+            )
             continue
         # Don't add the AIR & SKY Unit Battery sensors if this is a Tempest Device
-        if is_tempest and (sensor[SENSOR_ID] == "battery_air" or sensor[SENSOR_ID] == "battery_level_air" or sensor[SENSOR_ID] == "battery_level_sky"):
+        if is_tempest and (
+            sensor[SENSOR_ID] == "battery_air"
+            or sensor[SENSOR_ID] == "battery_level_air"
+            or sensor[SENSOR_ID] == "battery_level_sky"
+        ):
             continue
         # Don't add the TEMPEST Battery sensor and Battery Mode if this is a AIR or SKY Device
-        if not is_tempest and (sensor[SENSOR_ID] == "battery_level_tempest" or sensor[SENSOR_ID] == "battery_mode"):
+        if not is_tempest and (
+            sensor[SENSOR_ID] == "battery_level_tempest"
+            or sensor[SENSOR_ID] == "battery_mode"
+        ):
             continue
         # Modify name of Battery Device if Tempest Unit
         if is_tempest and sensor[SENSOR_ID] == "battery":
@@ -450,7 +497,9 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
         last_reset_topic = "homeassistant/sensor/{}/{}/last_reset_topic".format(
             DOMAIN, sensor[SENSOR_ID]
         )
-        highlow_topic = "homeassistant/sensor/{}/{}/attributes".format(DOMAIN, EVENT_HIGH_LOW)
+        highlow_topic = "homeassistant/sensor/{}/{}/attributes".format(
+            DOMAIN, EVENT_HIGH_LOW
+        )
 
         attribution = OrderedDict()
         payload = OrderedDict()
@@ -512,19 +561,51 @@ async def setup_sensors(endpoint, mqtt_client, unit_system, sensors, is_tempest,
                 payload["json_attributes_topic"] = highlow_topic
                 template = OrderedDict()
                 template = attribution
-                template["max_day"] = "{{{{ value_json.{}['max_day'] }}}}".format(sensor[SENSOR_ID])
-                template["max_day_time"] = "{{{{ value_json.{}['max_day_time'] }}}}".format(sensor[SENSOR_ID])
-                template["max_month"] = "{{{{ value_json.{}['max_month'] }}}}".format(sensor[SENSOR_ID])
-                template["max_month_time"] = "{{{{ value_json.{}['max_month_time'] }}}}".format(sensor[SENSOR_ID])
-                template["max_all"] = "{{{{ value_json.{}['max_all'] }}}}".format(sensor[SENSOR_ID])
-                template["max_all_time"] = "{{{{ value_json.{}['max_all_time'] }}}}".format(sensor[SENSOR_ID])
+                template["max_day"] = "{{{{ value_json.{}['max_day'] }}}}".format(
+                    sensor[SENSOR_ID]
+                )
+                template[
+                    "max_day_time"
+                ] = "{{{{ value_json.{}['max_day_time'] }}}}".format(sensor[SENSOR_ID])
+                template["max_month"] = "{{{{ value_json.{}['max_month'] }}}}".format(
+                    sensor[SENSOR_ID]
+                )
+                template[
+                    "max_month_time"
+                ] = "{{{{ value_json.{}['max_month_time'] }}}}".format(
+                    sensor[SENSOR_ID]
+                )
+                template["max_all"] = "{{{{ value_json.{}['max_all'] }}}}".format(
+                    sensor[SENSOR_ID]
+                )
+                template[
+                    "max_all_time"
+                ] = "{{{{ value_json.{}['max_all_time'] }}}}".format(sensor[SENSOR_ID])
                 if sensor[SENSOR_SHOW_MIN_ATT]:
-                    template["min_day"] = "{{{{ value_json.{}['min_day'] }}}}".format(sensor[SENSOR_ID])
-                    template["min_day_time"] = "{{{{ value_json.{}['min_day_time'] }}}}".format(sensor[SENSOR_ID])
-                    template["min_month"] = "{{{{ value_json.{}['min_month'] }}}}".format(sensor[SENSOR_ID])
-                    template["min_month_time"] = "{{{{ value_json.{}['min_month_time'] }}}}".format(sensor[SENSOR_ID])
-                    template["min_all"] = "{{{{ value_json.{}['min_all'] }}}}".format(sensor[SENSOR_ID])
-                    template["min_all_time"] = "{{{{ value_json.{}['min_all_time'] }}}}".format(sensor[SENSOR_ID])
+                    template["min_day"] = "{{{{ value_json.{}['min_day'] }}}}".format(
+                        sensor[SENSOR_ID]
+                    )
+                    template[
+                        "min_day_time"
+                    ] = "{{{{ value_json.{}['min_day_time'] }}}}".format(
+                        sensor[SENSOR_ID]
+                    )
+                    template[
+                        "min_month"
+                    ] = "{{{{ value_json.{}['min_month'] }}}}".format(sensor[SENSOR_ID])
+                    template[
+                        "min_month_time"
+                    ] = "{{{{ value_json.{}['min_month_time'] }}}}".format(
+                        sensor[SENSOR_ID]
+                    )
+                    template["min_all"] = "{{{{ value_json.{}['min_all'] }}}}".format(
+                        sensor[SENSOR_ID]
+                    )
+                    template[
+                        "min_all_time"
+                    ] = "{{{{ value_json.{}['min_all_time'] }}}}".format(
+                        sensor[SENSOR_ID]
+                    )
                 payload["json_attributes_template"] = json.dumps(template)
 
         try:
