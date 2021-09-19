@@ -78,12 +78,12 @@
         "heavy-rain": "Heavy Rain"
     },
     "rain_intensity": {
-        "NONE": "NONE",
-        "VERYLIGHT": "VERY LIGHT",
-        "LIGHT": "LIGHT",
-        "MODERATE": "MODERATE",
-        "HEAVY": "HEAVY",
-        "VERYHEAVY": "VERY HEAVY",
-        "EXTREME": "EXTREME"
+        "NONE": "None",
+        "VERYLIGHT": "Very Light",
+        "LIGHT": "Light",
+        "MODERATE": "Moderate",
+        "HEAVY": "Heavy",
+        "VERYHEAVY": "Very Heavy",
+        "EXTREME": "Extreme"
     }
 }

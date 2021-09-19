@@ -78,12 +78,12 @@
         "heavy-rain": "Kraftig regn"
     },
     "rain_intensity": {
-        "NONE": "INGEN",
-        "VERYLIGHT": "MEGET LET",
-        "LIGHT": "LET",
-        "MODERATE": "MODERAT",
-        "HEAVY": "KRAFTIG",
-        "VERYHEAVY": "MEGET KRAFTIG",
-        "EXTREME": "EKSTREM"
+        "NONE": "Ingen",
+        "VERYLIGHT": "Meget Let",
+        "LIGHT": "Let",
+        "MODERATE": "Moderat",
+        "HEAVY": "Kraftig",
+        "VERYHEAVY": "Meget Kraftig",
+        "EXTREME": "Ekstrem"
     }
 }
