@@ -12,9 +12,13 @@ import pytz
 import yaml
 
 from weatherflow2mqtt.__version__ import DB_VERSION
-from weatherflow2mqtt.const import (BATTERY_MODE_DESCRIPTION,
-                                    DEVICE_STATUS_MASKS, EXTERNAL_DIRECTORY,
-                                    SUPPORTED_LANGUAGES, UNITS_IMPERIAL)
+from weatherflow2mqtt.const import (
+    BATTERY_MODE_DESCRIPTION,
+    DEVICE_STATUS_MASKS,
+    EXTERNAL_DIRECTORY,
+    SUPPORTED_LANGUAGES,
+    UNITS_IMPERIAL,
+)
 from weatherflow2mqtt.sqlite import SQLFunctions
 
 UTC = pytz.utc
