@@ -218,13 +218,15 @@ class ConversionFunctions:
         # Format Relative Humidity
         RH = humidity / 100
         # Absolute Humidity Estimation is fairly acurate between (5C - 20C) (41F - 122F)
-        AH = (1320.65/TK)*RH*(10**((7.4475*(TK-273.14))/(TK-39.44))
+        AH = (1320.65/TK)*RH*(10**((7.4475*(TK-273.14))/(TK-39.44)))
 
-        # 
-        if self._unit_system == UNITS_IMPERIAL:
-            return round(vis / 1.609344, 1)
-        return round(AH, 1)
+        # lf/ft^3 is too small a value for that unit, will pass metric units just like Solar Radiation
+        # (g/m^3 * 0.000062) converts to lb/ft^3
+        #if self._unit_system == UNITS_IMPERIAL:
+        #    return round(AH * 0.000062, 6)
+        return round(AH, 2)
 *******************************************************************************************************
+
     async def rain_rate(self, value):
         """Returns rain rate per hour."""
         if not value:
