@@ -198,6 +198,46 @@ class ConversionFunctions:
             "FUNC: dewpoint ERROR: Temperature and/or Humidity value was reported as NoneType. Check the sensor"
         )
 
+#    async def absolute_humidity(self, elevation, temp, humidity):
+#        """Returns Absolute Humidity.
+#        Input:
+#            Elevation in Meters
+#            Temperature in Celcius
+#            Humidity in percent
+#        """
+#        if temp is None or elevation is None or humidity is None:
+#            return None
+#
+#        dewpoint_c = await self.dewpoint(temp, humidity, True)
+#        # Set minimum elevation for cases of stations below sea level
+#        if elevation > 2:
+#            elv_min = float(elevation)
+#        else:
+#            elv_min = float(2)
+#
+#        # Max possible visibility to horizon (units km)
+#        mv = float(3.56972 * math.sqrt(elv_min))
+#
+#        # Percent reduction based on quatity of water in air (no units)
+#        # 76 percent of visibility variation can be accounted for by humidity accourding to US-NOAA.
+#        pr_a = float((1.13 * abs(temp - dewpoint_c) - 1.15) / 10)
+#        if pr_a > 1:
+#            # Prevent visibility exceeding maximum distance
+#            pr = float(1)
+#        elif pr_a < 0.025:
+#            # Prevent visibility below minimum distance
+#            pr = float(0.025)
+#        else:
+#            pr = pr_a
+#
+#        # Visibility in km to horizon
+#        vis = float(mv * pr)
+#
+#        if self._unit_system == UNITS_IMPERIAL:
+#            # Originally was in nautical miles; HA displays miles as imperial, therfore converted to miles
+#            return round(vis / 1.609344, 1)
+#        return round(AH, 1)
+
     async def rain_rate(self, value):
         """Returns rain rate per hour."""
         if not value:
