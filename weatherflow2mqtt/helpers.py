@@ -198,46 +198,33 @@ class ConversionFunctions:
             "FUNC: dewpoint ERROR: Temperature and/or Humidity value was reported as NoneType. Check the sensor"
         )
 
-#    async def absolute_humidity(self, elevation, temp, humidity):
-#        """Returns Absolute Humidity.
-#        Input:
-#            Elevation in Meters
-#            Temperature in Celcius
-#            Humidity in percent
-#        """
-#        if temp is None or elevation is None or humidity is None:
-#            return None
-#
-#        dewpoint_c = await self.dewpoint(temp, humidity, True)
-#        # Set minimum elevation for cases of stations below sea level
-#        if elevation > 2:
-#            elv_min = float(elevation)
-#        else:
-#            elv_min = float(2)
-#
-#        # Max possible visibility to horizon (units km)
-#        mv = float(3.56972 * math.sqrt(elv_min))
-#
-#        # Percent reduction based on quatity of water in air (no units)
-#        # 76 percent of visibility variation can be accounted for by humidity accourding to US-NOAA.
-#        pr_a = float((1.13 * abs(temp - dewpoint_c) - 1.15) / 10)
-#        if pr_a > 1:
-#            # Prevent visibility exceeding maximum distance
-#            pr = float(1)
-#        elif pr_a < 0.025:
-#            # Prevent visibility below minimum distance
-#            pr = float(0.025)
-#        else:
-#            pr = pr_a
-#
-#        # Visibility in km to horizon
-#        vis = float(mv * pr)
-#
-#        if self._unit_system == UNITS_IMPERIAL:
-#            # Originally was in nautical miles; HA displays miles as imperial, therfore converted to miles
-#            return round(vis / 1.609344, 1)
-#        return round(AH, 1)
+***************************************************************************************************
+    async def absolute_humidity(self, temp, humidity):
+        """Returns Absolute Humidity.
+        Input:
+            Temperature in Celcius
+            Relative Humidity in percent
+        AH = (1320.65/TK)*RH*(10**((7.4475*(TK-273.14))/(TK-39.44))
+            where:
+              AH is Absolute Humidity g/m^3
+              RH is Relative Humidity in range of 0.0 - 1.0.  i.e. 25% RH is 0.25
+              TK is Temperature in Kelvin
+        """
+        if temp is None or humidity is None:
+            return None
 
+        # Convert Celcius to Kelvin
+        TK = temp + 273.16
+        # Format Relative Humidity
+        RH = humidity / 100
+        # Absolute Humidity Estimation is fairly acurate between (5C - 20C) (41F - 122F)
+        AH = (1320.65/TK)*RH*(10**((7.4475*(TK-273.14))/(TK-39.44))
+
+        # 
+        if self._unit_system == UNITS_IMPERIAL:
+            return round(vis / 1.609344, 1)
+        return round(AH, 1)
+*******************************************************************************************************
     async def rain_rate(self, value):
         """Returns rain rate per hour."""
         if not value:
