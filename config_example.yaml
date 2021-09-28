@@ -1,4 +1,5 @@
 sensors:
+  - absolute_humidity
   - air_density
   - air_temperature
   - voltage_air
@@ -13,6 +14,7 @@ sensors:
   - dewpoint_description
   - delta_t
   - feelslike
+  - humidity
   - illuminance
   - lightning_strike_count
   - lightning_strike_count_1hr
