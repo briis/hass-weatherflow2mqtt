@@ -113,6 +113,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 
 | Sensor ID   | Name   | Description   | Calculated Sensor   | Input (Tempest)  | Input (Air)   | Input (Sky)   | Default Units   
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| absolute_humidity | Absolute Humidity | The amount of water per volume of air | Yes | obs[7], obs[8] | obs[2], obs[3] |  | g/m^3 |
 | air_density | Air Density | The Air density | Yes | obs[7], obs[6] | obs[2], obs[1] |  | kg/m^3 |
 | air_temperature | Temperature | Outside Temperature | No | obs[7] | obs[2] |  | C° |
 | voltage_air | Voltage AIR | The voltage on the AIR unit (If present) | No |  | obs[6] |  | Volts |
@@ -169,6 +170,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 
 ```yaml
 sensors:
+  - absolute_humidity
   - air_density
   - air_temperature
   - voltage_air
