@@ -198,7 +198,6 @@ class ConversionFunctions:
             "FUNC: dewpoint ERROR: Temperature and/or Humidity value was reported as NoneType. Check the sensor"
         )
 
-***************************************************************************************************
     async def absolute_humidity(self, temp, humidity):
         """Returns Absolute Humidity.  Grams of water per cubic meter of air (g/m^3)
         Input:
@@ -228,7 +227,6 @@ class ConversionFunctions:
             return round(AH * 0.000062, 6)
         '''
         return round(AH, 2)
-*******************************************************************************************************
 
     async def rain_rate(self, value):
         """Returns rain rate per hour."""
