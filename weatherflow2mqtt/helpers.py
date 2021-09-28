@@ -200,7 +200,7 @@ class ConversionFunctions:
 
 ***************************************************************************************************
     async def absolute_humidity(self, temp, humidity):
-        """Returns Absolute Humidity.
+        """Returns Absolute Humidity.  Grams of water per cubic meter of air (g/m^3)
         Input:
             Temperature in Celcius
             Relative Humidity in percent
@@ -213,17 +213,20 @@ class ConversionFunctions:
         if temp is None or humidity is None:
             return None
 
-        # Convert Celcius to Kelvin
+        # Convert Celcius to Kelvin for temperature
         TK = temp + 273.16
         # Format Relative Humidity
         RH = humidity / 100
         # Absolute Humidity Estimation is fairly acurate between (5C - 20C) (41F - 122F)
         AH = (1320.65/TK)*RH*(10**((7.4475*(TK-273.14))/(TK-39.44)))
 
+        '''
         # lf/ft^3 is too small a value for that unit, will pass metric units just like Solar Radiation
-        # (g/m^3 * 0.000062) converts to lb/ft^3
-        #if self._unit_system == UNITS_IMPERIAL:
-        #    return round(AH * 0.000062, 6)
+        # Leaving conversion here for future reference
+        if self._unit_system == UNITS_IMPERIAL:
+            # (g/m^3 * 0.000062) converts to lb/ft^3
+            return round(AH * 0.000062, 6)
+        '''
         return round(AH, 2)
 *******************************************************************************************************
 
