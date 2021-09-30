@@ -173,7 +173,7 @@ async def main():
             storage["rain_today"] = 0
             storage["rain_duration_today"] = 0
             storage["lightning_count_today"] = 0
-            last_midnight = await cnv.utc_from_timestamp(datetime.now().timestamp())
+            last_midnight = await cnv.utc_last_midnight()
             await sql.writeStorage(storage)
             await sql.dailyHousekeeping()
             current_day = datetime.today().weekday()
