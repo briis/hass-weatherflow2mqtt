@@ -284,6 +284,8 @@ feelslike
 relative_humidity
 illuminance
 lightning_strike_count_today
+lightning_strike_distance
+lightning_strike_energy
 rain_duration_today
 rain_rate
 rain_today
