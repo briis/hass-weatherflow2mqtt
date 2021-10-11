@@ -2,7 +2,7 @@
 
 ## Version 2.1.0
 
-**Release Date**: RELEASED WITH `dev` TAG
+**Release Date**: October 11th, 2021
 
 ### Changes in release 2.1.0
 
