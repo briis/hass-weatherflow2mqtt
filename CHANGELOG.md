@@ -2,13 +2,13 @@
 
 ## Version 2.1.0
 
-**Release Date**: RELEASED WITH `dev` TAG
+**Release Date**: October 11th, 2021
 
 ### Changes in release 2.1.0
 
 * `FIX`: Issue #78, wrong Hex code used for decimal symbols.
 * `NEW`: Issue #77. Added new sensor called `sensor.wf_battery_mode`. This sensor reports a mode between 0 and 3, and the description for the mode is added as an attribute to the sensor. Basically it shows how the Tempest device operates with the current Voltage. You can read more about this on the [WeatherFlow Website](https://help.weatherflow.com/hc/en-us/articles/360048877194-Solar-Power-Rechargeable-Battery). **This sensor is only available for Tempest devices** <br>Thank you to @GlennGoddard for creating the formula.
-* `NEW`: Issue #81. Added `state_class` attributes to all sensors that has a numeric state value, so that they can be used with [Long Term Statistics](https://www.home-assistant.io/blog/2021/08/04/release-20218/#long-term-statistics).
+* `NEW`: Issue #81. Added `state_class` attributes to all relevant sensors, so that they can be used with [Long Term Statistics](https://www.home-assistant.io/blog/2021/08/04/release-20218/#long-term-statistics). See the README file for a list of supported sensors.
 * `NEW`: Discussion #83. Added new sensor `sensor.wf_rain_intensity`. This sensor shows a descriptive text about the current rain rate. See more on the [Weatherflow Community Forum](https://community.weatherflow.com/t/rain-intensity-values/806). The French and German translations are done by me, so they might need some checking to see if they are correct.
 
 ## Version 2.0.17

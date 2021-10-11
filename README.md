@@ -17,6 +17,7 @@ There is support for both the AIR & SKY devices and the TEMPEST device.
 3. [Available Sensors](#available-sensors)
     1. [Sensor Structure](#sensor-structure)
     2. [High and Low Values](#high-and-low-values)
+    3. [Long Term Statistics](#Home-Assistant-Long-Term-Statistics)
 4. [Creating a Home Assistant Weather Entity](#creating-a-home-assistant-weather-entity)
 
 ## Installation
@@ -263,6 +264,48 @@ The following sensors are displaying High and Low values:
 | `wind_gust` | Yes | No |
 | `wind_lull` | Yes | No |
 | `wind_speed_avg` | Yes | No |
+
+### Home Assistant Long Term Statistics
+
+These sensors have long term statistics (LTS) enabled in Home Assistant (HA), no action by user is required to have LTS collected by HA this is done with MQTT autodiscovery.  To display LTS in HA using the Statistics Graph Card (type: statistics-graph) the 'stat types' that can be used with this integration are Mean, Min, and Max.  It is the user's discreation as to how to display the information, but cases such as rain today 'Max' would be a more logical selection without 'Mean' or 'Min'.  During testing there has not been a use case for this integration that 'Sum' was of any valid use.  Air, Sky, and Tempest sensors are specific to those units.
+
+https://data.home-assistant.io/docs/statistics/
+
+```yaml
+voltage_air
+battery_air
+voltage_sky
+battery_sky
+voltage_tempest
+battery_tempest
+air_density
+beaufort
+delta_t
+dewpoint
+feelslike
+relative_humidity
+illuminance
+lightning_strike_count_today
+lightning_strike_distance
+lightning_strike_energy
+rain_duration_today
+rain_rate
+rain_today
+sealevel_pressure
+solar_radiation
+station_pressure
+air_temperature 
+uv
+visibility
+wet_bulb_globe_temperature
+wetbulb
+wind_bearing
+wind_bearing_avg
+wind_gust
+wind_lull
+wind_speed
+wind_speed_avg
+```
 
 ## Creating a Home Assistant Weather Entity
 
