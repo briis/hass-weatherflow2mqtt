@@ -1,5 +1,13 @@
 # Home Assistant WeatherFlow2MQTT Changelog
 
+## Version 2.1.1
+
+**Release Date**: RELEASED WITH `dev` TAG
+
+### Changes in release 2.1.1
+
+* `FIX`: Discussion #83, added new sensor called `sensor.wf_absolute_humidity`, which shows the actual amount of water in volume of air. Thank you to @GlennGoddard for creating the formula.
+
 ## Version 2.1.0
 
 **Release Date**: October 11th, 2021
