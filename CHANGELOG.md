@@ -6,7 +6,7 @@
 
 ### Changes in release 2.1.1
 
-* `FIX`: Discussion #83, added new sensor called `sensor.wf_absolute_humidity`, which shows the actual amount of water in volume of air. Thank you to @GlennGoddard for creating the formula.
+* `NEW`: Discussion #83, added new sensor called `sensor.wf_absolute_humidity`, which shows the actual amount of water in volume of air. Thank you to @GlennGoddard for creating the formula.
 
 ## Version 2.1.0
 
