@@ -11,7 +11,7 @@ from typing import OrderedDict
 import pytz
 import yaml
 
-from weatherflow2mqtt.__version__ import DB_VERSION
+from weatherflow2mqtt.__version__ import VERSION
 from weatherflow2mqtt.const import (
     BATTERY_MODE_DESCRIPTION,
     DEVICE_STATUS_MASKS,
@@ -721,4 +721,4 @@ class DataStorage:
 
     def getVersion(self):
         """Returns the version number stored in the __version__.py file."""
-        return DB_VERSION
+        return VERSION
