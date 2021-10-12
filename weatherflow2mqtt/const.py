@@ -284,9 +284,9 @@ WEATHERFLOW_SENSORS = [
     [
         "absolute_humidity",
         "Absolute Humidity",
-        "%",
-        "%",
-        DEVICE_CLASS_HUMIDITY,
+        "g/m^3",
+        "g/m^3",
+        None,
         STATE_CLASS_MEASUREMENT,
         None,
         EVENT_AIR_DATA,
