@@ -276,6 +276,7 @@ async def main():
                 )
                 data["temperature_description"] = await cnv.temperature_level(obs[2])
                 data["visibility"] = await cnv.visibility(elevation, obs[2], obs[3])
+                data["absolute_humidity"] = await cnv.absolute_humidity(obs[2], obs[3])
                 data["wbgt"] = await cnv.wbgt(obs[2], obs[3], obs[1], solar_radiation)
                 data["last_reset_midnight"] = last_midnight
                 client.publish(state_topic, json.dumps(data))
@@ -388,6 +389,7 @@ async def main():
                 data["wetbulb"] = await cnv.wetbulb(obs[7], obs[8], obs[6])
                 data["delta_t"] = await cnv.delta_t(obs[7], obs[8], obs[6])
                 data["visibility"] = await cnv.visibility(elevation, obs[7], obs[8])
+                data["absolute_humidity"] = await cnv.absolute_humidity(obs[7], obs[8])
                 data["wbgt"] = await cnv.wbgt(obs[7], obs[8], obs[6], obs[11])
                 data["dewpoint_description"] = await cnv.dewpoint_level(
                     data["dewpoint"]
