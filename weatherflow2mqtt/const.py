@@ -290,8 +290,8 @@ WEATHERFLOW_SENSORS = [
         STATE_CLASS_MEASUREMENT,
         None,
         EVENT_AIR_DATA,
-        True,
-        True,
+        False,
+        False,
         False,
     ],
     [
