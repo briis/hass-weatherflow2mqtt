@@ -1,4 +1,5 @@
  sensors:
+  - absolute_humidity
   - air_temperature
   - battery
   - battery_level_tempest
@@ -8,7 +9,7 @@
   - dewpoint_description
   - delta_t
   - feelslike
-  - absolute_humidity
+  - hub_status
   - illuminance
   - lightning_strike_count
   - lightning_strike_count_1hr
@@ -31,7 +32,7 @@
   - solar_radiation
   - station_pressure
   - temperature_description
-  - uptime
+  - tempest_status
   - uv
   - uv_description
   - visibility

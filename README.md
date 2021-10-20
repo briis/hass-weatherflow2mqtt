@@ -116,6 +116,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | absolute_humidity | Absolute Humidity | The amount of water per volume of air | Yes | obs[7], obs[8] | obs[2], obs[3] |  | g/m^3 |
 | air_density | Air Density | The Air density | Yes | obs[7], obs[6] | obs[2], obs[1] |  | kg/m^3 |
+| air_status | AIR Status | How long has the AIR device been running and other HW details | No | hub_status |  |  |  |
 | air_temperature | Temperature | Outside Temperature | No | obs[7] | obs[2] |  | C° |
 | voltage_air | Voltage AIR | The voltage on the AIR unit (If present) | No |  | obs[6] |  | Volts |
 | battery_air | Battery AIR | The battery level on the AIR unit (If present) | Yes |  | obs[6] |  | % |
@@ -129,6 +130,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | dewpoint | Dew Point | Dewpoint in degrees | Yes | obs[7], obs[8] | obs{2], obs[3] |  | C° |
 | dewpoint_description | Dewpoint Comfort Level | Textual representation of the Dewpoint value | Yes | dewpoint | dewpoint |  |  |
 | feelslike | Feels Like Temperature | The apparent temperature, a mix of Heat Index and Wind Chill | Yes | obs[7], obs[8], wind_speed | obs[2], obs[3], wind_speed |  | C° |
+| hub_status | Hub Status | How long has the HUB been running and other HW details | No | hub_status |  |  |  |
 | illuminance | Illuminance | How much the incident light illuminates the surface | No | obs[9] |  | obs[1] | Lux |
 | lightning_strike_count | Lightning Count | Number of lightning strikes in the last minute | Yes | obs[15] | obs[4] |  | # |
 | lightning_strike_count_1hr | Lightning Count (Last hour) | Number of lightning strikes during the last hour | Yes |  |  |  |  |
@@ -147,11 +149,12 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | rain_duration_yesterday | Rain Duration (Yesterday) | Total rain minutes yesterday | Yes | rain_duration_yesterday |  | rain_duration_yesterday | minutes |
 | relative_humidity | Humidity | Relative Humidity | No | obs[8] |  | obs[3] | % |
 | sealevel_pressure | Station Pressure | Preasure measurement at Sea Level | Yes | obs[6], elevation | obs[1], elevation |  | MB |
+| sky_status | SKY Status | How long has the SKY device been running and other HW details | No | hub_status |  |  |  |
 | pressure_trend | Pressure Trend | Returns Steady, Falling or Rising determined by the rate of change over the past 3 hours| trend_text | trend_text |  |  | Yes |
 | solar_radiation | Solar Radiation | Electromagnetic radiation emitted by the sun | No | obs[11] |  | obs[10] | W/m^2 |
 | station_pressure | Station Pressure | Pressure measurement where the station is located | No | obs[6] | obs[1] |  | MB |
 | temperature_description | Temperature Level | Textual representation of the Outside Air Temperature value | Yes | obs[7] | obs[2] |  | Text |
-| uptime | Uptime | How long has the HUB been running | No | hub_status/uptime |  |  |  |
+| tempest_status | Tempest Status | How long has the Tempest device been running and other HW details | No | hub_status |  |  |  |
 | uv | UV Index | The UV index | No | obs[10] |  | obs[2] | Index |
 | uv_description | UV Level | Textual representation of the UV Index value | Yes | obs[10] |  |  | obs[2] |
 | visibility | Visibility | Distance to the horizon | Yes | elevation, obs[7], obs[8] | elevation, obs[2], obs[3] |  | km |
@@ -173,6 +176,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 sensors:
   - absolute_humidity
   - air_density
+  - air_status # Only for AIR Device
   - air_temperature
   - battery_air # Voltage AIR 
   - battery_level_air # Battery Level AIR
@@ -185,6 +189,7 @@ sensors:
   - dewpoint_description
   - delta_t
   - feelslike
+  - hub_status
   - illuminance
   - lightning_strike_count
   - lightning_strike_count_1hr
@@ -204,10 +209,11 @@ sensors:
   - rain_duration_yesterday
   - relative_humidity
   - sealevel_pressure
+  - sky_status # Only for SKY Devices
   - solar_radiation
   - station_pressure
   - temperature_description
-  - uptime
+  - tempest_status # Only for Tempest devices
   - uv
   - uv_description
   - visibility

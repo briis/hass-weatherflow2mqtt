@@ -1,4 +1,6 @@
  sensors:
+  - absolute_humidity
+  - air_status
   - air_temperature
   - battery
   - battery_air
@@ -9,7 +11,7 @@
   - dewpoint_description
   - delta_t
   - feelslike
-  - absolute_humidity
+  - hub_status
   - illuminance
   - lightning_strike_count
   - lightning_strike_count_1hr
@@ -29,10 +31,10 @@
   - rain_duration_yesterday
   - relative_humidity
   - sealevel_pressure
+  - sky_status
   - solar_radiation
   - station_pressure
   - temperature_description
-  - uptime
   - uv
   - uv_description
   - visibility
