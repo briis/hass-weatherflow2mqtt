@@ -26,7 +26,7 @@ There is support for both the AIR & SKY devices and the TEMPEST device.
 - Ensure there is a MQTT Server available
 - Open a Terminal on the Machine you want to run the Docker container on.
 - Make a new Directory: `mkdir weatherflow2mqtt` (or some other name) and change to that directory.
-- If you **don't** want all sensors setup, copy the `config_example.yaml` file from this repo to that directory, and rename it to `config.yaml`. Then add or remove the sensors you want from the [available sensors list](#sensor-structure). If you don't do this, all sensors from the [Available Sensors](#available-sensors) will be added.
+- If you **don't** want all sensors setup, copy the `config_example_TEMPEST.yaml` or `config_example_AIR_SKY.yaml` file from this repo to that directory, and rename it to `config.yaml`. Then add or remove the sensors you want from the [available sensors list](#sensor-structure). If you don't do this, all sensors from the [Available Sensors](#available-sensors) will be added.
 - Now start the Docker Container with the parameters described under [docker-setup](#docker-setup)
 
 If everything is setup correctly with MQTT and Home Assistant, you should now start seeing the sensors show up in HA. **NOTE**, it can take up to 1 min after startup, before all sensors are populated with data.
@@ -174,12 +174,11 @@ sensors:
   - absolute_humidity
   - air_density
   - air_temperature
-  - voltage_air
-  - battery_air
-  - voltage_sky
-  - battery_sky
-  - voltage_tempest
-  - battery_tempest
+  - battery_air # Voltage AIR 
+  - battery_level_air # Battery Level AIR
+  - battery_level_sky # Battery Level SKY
+  - battery # Voltage for either SKY or TEMPEST
+  - battery_level_tempest # Battery Level TEMPEST
   - battery_mode # Only for Tempest Devices
   - beaufort
   - dewpoint
@@ -213,7 +212,7 @@ sensors:
   - uv_description
   - visibility
   - wetbulb
-  - wet_bulb_globe_temperature
+  - wbgt #Wet Bulb Globe Temperature
   - wind_bearing
   - wind_bearing_avg
   - wind_direction
