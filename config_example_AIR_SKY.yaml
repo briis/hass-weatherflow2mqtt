@@ -46,3 +46,4 @@
   - wind_lull
   - wind_speed
   - wind_speed_avg
+  - weather # Only if you are loading the Forecast
