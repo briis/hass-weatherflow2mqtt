@@ -1,5 +1,14 @@
 # Home Assistant WeatherFlow2MQTT Changelog
 
+## Version 2.1.2
+
+**Release Date**: RELEASED ONLY TO `dev` tag
+
+### Changes in release 2.1.2
+
+* `CHANGE`: **BREAKING CHANGE** The sensor `sensor.wf_uptime` has been renamed to `sensor.wf_hub_status`. This sensor will now have more attributes on the status of the Hub, like Serial Number, FW Version etc.
+* `NEW`: Depending on what HW you have, there will be 1 or 2 new sensors created, called either `sensor.wf_tempest_status` (If you have a Tempest device) or `sensor.wf_air_status` and `sensor.wf_sky_status`. The state of the sensors will display the Uptime of each device, and then there will attributes giving more details about each HW device.
+
 ## Version 2.1.1
 
 **Release Date**: October 17th, 2021

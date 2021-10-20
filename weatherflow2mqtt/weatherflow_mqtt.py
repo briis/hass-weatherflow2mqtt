@@ -222,9 +222,20 @@ async def main():
                     await asyncio.sleep(0.01)
                     rapid_last_run = datetime.now().timestamp()
             if msg_type in EVENT_HUB_STATUS:
-                data["uptime"] = await cnv.humanize_time(json_response.get("uptime"))
+                data["hub_status"] = await cnv.humanize_time(json_response.get("uptime"))
                 client.publish(state_topic, json.dumps(data))
                 await asyncio.sleep(0.01)
+                attr_topic = "homeassistant/sensor/{}/{}/attributes".format(DOMAIN, "hub_status")
+                attr = OrderedDict()
+                attr[ATTR_ATTRIBUTION] = ATTRIBUTION
+                attr[ATTR_BRAND] = BRAND
+                attr["serial_number"] = json_response.get("serial_number")
+                attr["firmware_revision"] = json_response.get("firmware_revision")
+                attr["rssi"] = json_response.get("rssi")
+                attr["reset_flags"] = json_response.get("reset_flags")
+                client.publish(attr_topic, json.dumps(attr))
+                await asyncio.sleep(0.01)
+
                 if show_debug:
                     _LOGGER.debug(
                         "HUB Reset Flags: %s", json_response.get("reset_flags")
@@ -411,15 +422,10 @@ async def main():
                 serial_number = json_response.get("serial_number")
                 firmware_revision = json_response.get("firmware_revision")
                 voltage = json_response.get("voltage")
+                uptime = await cnv.humanize_time(json_response.get("uptime"))
                 sensor_status = json_response.get("sensor_status")
-                if show_debug:
-                    _LOGGER.debug(
-                        "DEVICE STATUS TRIGGERED AT %s\n  -- Device: %s\n -- Firmware Revision: %s\n -- Voltage: %s",
-                        str(now),
-                        serial_number,
-                        firmware_revision,
-                        voltage,
-                    )
+
+                device_status = None
                 if sensor_status is not None and sensor_status != 0:
                     device_status = await cnv.device_status(sensor_status)
                     if device_status and show_debug:
@@ -428,6 +434,39 @@ async def main():
                             serial_number,
                             device_status,
                         )
+
+                data = OrderedDict()
+                if serial_number[0:2] == "ST":
+                    device_name = "tempest_status"
+                elif serial_number[0:2] == "AR":
+                    device_name = "air_status"
+                elif serial_number[0:2] == "SK":
+                    device_name = "sky_status"
+
+                data[device_name] = uptime
+                attr_topic = "homeassistant/sensor/{}/{}/attributes".format(DOMAIN, device_name)
+                attr = OrderedDict()
+                attr[ATTR_ATTRIBUTION] = ATTRIBUTION
+                attr[ATTR_BRAND] = BRAND
+                attr["serial_number"] = serial_number
+                attr["firmware_revision"] = firmware_revision
+                attr["voltage"] = voltage
+                attr["rssi"] = json_response.get("rssi")
+                attr["sensor_status"] = device_status
+                client.publish(attr_topic, json.dumps(attr))
+                await asyncio.sleep(0.01)
+                        
+                client.publish(state_topic, json.dumps(data))
+                await asyncio.sleep(0.01)
+                
+                if show_debug:
+                    _LOGGER.debug(
+                        "DEVICE STATUS TRIGGERED AT %s\n  -- Device: %s\n -- Firmware Revision: %s\n -- Voltage: %s",
+                        str(now),
+                        serial_number,
+                        firmware_revision,
+                        voltage,
+                    )
 
             if msg_type != EVENT_RAPID_WIND and msg_type != EVENT_HUB_STATUS:
                 # Update the Forecast State (Ensure there is data if HA restarts)
@@ -471,17 +510,20 @@ async def setup_sensors(
                 "Skipping Forecast sensor %s %s", add_forecast, sensor[SENSOR_DEVICE]
             )
             continue
-        # Don't add the AIR & SKY Unit Battery sensors if this is a Tempest Device
+        # Don't add the AIR & SKY Unit Battery and device sensors if this is a Tempest Device
         if is_tempest and (
             sensor[SENSOR_ID] == "battery_air"
             or sensor[SENSOR_ID] == "battery_level_air"
             or sensor[SENSOR_ID] == "battery_level_sky"
+            or sensor[SENSOR_ID] == "air_status"
+            or sensor[SENSOR_ID] == "sky_status"
         ):
             continue
         # Don't add the TEMPEST Battery sensor and Battery Mode if this is a AIR or SKY Device
         if not is_tempest and (
             sensor[SENSOR_ID] == "battery_level_tempest"
             or sensor[SENSOR_ID] == "battery_mode"
+            or sensor[SENSOR_ID] == "tempest_status"
         ):
             continue
         # Modify name of Battery Device if Tempest Unit
