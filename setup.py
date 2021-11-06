@@ -30,6 +30,7 @@ setup(name='weatherflow2mqtt',
                 "translations/da.json",
                 "translations/en.json",
                 "translations/fr.json",
+                "translations/de.json",
             ],
         )
       ],
