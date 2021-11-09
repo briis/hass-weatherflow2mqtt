@@ -13,6 +13,7 @@ from datetime import datetime
 from typing import OrderedDict
 
 import paho.mqtt.client as mqtt
+from aiohttp import ClientSession
 
 from weatherflow2mqtt.aioudp import open_local_endpoint
 from weatherflow2mqtt.const import (
@@ -57,6 +58,24 @@ _LOGGER = logging.getLogger(__name__)
 
 async def main():
     logging.basicConfig(level=logging.DEBUG)
+
+    if eval(os.getenv("HASS", "False")):
+        _LOGGER.info("🏠 Home Assistant Mode")
+        async with ClientSession() as session:
+            async with session.get(
+                "http://supervisor/services/mqtt",
+                headers={"Authorization": "Bearer " + os.getenv("SUPERVISOR_TOKEN")},
+            ) as resp:
+                mqtt_conf = await resp.json()
+                if "ok" in mqtt_conf.get("result"):
+                    data = mqtt_conf["data"]
+                    os.environ["MQTT_HOST"] = data["host"]
+                    os.environ["MQTT_PORT"] = str(data["port"])
+                    os.environ["MQTT_USERNAME"] = data["username"]
+                    os.environ["MQTT_PASSWORD"] = data["password"]
+        with open("/data/options.json") as f:
+            conf = json.load(f).items()
+            [os.environ.update({k: str(v)}) for k, v in conf if v]
 
     # Read the config Settings
     _LOGGER.info("Timezone is %s", os.environ["TZ"])
