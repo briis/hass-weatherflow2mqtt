@@ -1,4 +1,4 @@
 {
-  "name": "WeatherFlow to MQTT",
-  "url": "https://github.com/briis/weatherflow2mqtt"
+    "name": "WeatherFlow to MQTT",
+    "url": "https://github.com/briis/hass-weatherflow2mqtt"
 }
