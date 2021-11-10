@@ -7,7 +7,7 @@
 ### Changes in release 2.2.0
 
 * `CHANGE`: **BREAKING CHANGE** The sensor `sensor.wf_uptime` has been renamed to `sensor.wf_hub_status`. This sensor will now have more attributes on the status of the Hub, like Serial Number, FW Version etc.
-* `NEW`: Thanks to @natekspencer this image can now be installed and managed from the Home Assistant Add-On store. This is not part of the default store yet, but to use it from the Add-On store, just click the button 'ADD REPOSITORY' in the top of the README.md file.
+* `NEW`: Thanks to @natekspencer this image can now be installed and managed from the Home Assistant Add-On store. This is not part of the default store yet, but to use it from the Add-On store, just click the button 'ADD REPOSITORY' in the top of the README.md file. **NOTE** Remember to stop/remove the container running outside the Add-On store before attempting to install.
 * `NEW`: Depending on what HW you have, there will be 1 or 2 new sensors created, called either `sensor.wf_tempest_status` (If you have a Tempest device) or `sensor.wf_air_status` and `sensor.wf_sky_status`. The state of the sensors will display the Uptime of each device, and then there will attributes giving more details about each HW device.
 
 ## Version 2.1.1
