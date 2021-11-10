@@ -1,0 +1,54 @@
+{
+  "name": "WeatherFlow to MQTT",
+  "description": "WeatherFlow to MQTT for Home Assistant",
+  "slug": "weatherflow2mqtt",
+  "url": "https://github.com/briis/weatherflow2mqtt",
+  "image": "briis/weatherflow2mqtt",
+  "version": "2.1.1",
+  "arch": [
+    "armv7",
+    "aarch64",
+    "amd64"
+  ],
+  "startup": "application",
+  "boot": "auto",
+  "ports": {
+    "50222/udp": 50222
+  },
+  "ports_description": {
+    "50222/udp": "WeatherFlow socket"
+  },
+  "map": [
+    "config:rw"
+  ],
+  "environment": {
+    "HASS": "True",
+    "EXTERNAL_DIRECTORY": "/data"
+  },
+  "services": [
+    "mqtt:want"
+  ],
+  "options": {
+    "TEMPEST_DEVICE": true
+  },
+  "schema": {
+    "TZ": "str?",
+    "TEMPEST_DEVICE": "bool?",
+    "UNIT_SYSTEM": "list(imperial|metric)?",
+    "LANGUAGE": "list(en|da|de|fr)?",
+    "RAPID_WIND_INTERVAL": "int?",
+    "ELEVATION": "float?",
+    "WF_HOST": "str?",
+    "WF_PORT": "port?",
+    "MQTT_HOST": "str?",
+    "MQTT_PORT": "port?",
+    "MQTT_USERNAME": "str?",
+    "MQTT_PASSWORD": "password?",
+    "MQTT_DEBUG": "bool?",
+    "DEBUG": "bool?",
+    "ADD_FORECAST": "bool?",
+    "STATION_ID": "str?",
+    "STATION_TOKEN": "str?",
+    "FORECAST_INTERVAL": "int?"
+  }
+}
