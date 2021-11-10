@@ -6,7 +6,7 @@
 
 This project monitors the UDP socket (50222) from a WeatherFlow Hub, and publishes the data to a MQTT Server. Data is formatted in a way that, it supports the [MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/) format for Home Assistant, so a sensor will created for each entity that WeatherFlow sends out, if you have MQTT Discovery enabled.
 
-Everything runs in a pre-build Docker Container, so installation is very simple, you only need Docker installed on a computer and a MQTT Server setup somewhere in your network. If you run the Supervised version of Home Assistant, you will have easy access to both.ß
+Everything runs in a pre-build Docker Container, so installation is very simple, you only need Docker installed on a computer and a MQTT Server setup somewhere in your network. If you run the Supervised version of Home Assistant, you will have easy access to both. 
 
 There is support for both the AIR & SKY devices and the TEMPEST device.
 
@@ -23,6 +23,12 @@ There is support for both the AIR & SKY devices and the TEMPEST device.
 4. [Creating a Home Assistant Weather Entity](#creating-a-home-assistant-weather-entity)
 
 ## Installation
+
+### Home Assistant Supervised version
+
+This is the easiest installation method. Just click the Blue Button which is labelled 'ADD INTEGRATION' and you will be taken to Home Assistant to add this repository to the Add-On store, from where you can install and configure it.
+
+### Outside Home Assistant using Docker
 
 - Ensure Docker is setup and running
 - Ensure there is a MQTT Server available
@@ -64,6 +70,7 @@ docker run -d \
 -e FORECAST_INTERVAL=30 \
 briis/weatherflow2mqtt:latest
 ```
+
 The container is build for both Intel and ARM platforms, so it should work on most HW types. Please create an issue, if there is a platform for which it does not work.
 
 ### Docker Volume
