@@ -1,7 +1,5 @@
-"""Program listening to the UDP Broadcast from
-   a WeatherFlow Weather Station and publishing
-   sensor data to MQTT.
-"""
+"""Program listening to the UDP Broadcast from a WeatherFlow Weather Station and publishing sensor data to MQTT."""
+from __future__ import annotations
 
 import asyncio
 import json
@@ -10,12 +8,11 @@ import os
 import sys
 import time
 from datetime import datetime
-from typing import OrderedDict
+from typing import Any, OrderedDict
 
 import paho.mqtt.client as mqtt
-from aiohttp import ClientSession
 
-from weatherflow2mqtt.aioudp import open_local_endpoint
+from weatherflow2mqtt.aioudp import LocalEndpoint, open_local_endpoint
 from weatherflow2mqtt.const import (
     ATTR_ATTRIBUTION,
     ATTR_BRAND,
@@ -33,8 +30,10 @@ from weatherflow2mqtt.const import (
     EVENT_SKY_DATA,
     EVENT_STRIKE,
     EVENT_TEMPEST_DATA,
+    EXTERNAL_DIRECTORY,
     FORECAST_ENTITY,
     HIGH_LOW_TIMER,
+    OBSOLETE_SENSORS,
     SENSOR_CLASS,
     SENSOR_DEVICE,
     SENSOR_EXTRA_ATT,
@@ -50,56 +49,51 @@ from weatherflow2mqtt.const import (
     WEATHERFLOW_SENSORS,
 )
 from weatherflow2mqtt.forecast import Forecast
-from weatherflow2mqtt.helpers import ConversionFunctions, DataStorage
+from weatherflow2mqtt.helpers import ConversionFunctions, DataStorage, truebool
 from weatherflow2mqtt.sqlite import SQLFunctions
 
 _LOGGER = logging.getLogger(__name__)
 
 
 async def main():
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
 
-    if eval(os.getenv("HASS", "False")):
-        _LOGGER.info("🏠 Home Assistant Mode")
-        async with ClientSession() as session:
-            async with session.get(
-                "http://supervisor/services/mqtt",
-                headers={"Authorization": "Bearer " + os.getenv("SUPERVISOR_TOKEN")},
-            ) as resp:
-                mqtt_conf = await resp.json()
-                if "ok" in mqtt_conf.get("result"):
-                    data = mqtt_conf["data"]
-                    os.environ["MQTT_HOST"] = data["host"]
-                    os.environ["MQTT_PORT"] = str(data["port"])
-                    os.environ["MQTT_USERNAME"] = data["username"]
-                    os.environ["MQTT_PASSWORD"] = data["password"]
-        with open("/data/options.json") as f:
-            conf = json.load(f).items()
-            [os.environ.update({k: str(v)}) for k, v in conf if v]
+    if is_supervisor := truebool(os.getenv("HA_SUPERVISOR")):
+        config = await get_supervisor_configuration()
+    else:
+        config = os.environ
+
+    _LOGGER.info("Timezone is %s", os.environ.get("TZ"))
 
     # Read the config Settings
-    _LOGGER.info("Timezone is %s", os.environ["TZ"])
-    is_tempest = eval(os.environ["TEMPEST_DEVICE"])
-    weatherflow_ip = os.environ["WF_HOST"]
-    weatherflow_port = int(os.environ["WF_PORT"])
-    elevation = float(os.environ["ELEVATION"])
-    mqtt_host = os.environ["MQTT_HOST"]
-    mqtt_port = int(os.environ["MQTT_PORT"])
-    mqtt_username = os.environ["MQTT_USERNAME"]
-    mqtt_password = os.environ["MQTT_PASSWORD"]
-    mqtt_debug = eval(os.environ["MQTT_DEBUG"])
-    unit_system = os.environ["UNIT_SYSTEM"]
-    rw_interval = int(os.environ["RAPID_WIND_INTERVAL"])
-    show_debug = eval(os.environ["DEBUG"])
-    add_forecast = eval(os.environ["ADD_FORECAST"])
-    station_id = os.environ["STATION_ID"]
-    station_token = os.environ["STATION_TOKEN"]
-    forecast_interval = int(os.environ["FORECAST_INTERVAL"])
-    language = os.environ["LANGUAGE"]
+    is_tempest = truebool(config.get("TEMPEST_DEVICE", True))
+    weatherflow_ip = config.get("WF_HOST", "0.0.0.0")
+    weatherflow_port = int(config.get("WF_PORT", 50222))
+    elevation = float(config.get("ELEVATION", 0))
+    mqtt_host = config.get("MQTT_HOST", "127.0.0.1")
+    mqtt_port = int(config.get("MQTT_PORT", 1883))
+    mqtt_username = config.get("MQTT_USERNAME")
+    mqtt_password = config.get("MQTT_PASSWORD")
+    mqtt_debug = truebool(config.get("MQTT_DEBUG"))
+    unit_system = config.get("UNIT_SYSTEM", "metric")
+    rw_interval = int(config.get("RAPID_WIND_INTERVAL", 0))
+    show_debug = truebool(config.get("DEBUG"))
+    add_forecast = truebool(config.get("ADD_FORECAST"))
+    station_id = config.get("STATION_ID")
+    station_token = config.get("STATION_TOKEN")
+    forecast_interval = int(config.get("FORECAST_INTERVAL", 30))
+    language = config.get("LANGUAGE", "en").lower()
+    if isinstance(filter_sensors := config.get("FILTER_SENSORS"), str):
+        filter_sensors = [sensor.strip() for sensor in filter_sensors.split(",")]
+    invert_filter = truebool(config.get("INVERT_FILTER"))
+
+    if show_debug:
+        logging.getLogger().setLevel(logging.DEBUG)
 
     # Read the sensor config and translation file
     data_store = DataStorage()
-    sensors = await data_store.read_config()
+    if filter_sensors is None and not is_supervisor:
+        filter_sensors = await data_store.read_config()
     program_version = data_store.getVersion()
     translations = await data_store.getLanguageFile(language)
 
@@ -108,8 +102,14 @@ async def main():
 
     # Forecast
     if add_forecast:
-        forecast = Forecast(station_id, unit_system, translations, station_token)
-        forecast_interval = forecast_interval * 60
+        if not station_id or not station_token:
+            _LOGGER.info(
+                "STATION_ID and STATION_TOKEN must also be set to retrieve forecast data"
+            )
+            add_forecast = False
+        else:
+            forecast = Forecast(station_id, unit_system, translations, station_token)
+            forecast_interval = forecast_interval * 60
 
     # MQTT
     mqtt_anonymous = False
@@ -152,7 +152,8 @@ async def main():
         endpoint,
         client,
         unit_system,
-        sensors,
+        filter_sensors,
+        invert_filter,
         is_tempest,
         add_forecast,
         program_version,
@@ -474,10 +475,10 @@ async def main():
                 attr["sensor_status"] = device_status
                 client.publish(attr_topic, json.dumps(attr))
                 await asyncio.sleep(0.01)
-                        
+
                 client.publish(state_topic, json.dumps(data))
                 await asyncio.sleep(0.01)
-                
+
                 if show_debug:
                     _LOGGER.debug(
                         "DEVICE STATUS TRIGGERED AT %s\n  -- Device: %s\n -- Firmware Revision: %s\n -- Voltage: %s",
@@ -504,11 +505,49 @@ async def main():
                 )
 
 
+async def get_supervisor_configuration() -> dict[str, Any]:
+    """Get the configuration from Home Assistant Supervisor."""
+    from aiohttp import ClientSession
+
+    _LOGGER.info("🏠 Home Assistant Supervisor Mode 🏠")
+
+    config: dict[str, Any] = {}
+
+    async with ClientSession() as session:
+        async with session.get(
+            "http://supervisor/services/mqtt",
+            headers={"Authorization": "Bearer " + os.getenv("SUPERVISOR_TOKEN")},
+        ) as resp:
+            mqtt_conf = await resp.json()
+            if "ok" in mqtt_conf.get("result"):
+                data = mqtt_conf["data"]
+                config.update(
+                    {
+                        "MQTT_HOST": data["host"],
+                        "MQTT_PORT": data["port"],
+                        "MQTT_USERNAME": data["username"],
+                        "MQTT_PASSWORD": data["password"],
+                    }
+                )
+
+    if os.path.exists(options_file := f"{EXTERNAL_DIRECTORY}/options.json"):
+        with open(options_file, "r") as f:
+            config.update(json.load(f))
+
+    return config
+
+
 async def setup_sensors(
-    endpoint, mqtt_client, unit_system, sensors, is_tempest, add_forecast, version
+    endpoint: LocalEndpoint,
+    mqtt_client: mqtt.Client,
+    unit_system: str,
+    filter_sensors: list[str] | None,
+    invert_filter: bool,
+    is_tempest: bool,
+    add_forecast: bool,
+    version: str,
 ):
     """Setup the Sensors in Home Assistant."""
-
     # Get Hub Information
     while True:
         data, (host, port) = await endpoint.receive()
@@ -568,7 +607,9 @@ async def setup_sensors(
         attribution = OrderedDict()
         payload = OrderedDict()
 
-        if sensors is None or sensor[SENSOR_ID] in sensors:
+        if filter_sensors is None or (
+            (sensor[SENSOR_ID] in filter_sensors) is not invert_filter
+        ):
             _LOGGER.info("SETTING UP %s SENSOR", sensor_name)
 
             # Payload
@@ -678,6 +719,19 @@ async def setup_sensors(
             )
             await asyncio.sleep(0.01)
             mqtt_client.publish(attr_topic, json.dumps(attribution), qos=1, retain=True)
+            await asyncio.sleep(0.01)
+        except Exception as e:
+            _LOGGER.error("Could not connect to MQTT Server. Error is: %s", e)
+            break
+
+    # cleanup obsolete sensors
+    for sensor in OBSOLETE_SENSORS:
+        try:
+            mqtt_client.publish(
+                topic=f"homeassistant/sensor/{DOMAIN}/{sensor}/config",
+                qos=1,
+                retain=True,
+            )
             await asyncio.sleep(0.01)
         except Exception as e:
             _LOGGER.error("Could not connect to MQTT Server. Error is: %s", e)

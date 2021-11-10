@@ -2,19 +2,24 @@
 
 This add-on allows you to get data from a WeatherFlow weather station using UDP. There is support for both the new Tempest station and the older AIR & SKY station.
 
+**Important**: this add-on uses the same timezone as your Home Assistant instance, so make sure it has been properly set.
+
 ## Installation
 
 To install the add-on, first follow the installation steps from the [README on GitHub](https://github.com/briis/hass-weatherflow2mqtt/blob/main/README.md).
 
 ## Configuration
 
-### Option: `TZ` (default: Same as Home Assistant)
-
-Set your local Timezone. It is important that you use the right timezone here, or else some of the calculations done by the container will not be correct.
-
 ### Option: `TEMPEST_DEVICE`: (default: True)
 
 If you have a Tempest Weather Station set this to True. If False, the program will assume you have the older AIR and SKY units. Default is *True*
+### Option: `FILTER_SENSORS`: (default: None)
+
+A comma-separated list of sensors to include instead of loading all sensors. Default is _None_, which disables filtering such that all sensors are loaded.
+
+### Option: `INVERT_FILTER`: (default: False)
+
+If set to True, `FILTER_SENSORS` will be treated as an exclusion list such that the specified sensors are ignored. Default is _False_.
 
 ### Option: `UNIT_SYSTEM`: (default: Same as Home Assistant)
 

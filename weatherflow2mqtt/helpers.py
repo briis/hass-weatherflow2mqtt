@@ -1,12 +1,13 @@
 """Several Helper Functions."""
+from __future__ import annotations
 
 import datetime
 import json
 import logging
 import math
 from cmath import phase, rect
-from math import degrees, gamma, radians
-from typing import OrderedDict
+from math import degrees, radians
+from typing import Any
 
 import pytz
 import yaml
@@ -14,16 +15,23 @@ import yaml
 from weatherflow2mqtt.__version__ import VERSION
 from weatherflow2mqtt.const import (
     BATTERY_MODE_DESCRIPTION,
-    DEVICE_STATUS_MASKS,
     EXTERNAL_DIRECTORY,
+    DEVICE_STATUS_MASKS,
     SUPPORTED_LANGUAGES,
     UNITS_IMPERIAL,
 )
-from weatherflow2mqtt.sqlite import SQLFunctions
 
 UTC = pytz.utc
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def truebool(val: Any | None) -> bool:
+    """Return `True` if the value passed in matches a "True" value, otherwise `False`.
+
+    "True" values are: 'true', 't', 'yes', 'y', 'on' or '1'.
+    """
+    return val is not None and str(val).lower() in ("true", "t", "yes", "y", "on", "1")
 
 
 class ConversionFunctions:
@@ -217,15 +225,15 @@ class ConversionFunctions:
         # Format Relative Humidity
         RH = humidity / 100
         # Absolute Humidity Estimation is fairly acurate between (5C - 20C) (41F - 122F)
-        AH = (1320.65/TK)*RH*(10**((7.4475*(TK-273.14))/(TK-39.44)))
+        AH = (1320.65 / TK) * RH * (10 ** ((7.4475 * (TK - 273.14)) / (TK - 39.44)))
 
-        '''
+        """
         # lf/ft^3 is too small a value for that unit, will pass metric units just like Solar Radiation
         # Leaving conversion here for future reference
         if self._unit_system == UNITS_IMPERIAL:
             # (g/m^3 * 0.000062) converts to lb/ft^3
             return round(AH * 0.000062, 6)
-        '''
+        """
         return round(AH, 2)
 
     async def rain_rate(self, value):
@@ -685,7 +693,7 @@ class DataStorage:
 
     logging.basicConfig(level=logging.DEBUG)
 
-    async def read_config(self):
+    async def read_config(self) -> list[str] | None:
         """Reads the config file, to look for sensors."""
         try:
             filepath = f"{EXTERNAL_DIRECTORY}/config.yaml"
@@ -707,7 +715,7 @@ class DataStorage:
             if language not in SUPPORTED_LANGUAGES:
                 filename = "translations/en.json"
             else:
-                filename = f"translations/{language.lower()}.json"
+                filename = f"translations/{language}.json"
 
             with open(filename, "r") as json_file:
                 return json.load(json_file)

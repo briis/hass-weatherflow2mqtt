@@ -48,7 +48,7 @@ class SQLFunctions:
         self._debug = debug
 
     async def create_connection(self, db_file):
-        """ create a database connection to a SQLite database """
+        """Create a database connection to a SQLite database."""
         try:
             self.connection = sqlite3.connect(db_file)
 
@@ -56,7 +56,7 @@ class SQLFunctions:
             _LOGGER.error("Could not create SQL Database. Error: %s", e)
 
     async def create_table(self, create_table_sql):
-        """create a table from the create_table_sql statement
+        """Create a table from the create_table_sql statement.
         :param conn: Connection object
         :param create_table_sql: a CREATE TABLE statement
         :return:
@@ -69,7 +69,7 @@ class SQLFunctions:
 
     async def create_storage_row(self, rowdata):
         """
-        Create a new storage row into the storage table
+        Create a new storage row into the storage table.
         :param conn:
         :param rowdata:
         :return: project id

@@ -18,12 +18,8 @@
     "ports_description": {
         "50222/udp": "WeatherFlow socket"
     },
-    "map": [
-        "config:rw"
-    ],
     "environment": {
-        "HASS": "True",
-        "EXTERNAL_DIRECTORY": "/data"
+        "HA_SUPERVISOR": "True"
     },
     "services": [
         "mqtt:want"
@@ -32,8 +28,9 @@
         "TEMPEST_DEVICE": true
     },
     "schema": {
-        "TZ": "str?",
-        "TEMPEST_DEVICE": "bool?",
+        "TEMPEST_DEVICE": "bool",
+        "FILTER_SENSORS": "str?",
+        "INVERT_FILTER": "bool?",
         "UNIT_SYSTEM": "list(imperial|metric)?",
         "LANGUAGE": "list(en|da|de|fr)?",
         "RAPID_WIND_INTERVAL": "int?",

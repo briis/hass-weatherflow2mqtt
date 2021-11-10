@@ -1,12 +1,12 @@
 # WeatherFlow-2-MQTT for Home Assistant
 
-![](https://img.shields.io/docker/v/briis/weatherflow2mqtt/latest?style=flat-square)  ![](https://img.shields.io/docker/pulls/briis/weatherflow2mqtt?style=flat-square)  [![](https://img.shields.io/badge/COMMUNITY-FORUM-success?style=flat-square)](https://community.weatherflow.com/t/weatherflow2mqtt-for-home-assistant/13718)
+![](https://img.shields.io/docker/v/briis/weatherflow2mqtt/latest?style=flat-square) ![](https://img.shields.io/docker/pulls/briis/weatherflow2mqtt?style=flat-square) [![](https://img.shields.io/badge/COMMUNITY-FORUM-success?style=flat-square)](https://community.weatherflow.com/t/weatherflow2mqtt-for-home-assistant/13718)
 
 [![Open your Home Assistant instance and show the add add-on repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fbriis%2Fhass-weatherflow2mqtt)
 
 This project monitors the UDP socket (50222) from a WeatherFlow Hub, and publishes the data to a MQTT Server. Data is formatted in a way that, it supports the [MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/) format for Home Assistant, so a sensor will created for each entity that WeatherFlow sends out, if you have MQTT Discovery enabled.
 
-Everything runs in a pre-build Docker Container, so installation is very simple, you only need Docker installed on a computer and a MQTT Server setup somewhere in your network. If you run the Supervised version of Home Assistant, you will have easy access to both. 
+Everything runs in a pre-built Docker Container, so installation is very simple. You only need Docker installed on a computer and a MQTT Server setup somewhere in your network. If you run either the Operating System or Supervised installation of Home Assistant, you will have easy access to both.
 
 There is support for both the AIR & SKY devices and the TEMPEST device.
 
@@ -24,9 +24,9 @@ There is support for both the AIR & SKY devices and the TEMPEST device.
 
 ## Installation
 
-### Home Assistant Supervised version
+### Home Assistant Supervised
 
-This is the easiest installation method. Just click the Blue Button which is labelled 'ADD INTEGRATION' and you will be taken to Home Assistant to add this repository to the Add-On store, from where you can install and configure it.
+This is the easiest installation method. Just click on the blue **ADD REPOSITORY** button at the top of this README and you will be taken to your Home Assistant instance to add this repository to the _Add-On Store_. From there, scroll down to find "WeatherFlow to MQTT" and then install, configure (optional) and start the add-on.
 
 ### Outside Home Assistant using Docker
 
@@ -43,12 +43,12 @@ If everything is setup correctly with MQTT and Home Assistant, you should now st
 
 The below command will pull the latest docker image and start WeatherFlow2MQTT for timezone Europe/Copenhagen and save data in the directory you are placed in when you launch the command. Ensure that you have replaced the Environment variables with your specific data. See description below.
 
-If you are using docker-compose you can use the [docker-compose.yml](docker-compose.yml) file and make the modifications for your environment.  
+If you are using docker-compose you can use the [docker-compose.yml](docker-compose.yml) file and make the modifications for your environment.
 
 ```bash
 docker run -d \
 --name=weatherflow2mqtt --restart=unless-stopped \
--v $(pwd):/usr/local/config \
+-v $(pwd):/data \
 -p 0.0.0.0:50222:50222/udp \
 -e TZ=Europe/Copenhagen \
 -e TEMPEST_DEVICE=True \
@@ -75,7 +75,7 @@ The container is build for both Intel and ARM platforms, so it should work on mo
 
 ### Docker Volume
 
-`-v YOUR_STORAGE_AREA:/usr/local/config` Please replace YOUR_STORAGE_AREA with a directory where Docker will have read and write access. It is also in this directory that you must place the *config.yaml* file if you don't want all the sensors (See [Installation](#installation)). Once the program runs, a SQLite Database with the name `weatherflow2mqtt.db` will be created in this directory. This database is used to hold some calculated values, store temporary data used for calculations and to ensure that you don't start from 0 if you have to restart Home Assistant or the container.
+`-v YOUR_STORAGE_AREA:/data` Please replace _YOUR_STORAGE_AREA_ with a directory where Docker will have read and write access. Once the program runs, a SQLite Database with the name `weatherflow2mqtt.db` will be created in this directory. This database is used to hold some calculated values, store temporary data used for calculations and to ensure that you don't start from 0 if you have to restart Home Assistant or the container. This is also where you can place the `config.yaml` file if you don't want all the sensors (see [Installation](#installation)).
 
 ### Docker Environment Variables
 
@@ -377,6 +377,7 @@ export MQTT_PASSWORD="..."
 ```
 
 Then you can run the daemon with
-```
-weatherflow2mqt
+
+```bash
+weatherflow2mqtt
 ```
