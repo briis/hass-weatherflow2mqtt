@@ -8,7 +8,7 @@ To install the add-on, first follow the installation steps from the [README on G
 
 ## Configuration
 
-### Option: `TZ` (default: none)
+### Option: `TZ` (default: Same as Home Assistant)
 
 Set your local Timezone. It is important that you use the right timezone here, or else some of the calculations done by the container will not be correct.
 
@@ -16,7 +16,7 @@ Set your local Timezone. It is important that you use the right timezone here, o
 
 If you have a Tempest Weather Station set this to True. If False, the program will assume you have the older AIR and SKY units. Default is *True*
 
-### Option: `UNIT_SYSTEM`: (default: metric)
+### Option: `UNIT_SYSTEM`: (default: Same as Home Assistant)
 
 Select *imperial* or *metric*. This will determine the unit system used when displaying the values. Default is *metric*
 
@@ -79,3 +79,9 @@ Enter your personal access Token to allow retrieval of data. If you don't have t
 ### Option: `FORECAST_INTERVAL`: (default: 30)
 
 The interval in minutes, between updates of the Forecast data.
+
+## Authors & contributors
+
+The original setup of this repository is by [Bjarne Riis](https://github.com/briis).
+
+For a full list of all authors and contributors, check the [contributor's page](https://github.com/briis/hass-weatherflow2mqtt/graphs/contributors).
