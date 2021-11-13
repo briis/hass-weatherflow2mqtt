@@ -18,7 +18,7 @@ ATTR_FORECAST_WIND_BEARING = "wind_bearing"
 ATTR_FORECAST_WIND_SPEED = "wind_speed"
 ATTR_FORECAST_HUMIDITY = "humidity"
 
-EXTERNAL_DIRECTORY = os.environ.get("EXTERNAL_DIRECTORY", "/usr/local/config")
+EXTERNAL_DIRECTORY = os.environ.get("EXTERNAL_DIRECTORY", "/data")
 INTERNAL_DIRECTORY = "/app"
 STORAGE_FILE = f"{EXTERNAL_DIRECTORY}/.storage.json"
 DATABASE = f"{EXTERNAL_DIRECTORY}/weatherflow2mqtt.db"
@@ -827,7 +827,6 @@ WEATHERFLOW_SENSORS = [
         False,
     ],
     # Sensor ID, Sensor Name, Unit Metric, Unit Imperial, Device Class, State Class, Icon, Update Event, Extra Attributes, Show Min Values, Show Last Reset
-
     [
         "tempest_status",
         "TEMPEST Status",
@@ -881,6 +880,8 @@ WEATHERFLOW_SENSORS = [
         False,
     ],
 ]
+
+OBSOLETE_SENSORS = ["uptime"]
 
 SENSOR_ID = 0
 SENSOR_NAME = 1

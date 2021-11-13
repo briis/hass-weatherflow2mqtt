@@ -1,4 +1,4 @@
-version: '2'
+version: "2"
 services:
   weatherflow2mqtt:
     image: ghcr.io/briis/hass-weatherflow2mqtt:latest
@@ -7,7 +7,7 @@ services:
       - TZ=America/Los_Angeles
       - TEMPEST_DEVICE=True
       - UNIT_SYSTEM=imperial
-      - LANGUAGE=EN
+      - LANGUAGE=en
       - RAPID_WIND_INTERVAL=0
       - DEBUG=False
       - ELEVATION=0
@@ -23,6 +23,6 @@ services:
       - STATION_TOKEN=
       - FORECAST_INTERVAL=30
     volumes:
-      - /YOUR_STORAGE_AREA/PATH:/usr/local/config
+      - /YOUR_STORAGE_AREA/PATH:/data
     ports:
       - 0.0.0.0:50222:50222/udp

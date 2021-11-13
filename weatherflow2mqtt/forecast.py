@@ -208,11 +208,11 @@ class Forecast:
             _LOGGER.debug("Request to endpoint timed out: %s", endpoint)
         except ClientError as err:
             if "Unauthorized" in str(err):
-                _LOGGER.debug(
+                _LOGGER.error(
                     "Your API Key is invalid or does not support this operation"
                 )
             if "Not Found" in str(err):
-                _LOGGER.debug("The Station ID does not exis")
+                _LOGGER.error("The Station ID does not exist")
         except Exception as e:
             _LOGGER.debug("Error requesting data from %s Error: ", endpoint, e)
 
