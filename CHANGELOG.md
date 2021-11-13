@@ -6,9 +6,9 @@
 
 ### Changes in release 2.2.1
 
-@natekspencer further enhanced the Home Assistant Add-On experience and made this more compliant with the way the Add-On is setup. Also he added a new option to filter out sensors *you do not want*, please a few other great things you can read about below. Thank you.
+@natekspencer further enhanced the Home Assistant Add-On experience and made this more compliant with the way the Add-On is setup. Also he added a new option to filter out sensors *you do not want*, plus a few other great things you can read about below. Thank you @natekspencer.
 
-* `CHANGE`: **BREAKING CHANGE** Move mapped volume from /usr/local/config to /data to support supervisor. If you are not running the Home Assistant supervised mode, then you will need change this `v $(pwd):/usr/local/config` to this `v $(pwd):/data`.
+* `CHANGE`: **BREAKING CHANGE** Move mapped volume from /usr/local/config to /data to support supervisor. If you are not running the Home Assistant supervised version, then you will need change this `v $(pwd):/usr/local/config` to this `v $(pwd):/data`.
 * `CHANGE`: Move configuration defaults to code and gracefully handle retrieval
 * `CHANGE`: Cleanup environment variables in Dockerfile since they are now handled in code
 * `CHANGE`: Simplify config loading between environment/supervisor options
