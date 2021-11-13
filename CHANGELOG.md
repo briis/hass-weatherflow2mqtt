@@ -1,5 +1,21 @@
 # Home Assistant WeatherFlow2MQTT Changelog
 
+## Version 2.2.1
+
+**Release Date**: November 13th, 2021
+
+### Changes in release 2.2.1
+
+@natekspencer further enhanced the Home Assistant Add-On experience and made this more compliant with the way the Add-On is setup. Also he added a new option to filter out sensors *you do not want*, please a few other great things you can read about below. Thank you.
+
+* `CHANGE`: **BREAKING CHANGE** Move mapped volume from /usr/local/config to /data to support supervisor. If you are not running the Home Assistant supervised mode, then you will need change this `v $(pwd):/usr/local/config` to this `v $(pwd):/data`.
+* `CHANGE`: Move configuration defaults to code and gracefully handle retrieval
+* `CHANGE`: Cleanup environment variables in Dockerfile since they are now handled in code
+* `CHANGE`: Simplify config loading between environment/supervisor options
+* `CHANGE`: Remove TZ option from HA supervisor configuration since it should be loaded from HA
+* `NEW`: Add options for FILTER_SENSORS and INVERT_FILTER to avoid having to load a config.yaml file in HA
+* `NEW`: Add a list of obsolete sensors that can be used to handle cleanup of old sensors when they are deprecated and removed
+
 ## Version 2.2.0
 
 **Release Date**: November 10th, 2021
