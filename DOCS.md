@@ -13,6 +13,7 @@ To install the add-on, first follow the installation steps from the [README on G
 ### Option: `TEMPEST_DEVICE`: (default: True)
 
 If you have a Tempest Weather Station set this to True. If False, the program will assume you have the older AIR and SKY units. Default is *True*
+
 ### Option: `FILTER_SENSORS`: (default: None)
 
 A comma-separated list of sensors to include instead of loading all sensors. Default is _None_, which disables filtering such that all sensors are loaded.
