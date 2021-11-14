@@ -171,6 +171,8 @@ HIGH_LOW_TIMER = 10 * 60
 
 SUPPORTED_LANGUAGES = ["en", "da", "de", "fr"]
 
+TEMP_CELSIUS = "°C"
+TEMP_FAHRENHEIT = "°F"
 UNITS_IMPERIAL = "imperial"
 
 UTC = datetime.timezone.utc
@@ -258,8 +260,8 @@ WEATHERFLOW_SENSORS = [
     [
         "air_temperature",
         "Temperature",
-        "°C",
-        "°F",
+        TEMP_CELSIUS,
+        TEMP_FAHRENHEIT,
         DEVICE_CLASS_TEMPERATURE,
         STATE_CLASS_MEASUREMENT,
         None,
@@ -660,8 +662,8 @@ WEATHERFLOW_SENSORS = [
     [
         "dewpoint",
         "Dew Point",
-        "°C",
-        "°F",
+        TEMP_CELSIUS,
+        TEMP_FAHRENHEIT,
         DEVICE_CLASS_TEMPERATURE,
         STATE_CLASS_MEASUREMENT,
         "thermometer-lines",
@@ -712,8 +714,8 @@ WEATHERFLOW_SENSORS = [
     [
         "feelslike",
         "Feels Like Temperature",
-        "°C",
-        "°F",
+        TEMP_CELSIUS,
+        TEMP_FAHRENHEIT,
         DEVICE_CLASS_TEMPERATURE,
         STATE_CLASS_MEASUREMENT,
         None,
@@ -738,8 +740,8 @@ WEATHERFLOW_SENSORS = [
     [
         "wetbulb",
         "Wet Bulb Temperature",
-        "°C",
-        "°F",
+        TEMP_CELSIUS,
+        TEMP_FAHRENHEIT,
         DEVICE_CLASS_TEMPERATURE,
         STATE_CLASS_MEASUREMENT,
         None,
@@ -751,8 +753,8 @@ WEATHERFLOW_SENSORS = [
     [
         "wbgt",
         "Wet Bulb Globe Temperature",
-        "°C",
-        "°F",
+        TEMP_CELSIUS,
+        TEMP_FAHRENHEIT,
         DEVICE_CLASS_TEMPERATURE,
         STATE_CLASS_MEASUREMENT,
         None,
@@ -764,8 +766,8 @@ WEATHERFLOW_SENSORS = [
     [
         "delta_t",
         "Delta T",
-        "°C",
-        "°F",
+        TEMP_CELSIUS,
+        TEMP_FAHRENHEIT,
         DEVICE_CLASS_TEMPERATURE,
         STATE_CLASS_MEASUREMENT,
         None,
