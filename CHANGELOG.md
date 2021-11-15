@@ -1,5 +1,13 @@
 # Home Assistant WeatherFlow2MQTT Changelog
 
+## Version 2.2.2
+
+**Release Date**: November 15th, 2021
+
+### Changes in release 2.2.2
+
+* `CHANGE`: Issue #93. A user reported that Temperature sensors creates an error when being exported to `homekit`. This is not a consistent error, but might be due to unicoding of the degree symbol. The `unit_of_measurement` value has now been changed so that it reflects the constants from Home Assistant.
+
 ## Version 2.2.1
 
 **Release Date**: November 13th, 2021
