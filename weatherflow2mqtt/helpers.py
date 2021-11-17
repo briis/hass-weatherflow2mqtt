@@ -15,8 +15,8 @@ import yaml
 from weatherflow2mqtt.__version__ import VERSION
 from weatherflow2mqtt.const import (
     BATTERY_MODE_DESCRIPTION,
-    EXTERNAL_DIRECTORY,
     DEVICE_STATUS_MASKS,
+    EXTERNAL_DIRECTORY,
     SUPPORTED_LANGUAGES,
     UNITS_IMPERIAL,
 )
@@ -41,7 +41,7 @@ class ConversionFunctions:
         self._unit_system = unit_system
         self._translations = translations
 
-    async def temperature(self, value) -> float:
+    def temperature(self, value) -> float:
         """Convert Temperature Value."""
         if value is not None:
             if self._unit_system == UNITS_IMPERIAL:
@@ -52,7 +52,7 @@ class ConversionFunctions:
             "FUNC: temperature ERROR: Temperature value was reported as NoneType. Check the sensor"
         )
 
-    async def pressure(self, value) -> float:
+    def pressure(self, value) -> float:
         """Convert Pressure Value."""
         if value is not None:
             if self._unit_system == UNITS_IMPERIAL:
@@ -63,7 +63,7 @@ class ConversionFunctions:
             "FUNC: pressure ERROR: Pressure value was reported as NoneType. Check the sensor"
         )
 
-    async def speed(self, value, kmh=False) -> float:
+    def speed(self, value, kmh=False) -> float:
         """Convert Wind Speed."""
         if value is not None:
             if self._unit_system == UNITS_IMPERIAL:
@@ -76,7 +76,7 @@ class ConversionFunctions:
             "FUNC: speed ERROR: Wind value was reported as NoneType. Check the sensor"
         )
 
-    async def distance(self, value) -> float:
+    def distance(self, value) -> float:
         """Convert distance."""
         if value is not None:
             if self._unit_system == UNITS_IMPERIAL:
@@ -87,7 +87,7 @@ class ConversionFunctions:
             "FUNC: distance ERROR: Lightning Distance value was reported as NoneType. Check the sensor"
         )
 
-    async def rain(self, value) -> float:
+    def rain(self, value) -> float:
         """Convert rain."""
         if value is not None:
             if self._unit_system == UNITS_IMPERIAL:
@@ -98,7 +98,7 @@ class ConversionFunctions:
             "FUNC: rain ERROR: Rain value was reported as NoneType. Check the sensor"
         )
 
-    async def rain_type(self, value) -> str:
+    def rain_type(self, value) -> str:
         """Convert rain type."""
         type_array = ["none", "rain", "hail", "heavy"]
         try:
@@ -108,7 +108,7 @@ class ConversionFunctions:
             _LOGGER.warning("VALUE is: %s", value)
             return f"Unknown - {value}"
 
-    async def direction(self, value) -> str:
+    def direction(self, value) -> str:
         """Returns a directional Wind Direction string."""
         if value is None:
             return "N"
@@ -135,7 +135,7 @@ class ConversionFunctions:
         direction_str = direction_array[int((value + 11.25) / 22.5)]
         return self._translations["wind_dir"][direction_str]
 
-    async def air_density(self, temperature, station_pressure):
+    def air_density(self, temperature, station_pressure):
         """Returns the Air Density."""
         if temperature is not None and station_pressure is not None:
             kelvin = temperature + 273.15
@@ -155,7 +155,7 @@ class ConversionFunctions:
             "FUNC: air_density ERROR: Temperature or Pressure value was reported as NoneType. Check the sensor"
         )
 
-    async def sea_level_pressure(self, station_press, elevation):
+    def sea_level_pressure(self, station_press, elevation):
         """Returns Sea Level pressure.
         Converted from a JS formula made by Gary W Funk
         """
@@ -176,13 +176,13 @@ class ConversionFunctions:
             )
             sea_pressure = press * u
 
-            return await self.pressure(sea_pressure)
+            return self.pressure(sea_pressure)
 
         _LOGGER.error(
             "FUNC: sea_level_pressure ERROR: Temperature or Pressure value was reported as NoneType. Check the sensor"
         )
 
-    async def dewpoint(self, temperature, humidity, no_conversion=False):
+    def dewpoint(self, temperature, humidity, no_conversion=False):
         """Returns Dewpoint."""
         if temperature is not None and humidity is not None:
             dewpoint_c = round(
@@ -200,13 +200,13 @@ class ConversionFunctions:
             )
             if no_conversion:
                 return dewpoint_c
-            return await self.temperature(dewpoint_c)
+            return self.temperature(dewpoint_c)
 
         _LOGGER.error(
             "FUNC: dewpoint ERROR: Temperature and/or Humidity value was reported as NoneType. Check the sensor"
         )
 
-    async def absolute_humidity(self, temp, humidity):
+    def absolute_humidity(self, temp, humidity):
         """Returns Absolute Humidity.  Grams of water per cubic meter of air (g/m^3)
         Input:
             Temperature in Celcius
@@ -236,13 +236,13 @@ class ConversionFunctions:
         """
         return round(AH, 2)
 
-    async def rain_rate(self, value):
+    def rain_rate(self, value):
         """Returns rain rate per hour."""
         if not value:
             return 0
-        return await self.rain(value * 60)
+        return self.rain(value * 60)
 
-    async def rain_intensity(self, rain_rate) -> str:
+    def rain_intensity(self, rain_rate) -> str:
         """Returns a descriptive value of the rain rate.
         VERY LIGHT: < 0.25 mm/hour
         LIGHT: ≥ 0.25, < 1.0 mm/hour
@@ -268,7 +268,7 @@ class ConversionFunctions:
 
         return self._translations["rain_intensity"][intensity]
 
-    async def feels_like(self, temperature, humidity, windspeed):
+    def feels_like(self, temperature, humidity, windspeed):
         """Calculates the feel like temperature."""
         if temperature is None or humidity is None or windspeed is None:
             return 0
@@ -277,16 +277,16 @@ class ConversionFunctions:
             humidity * 0.06105 * math.exp((17.27 * temperature) / (237.7 + temperature))
         )
         feelslike_c = temperature + 0.348 * e_value - 0.7 * windspeed - 4.25
-        return await self.temperature(feelslike_c)
+        return self.temperature(feelslike_c)
 
-    async def average_bearing(self, bearing_arr) -> int:
+    def average_bearing(self, bearing_arr) -> int:
         """Returns the average Wind Bearing from an array of bearings."""
         mean_angle = degrees(
             phase(sum(rect(1, radians(d)) for d in bearing_arr) / len(bearing_arr))
         )
         return int(abs(mean_angle))
 
-    async def visibility(self, elevation, temp, humidity):
+    def visibility(self, elevation, temp, humidity):
         """Returns the visibility.
         Input:
             Elevation in Meters
@@ -296,7 +296,7 @@ class ConversionFunctions:
         if temp is None or elevation is None or humidity is None:
             return None
 
-        dewpoint_c = await self.dewpoint(temp, humidity, True)
+        dewpoint_c = self.dewpoint(temp, humidity, True)
         # Set minimum elevation for cases of stations below sea level
         if elevation > 2:
             elv_min = float(elevation)
@@ -326,7 +326,7 @@ class ConversionFunctions:
             return round(vis / 1.609344, 1)
         return round(vis, 1)
 
-    async def wetbulb(self, temp, humidity, pressure, no_conversion=False):
+    def wetbulb(self, temp, humidity, pressure, no_conversion=False):
         """Returns the Wet Bulb Temperature.
         Converted from a JS formula made by Gary W Funk
         Input:
@@ -375,9 +375,9 @@ class ConversionFunctions:
 
         if no_conversion:
             return twguess
-        return await self.temperature(twguess)
+        return self.temperature(twguess)
 
-    async def wbgt(self, temp, humidity, pressure, solar_radiation):
+    def wbgt(self, temp, humidity, pressure, solar_radiation):
         """Returns the Wet Bulb Globe Temperature.
         This is a way to show heat stress on the human body.
         Input:
@@ -411,7 +411,7 @@ class ConversionFunctions:
             return None
 
         ta = float(temp)
-        twb = await self.wetbulb(temp, humidity, pressure, True)
+        twb = self.wetbulb(temp, humidity, pressure, True)
         rh = float(humidity)
         p = float(pressure)
         sr = float(solar_radiation)
@@ -419,40 +419,40 @@ class ConversionFunctions:
         wbgt = round(0.7 * twb + 0.002996 * sr + 0.3368 * ta - 0.01578 * rh - 0.5478, 1)
 
         if self._unit_system == UNITS_IMPERIAL:
-            return await self.temperature(wbgt)
+            return self.temperature(wbgt)
         return wbgt
 
-    async def delta_t(self, temp, humidity, pressure):
+    def delta_t(self, temp, humidity, pressure):
         """Returns Delta T temperature."""
         if temp is None or humidity is None or pressure is None:
             return None
 
         # Ensure both Wetbulb and Temperature is same unit system
-        wb = await self.wetbulb(temp, humidity, pressure)
-        temp_u = await self.temperature(temp)
+        wb = self.wetbulb(temp, humidity, pressure)
+        temp_u = self.temperature(temp)
 
         deltat = temp_u - wb
 
         return round(deltat, 1)
 
-    async def battery_level(self, battery, is_tempest):
+    def battery_level(self, battery, is_tempest):
         """Returns the battery percentage.
         Input:
             Voltage in Volts DC (depends on the weather station type, see below)
             is_tempest in Boolean
         Tempest:
-            # data["battery_level"] = await cnv.battery_level(obs[16])
+            # data["battery_level"] = cnv.battery_level(obs[16])
             Battery voltage range is 1.8 to 2.85 Vdc
                 > 2.80 is capped at 100%
                 < 1.8 is capped at 0%
         Air:
-            # data["battery_level"] = await cnv.battery_level(obs[6])
+            # data["battery_level"] = cnv.battery_level(obs[6])
             4 AA batteries (2 in series, then parallel for 2 sets)
             Battery voltage range is 1.2(x2) => 2.4 to 1.8(x2) => 3.6 Vdc (lowered to 3.5 based on observation)
                 > 3.5 is capped at 100%
                 < 2.4 is capped at 0%
         Sky:
-            # data["battery_level"] = await cnv.battery_level(obs[8])
+            # data["battery_level"] = cnv.battery_level(obs[8])
             8 AA batteries (2 in series, then parallel for 4 sets)
             Battery voltage range is 1.2(x2) => 2.4 to 1.8(x2) => 3.6 Vdc (lowered to 3.5 based on observation)
                 > 3.5 is capped at 100%
@@ -486,14 +486,14 @@ class ConversionFunctions:
 
         return pb
 
-    async def battery_mode(self, voltage, solar_radiation):
+    def battery_mode(self, voltage, solar_radiation):
         """Returns the battery operating mode.
         Input:
             Voltage in Volts DC (depends on the weather station type, see below)
             is_tempest in Boolean
             solar_radiation in W/M^2 (used to determine if battery is in a charging state)
         Tempest:
-            # data["battery_level"] = await cnv.battery_mode(obs[16], True, obs[11])
+            # data["battery_level"] = cnv.battery_mode(obs[16], True, obs[11])
             # https://help.weatherflow.com/hc/en-us/articles/360048877194-Solar-Power-Rechargeable-Battery
         AIR & SKY:
             The battery mode does not apply to AIR & SKY Units
@@ -536,7 +536,7 @@ class ConversionFunctions:
         mode_description = BATTERY_MODE_DESCRIPTION[batt_mode]
         return batt_mode, mode_description
 
-    async def beaufort(self, wind_speed):
+    def beaufort(self, wind_speed):
         """Returns the Beaufort Scale value based on Wind Speed."""
 
         if wind_speed is None:
@@ -573,7 +573,7 @@ class ConversionFunctions:
 
         return bft_value, bft_text
 
-    async def dewpoint_level(self, dewpoint_c):
+    def dewpoint_level(self, dewpoint_c):
         """Returns a text based comfort level, based on dewpoint F value."""
         if dewpoint_c is None:
             return "no-data"
@@ -606,7 +606,7 @@ class ConversionFunctions:
 
         return self._translations["dewpoint"]["undefined"]
 
-    async def temperature_level(self, temperature_c):
+    def temperature_level(self, temperature_c):
         """Returns a text based comfort level, based on Air Temperature value."""
         if temperature_c is None:
             return "no-data"
@@ -636,7 +636,7 @@ class ConversionFunctions:
 
         return self._translations["temperature"]["undefined"]
 
-    async def uv_level(self, uvi):
+    def uv_level(self, uvi):
         """Returns a text based UV Description."""
 
         if uvi is None:
@@ -655,13 +655,13 @@ class ConversionFunctions:
 
         return self._translations["uv"]["none"]
 
-    async def humanize_time(self, value):
+    def humanize_time(self, value):
         """Humanize Time in Seconds."""
         if value is None:
             return "None"
         return str(datetime.timedelta(seconds=value))
 
-    async def device_status(self, value):
+    def device_status(self, value):
         """Return device status as string."""
         if value is None:
             return
@@ -674,17 +674,17 @@ class ConversionFunctions:
 
         return failed
 
-    async def utc_from_timestamp(self, timestamp: float) -> datetime.datetime:
+    def utc_from_timestamp(self, timestamp: float) -> datetime.datetime:
         """Return a UTC time from a timestamp."""
         return UTC.localize(datetime.datetime.utcfromtimestamp(timestamp))
 
-    async def utc_last_midnight(self) -> str:
+    def utc_last_midnight(self) -> str:
         """Return UTC Time for last midnight."""
         midnight = datetime.datetime.combine(
             datetime.datetime.today(), datetime.time.min
         )
         midnight_ts = datetime.datetime.timestamp(midnight)
-        midnight_dt = await self.utc_from_timestamp(midnight_ts)
+        midnight_dt = self.utc_from_timestamp(midnight_ts)
         return midnight_dt.isoformat()
 
 
@@ -693,7 +693,7 @@ class DataStorage:
 
     logging.basicConfig(level=logging.DEBUG)
 
-    async def read_config(self) -> list[str] | None:
+    def read_config(self) -> list[str] | None:
         """Reads the config file, to look for sensors."""
         try:
             filepath = f"{EXTERNAL_DIRECTORY}/config.yaml"
@@ -709,7 +709,7 @@ class DataStorage:
             _LOGGER.error("Could not read config.yaml file. Error message: %s", e)
             return None
 
-    async def getLanguageFile(self, language: str):
+    def getLanguageFile(self, language: str):
         """Return the language file json array."""
         try:
             if language not in SUPPORTED_LANGUAGES:
