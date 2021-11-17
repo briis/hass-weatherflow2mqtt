@@ -47,7 +47,7 @@ class SQLFunctions:
         self._unit_system = unit_system
         self._debug = debug
 
-    async def create_connection(self, db_file):
+    def create_connection(self, db_file):
         """Create a database connection to a SQLite database."""
         try:
             self.connection = sqlite3.connect(db_file)
@@ -55,7 +55,7 @@ class SQLFunctions:
         except SQLError as e:
             _LOGGER.error("Could not create SQL Database. Error: %s", e)
 
-    async def create_table(self, create_table_sql):
+    def create_table(self, create_table_sql):
         """Create a table from the create_table_sql statement.
         :param conn: Connection object
         :param create_table_sql: a CREATE TABLE statement
@@ -67,7 +67,7 @@ class SQLFunctions:
         except SQLError as e:
             _LOGGER.error("Could not create SQL Table. Error: %s", e)
 
-    async def create_storage_row(self, rowdata):
+    def create_storage_row(self, rowdata):
         """
         Create a new storage row into the storage table.
         :param conn:
@@ -86,7 +86,7 @@ class SQLFunctions:
         except SQLError as e:
             _LOGGER.error("Could not Insert data in table storage. Error: %s", e)
 
-    async def readStorage(self):
+    def readStorage(self):
         """Returns data from the storage table as JSON."""
         try:
             cursor = self.connection.cursor()
@@ -112,7 +112,7 @@ class SQLFunctions:
         except SQLError as e:
             _LOGGER.error("Could not access storage data. Error: %s", e)
 
-    async def writeStorage(self, json_data: OrderedDict):
+    def writeStorage(self, json_data: OrderedDict):
         """Stores data in the storage table from JSON."""
 
         try:
@@ -151,7 +151,7 @@ class SQLFunctions:
         except SQLError as e:
             _LOGGER.error("Could not update storage data. Error: %s", e)
 
-    async def readPressureTrend(self, new_pressure, translations):
+    def readPressureTrend(self, new_pressure, translations):
         """Returns the Pressure Trend."""
         if new_pressure is None:
             return "Steady", 0
@@ -187,7 +187,7 @@ class SQLFunctions:
         except Exception as e:
             _LOGGER.error("Could not calculate pressure trend. Error message: %s", e)
 
-    async def readPressureData(self):
+    def readPressureData(self):
         """Returns the formatted pressure data - USED FOR TESTING ONLY."""
         try:
             cursor = self.connection.cursor()
@@ -201,7 +201,7 @@ class SQLFunctions:
         except SQLError as e:
             _LOGGER.error("Could not access storage data. Error: %s", e)
 
-    async def writePressure(self, pressure):
+    def writePressure(self, pressure):
         """Adds an entry to the Pressure Table."""
 
         try:
@@ -218,7 +218,7 @@ class SQLFunctions:
             _LOGGER.error("Could write to Pressure Table. Error message: %s", e)
             return False
 
-    async def readLightningCount(self, hours: int):
+    def readLightningCount(self, hours: int):
         """Returns the number of Lightning Strikes in the last x hours."""
         try:
             time_point = time.time() - hours * 60 * 60
@@ -233,7 +233,7 @@ class SQLFunctions:
         except SQLError as e:
             _LOGGER.error("Could not access storage data. Error: %s", e)
 
-    async def writeLightning(self):
+    def writeLightning(self):
         """Adds an entry to the Lightning Table."""
 
         try:
@@ -248,7 +248,7 @@ class SQLFunctions:
             _LOGGER.error("Could write to Lightning Table. Error message: %s", e)
             return False
 
-    async def writeDailyLog(self, sensor_data):
+    def writeDailyLog(self, sensor_data):
         """Adds an entry to the Daily Log Table."""
 
         try:
@@ -269,7 +269,7 @@ class SQLFunctions:
         except Exception as e:
             _LOGGER.error("Could not write to daily_log Table. Error message: %s", e)
 
-    async def updateDayData(self, sensor_data):
+    def updateDayData(self, sensor_data):
         """Updates the Day Data Table."""
 
         try:
@@ -321,7 +321,7 @@ class SQLFunctions:
         except Exception as e:
             _LOGGER.error("Could not write to day_data Table. Error message: %s", e)
 
-    async def updateHighLow(self, sensor_data):
+    def updateHighLow(self, sensor_data):
         """Updates the High and Low Values."""
         try:
             self.connection.row_factory = sqlite3.Row
@@ -381,7 +381,7 @@ class SQLFunctions:
             _LOGGER.error("Could write to High and Low Table. Error message: %s", e)
             return False
 
-    async def readHighLow(self):
+    def readHighLow(self):
         """Returns data from the high_low table as JSON."""
         try:
             self.connection.row_factory = sqlite3.Row
@@ -442,7 +442,7 @@ class SQLFunctions:
             _LOGGER.error("Could not get all High Low values. Error message: %s", e)
             return sensor_json
 
-    async def migrateStorageFile(self):
+    def migrateStorageFile(self):
         """Migrates the old .storage.json file to the database."""
 
         try:
@@ -468,28 +468,28 @@ class SQLFunctions:
                     "last_lightning_energy": old_data["last_lightning_energy"],
                 }
 
-                await self.writeStorage(storage_json)
+                self.writeStorage(storage_json)
 
         except FileNotFoundError as e:
             _LOGGER.error("Could not find old storage file. Error message: %s", e)
         except Exception as e:
             _LOGGER.error("Could not Read storage file. Error message: %s", e)
 
-    async def createInitialDataset(self):
+    def createInitialDataset(self):
         """Setup the Initial database, and migrate data if needed."""
 
         try:
             with self.connection:
                 # Create Empty Tables
-                await self.create_table(TABLE_STORAGE)
-                await self.create_table(TABLE_LIGHTNING)
-                await self.create_table(TABLE_PRESSURE)
-                await self.create_table(TABLE_HIGH_LOW)
+                self.create_table(TABLE_STORAGE)
+                self.create_table(TABLE_LIGHTNING)
+                self.create_table(TABLE_PRESSURE)
+                self.create_table(TABLE_HIGH_LOW)
 
                 # Store Initial Data
                 storage = (STORAGE_ID, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-                await self.create_storage_row(storage)
-                await self.initializeHighLow()
+                self.create_storage_row(storage)
+                self.initializeHighLow()
 
                 # Update the version number
                 cursor = self.connection.cursor()
@@ -497,12 +497,12 @@ class SQLFunctions:
 
                 # Migrate data if they exist
                 if os.path.isfile(STORAGE_FILE):
-                    await self.migrateStorageFile()
+                    self.migrateStorageFile()
 
         except Exception as e:
             _LOGGER.error("Could not Read storage file. Error message: %s", e)
 
-    async def upgradeDatabase(self):
+    def upgradeDatabase(self):
         """Upgrade the Database to ensure tables and columns are correct."""
 
         try:
@@ -514,9 +514,9 @@ class SQLFunctions:
             if db_version < 1:
                 _LOGGER.info("Upgrading the database to version 1")
                 # Create Empty Tables
-                await self.create_table(TABLE_HIGH_LOW)
+                self.create_table(TABLE_HIGH_LOW)
                 # Add Initial data to High Low
-                await self.initializeHighLow()
+                self.initializeHighLow()
 
             if db_version < DATABASE_VERSION:
                 _LOGGER.info("Upgrading the database to version 2")
@@ -536,7 +536,7 @@ class SQLFunctions:
 
                 # if db_version < DATABASE_VERSION:
                 #     _LOGGER.info("Upgrading the database to version %s...", DATABASE_VERSION)
-                #     await self.create_table(TABLE_DAY_DATA)
+                #     self.create_table(TABLE_DAY_DATA)
                 #     self.connection.commit()
 
                 # Finally update the version number
@@ -546,7 +546,7 @@ class SQLFunctions:
         except Exception as e:
             _LOGGER.error("An undefined error occured. Error message: %s", e)
 
-    async def initializeHighLow(self):
+    def initializeHighLow(self):
         """Writes the Initial Data to the High Low Tabble."""
 
         try:
@@ -600,7 +600,7 @@ class SQLFunctions:
         except Exception as e:
             _LOGGER.error("Could write to high_low Table. Error message: %s", e)
 
-    async def dailyHousekeeping(self):
+    def dailyHousekeeping(self):
         """This function is called once a day, to clean up old data."""
 
         try:

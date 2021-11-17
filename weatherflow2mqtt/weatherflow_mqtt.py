@@ -93,9 +93,9 @@ async def main():
     # Read the sensor config and translation file
     data_store = DataStorage()
     if filter_sensors is None and not is_supervisor:
-        filter_sensors = await data_store.read_config()
+        filter_sensors = data_store.read_config()
     program_version = data_store.getVersion()
-    translations = await data_store.getLanguageFile(language)
+    translations = data_store.getLanguageFile(language)
 
     # Helper Functions
     cnv = ConversionFunctions(unit_system, translations)
@@ -168,17 +168,17 @@ async def main():
     # Connect to SQLite DB
     sql = SQLFunctions(unit_system, show_debug)
     database_exist = os.path.isfile(DATABASE)
-    await sql.create_connection(DATABASE)
+    sql.create_connection(DATABASE)
     if not database_exist:
-        await sql.createInitialDataset()
+        sql.createInitialDataset()
     # Upgrade Database if needed
-    await sql.upgradeDatabase()
+    sql.upgradeDatabase()
 
     # Read stored Values and set variable values
-    storage = await sql.readStorage()
+    storage = sql.readStorage()
     wind_speed = None
     solar_radiation = None
-    last_midnight = await cnv.utc_last_midnight()
+    last_midnight = cnv.utc_last_midnight()
 
     # Watch for message from the UDP socket
     while True:
@@ -193,9 +193,9 @@ async def main():
             storage["rain_today"] = 0
             storage["rain_duration_today"] = 0
             storage["lightning_count_today"] = 0
-            last_midnight = await cnv.utc_last_midnight()
-            await sql.writeStorage(storage)
-            await sql.dailyHousekeeping()
+            last_midnight = cnv.utc_last_midnight()
+            sql.writeStorage(storage)
+            sql.dailyHousekeeping()
             current_day = datetime.today().weekday()
 
         # Update High and Low values if it is time
@@ -204,7 +204,7 @@ async def main():
             highlow_topic = "homeassistant/sensor/{}/{}/attributes".format(
                 DOMAIN, EVENT_HIGH_LOW
             )
-            high_low_data = await sql.readHighLow()
+            high_low_data = sql.readHighLow()
             client.publish(highlow_topic, json.dumps(high_low_data), qos=1, retain=True)
             high_low_last_run = datetime.now().timestamp()
 
@@ -234,18 +234,20 @@ async def main():
                 now = datetime.now().timestamp()
                 if (now - rapid_last_run) >= rw_interval:
                     obs = json_response["ob"]
-                    data["wind_speed"] = await cnv.speed(obs[1])
+                    data["wind_speed"] = cnv.speed(obs[1])
                     data["wind_bearing"] = obs[2]
-                    data["wind_direction"] = await cnv.direction(obs[2])
+                    data["wind_direction"] = cnv.direction(obs[2])
                     wind_speed = obs[1]
                     client.publish(state_topic, json.dumps(data))
                     await asyncio.sleep(0.01)
                     rapid_last_run = datetime.now().timestamp()
             if msg_type in EVENT_HUB_STATUS:
-                data["hub_status"] = await cnv.humanize_time(json_response.get("uptime"))
+                data["hub_status"] = cnv.humanize_time(json_response.get("uptime"))
                 client.publish(state_topic, json.dumps(data))
                 await asyncio.sleep(0.01)
-                attr_topic = "homeassistant/sensor/{}/{}/attributes".format(DOMAIN, "hub_status")
+                attr_topic = "homeassistant/sensor/{}/{}/attributes".format(
+                    DOMAIN, "hub_status"
+                )
                 attr = OrderedDict()
                 attr[ATTR_ATTRIBUTION] = ATTRIBUTION
                 attr[ATTR_BRAND] = BRAND
@@ -263,24 +265,24 @@ async def main():
             if msg_type in EVENT_PRECIP_START:
                 obs = json_response["evt"]
                 storage["rain_start"] = obs[0]
-                await sql.writeStorage(storage)
+                sql.writeStorage(storage)
 
             if msg_type in EVENT_STRIKE:
                 obs = json_response["evt"]
-                await sql.writeLightning()
+                sql.writeLightning()
                 storage["lightning_count_today"] += 1
-                storage["last_lightning_distance"] = await cnv.distance(obs[1])
+                storage["last_lightning_distance"] = cnv.distance(obs[1])
                 storage["last_lightning_energy"] = obs[2]
                 storage["last_lightning_time"] = time.time()
-                await sql.writeStorage(storage)
+                sql.writeStorage(storage)
             if msg_type in EVENT_AIR_DATA:
                 obs = json_response["obs"][0]
-                data["station_pressure"] = await cnv.pressure(obs[1])
-                data["air_temperature"] = await cnv.temperature(obs[2])
+                data["station_pressure"] = cnv.pressure(obs[1])
+                data["air_temperature"] = cnv.temperature(obs[2])
                 data["relative_humidity"] = obs[3]
                 data["lightning_strike_count"] = obs[4]
-                data["lightning_strike_count_1hr"] = await sql.readLightningCount(1)
-                data["lightning_strike_count_3hr"] = await sql.readLightningCount(3)
+                data["lightning_strike_count_1hr"] = sql.readLightningCount(1)
+                data["lightning_strike_count_3hr"] = sql.readLightningCount(3)
                 data["lightning_strike_count_today"] = storage["lightning_count_today"]
                 data["lightning_strike_distance"] = storage["last_lightning_distance"]
                 data["lightning_strike_energy"] = storage["last_lightning_energy"]
@@ -288,166 +290,158 @@ async def main():
                     storage["last_lightning_time"]
                 ).isoformat()
                 data["battery_air"] = round(obs[6], 2)
-                data["battery_level_air"] = await cnv.battery_level(obs[6], False)
-                data["sealevel_pressure"] = await cnv.sea_level_pressure(
-                    obs[1], elevation
-                )
-                trend_text, trend_value = await sql.readPressureTrend(
+                data["battery_level_air"] = cnv.battery_level(obs[6], False)
+                data["sealevel_pressure"] = cnv.sea_level_pressure(obs[1], elevation)
+                trend_text, trend_value = sql.readPressureTrend(
                     data["sealevel_pressure"], translations
                 )
                 data["pressure_trend"] = trend_text
                 data["pressure_trend_value"] = trend_value
-                data["air_density"] = await cnv.air_density(obs[2], obs[1])
-                data["dewpoint"] = await cnv.dewpoint(obs[2], obs[3])
-                data["feelslike"] = await cnv.feels_like(obs[2], obs[3], wind_speed)
-                data["wetbulb"] = await cnv.wetbulb(obs[2], obs[3], obs[1])
-                data["delta_t"] = await cnv.delta_t(obs[2], obs[3], obs[1])
-                data["dewpoint_description"] = await cnv.dewpoint_level(
-                    data["dewpoint"]
-                )
-                data["temperature_description"] = await cnv.temperature_level(obs[2])
-                data["visibility"] = await cnv.visibility(elevation, obs[2], obs[3])
-                data["absolute_humidity"] = await cnv.absolute_humidity(obs[2], obs[3])
-                data["wbgt"] = await cnv.wbgt(obs[2], obs[3], obs[1], solar_radiation)
+                data["air_density"] = cnv.air_density(obs[2], obs[1])
+                data["dewpoint"] = cnv.dewpoint(obs[2], obs[3])
+                data["feelslike"] = cnv.feels_like(obs[2], obs[3], wind_speed)
+                data["wetbulb"] = cnv.wetbulb(obs[2], obs[3], obs[1])
+                data["delta_t"] = cnv.delta_t(obs[2], obs[3], obs[1])
+                data["dewpoint_description"] = cnv.dewpoint_level(data["dewpoint"])
+                data["temperature_description"] = cnv.temperature_level(obs[2])
+                data["visibility"] = cnv.visibility(elevation, obs[2], obs[3])
+                data["absolute_humidity"] = cnv.absolute_humidity(obs[2], obs[3])
+                data["wbgt"] = cnv.wbgt(obs[2], obs[3], obs[1], solar_radiation)
                 data["last_reset_midnight"] = last_midnight
                 client.publish(state_topic, json.dumps(data))
-                await sql.writePressure(data["sealevel_pressure"])
-                await sql.updateHighLow(data)
-                # await sql.updateDayData(data)
+                sql.writePressure(data["sealevel_pressure"])
+                sql.updateHighLow(data)
+                # sql.updateDayData(data)
                 await asyncio.sleep(0.01)
             if msg_type in EVENT_SKY_DATA:
                 obs = json_response["obs"][0]
                 data["illuminance"] = obs[1]
                 data["uv"] = obs[2]
                 storage["rain_today"] += obs[3]
-                data["rain_today"] = await cnv.rain(storage["rain_today"])
-                data["rain_yesterday"] = await cnv.rain(storage["rain_yesterday"])
+                data["rain_today"] = cnv.rain(storage["rain_today"])
+                data["rain_yesterday"] = cnv.rain(storage["rain_yesterday"])
                 data["rain_duration_today"] = storage["rain_duration_today"]
                 data["rain_duration_yesterday"] = storage["rain_duration_yesterday"]
                 data["rain_start_time"] = datetime.fromtimestamp(
                     storage["rain_start"]
                 ).isoformat()
-                data["wind_lull"] = await cnv.speed(obs[4])
-                data["wind_speed_avg"] = await cnv.speed(obs[5])
-                data["wind_gust"] = await cnv.speed(obs[6])
+                data["wind_lull"] = cnv.speed(obs[4])
+                data["wind_speed_avg"] = cnv.speed(obs[5])
+                data["wind_gust"] = cnv.speed(obs[6])
                 data["wind_bearing_avg"] = obs[7]
-                data["wind_direction_avg"] = await cnv.direction(obs[7])
+                data["wind_direction_avg"] = cnv.direction(obs[7])
                 data["battery"] = round(obs[8], 2)
-                data["battery_level_sky"] = await cnv.battery_level(obs[8], False)
+                data["battery_level_sky"] = cnv.battery_level(obs[8], False)
                 solar_radiation = obs[10]
                 data["solar_radiation"] = obs[10]
-                data["precipitation_type"] = await cnv.rain_type(obs[12])
-                data["rain_rate"] = await cnv.rain_rate(obs[3])
-                data["uv_description"] = await cnv.uv_level(obs[2])
-                bft_value, bft_text = await cnv.beaufort(obs[5])
+                data["precipitation_type"] = cnv.rain_type(obs[12])
+                data["rain_rate"] = cnv.rain_rate(obs[3])
+                data["uv_description"] = cnv.uv_level(obs[2])
+                bft_value, bft_text = cnv.beaufort(obs[5])
                 data["beaufort"] = bft_value
                 data["beaufort_text"] = bft_text
                 data["last_reset_midnight"] = last_midnight
                 client.publish(state_topic, json.dumps(data))
-                await sql.updateHighLow(data)
-                # await sql.updateDayData(data)
+                sql.updateHighLow(data)
+                # sql.updateDayData(data)
                 await asyncio.sleep(0.01)
                 if obs[3] > 0:
                     storage["rain_duration_today"] += 1
-                    await sql.writeStorage(storage)
+                    sql.writeStorage(storage)
             if msg_type in EVENT_TEMPEST_DATA:
                 obs = json_response["obs"][0]
 
                 state_topic = "homeassistant/sensor/{}/{}/state".format(
                     DOMAIN, EVENT_SKY_DATA
                 )
-                data["wind_lull"] = await cnv.speed(obs[1])
-                data["wind_speed_avg"] = await cnv.speed(obs[2])
-                data["wind_gust"] = await cnv.speed(obs[3])
+                data["wind_lull"] = cnv.speed(obs[1])
+                data["wind_speed_avg"] = cnv.speed(obs[2])
+                data["wind_gust"] = cnv.speed(obs[3])
                 data["wind_bearing_avg"] = obs[4]
-                data["wind_direction_avg"] = await cnv.direction(obs[4])
+                data["wind_direction_avg"] = cnv.direction(obs[4])
                 data["illuminance"] = obs[9]
                 data["uv"] = obs[10]
                 data["solar_radiation"] = obs[11]
                 storage["rain_today"] += obs[12]
-                data["rain_today"] = await cnv.rain(storage["rain_today"])
-                data["rain_yesterday"] = await cnv.rain(storage["rain_yesterday"])
+                data["rain_today"] = cnv.rain(storage["rain_today"])
+                data["rain_yesterday"] = cnv.rain(storage["rain_yesterday"])
                 data["rain_duration_today"] = storage["rain_duration_today"]
                 data["rain_duration_yesterday"] = storage["rain_duration_yesterday"]
                 data["rain_start_time"] = datetime.fromtimestamp(
                     storage["rain_start"]
                 ).isoformat()
-                data["precipitation_type"] = await cnv.rain_type(obs[13])
+                data["precipitation_type"] = cnv.rain_type(obs[13])
                 data["battery"] = round(obs[16], 2)
-                data["battery_level_tempest"] = await cnv.battery_level(obs[16], True)
-                bat_mode, bat_desc = await cnv.battery_mode(obs[16], obs[11])
+                data["battery_level_tempest"] = cnv.battery_level(obs[16], True)
+                bat_mode, bat_desc = cnv.battery_mode(obs[16], obs[11])
                 data["battery_mode"] = bat_mode
                 data["battery_desc"] = bat_desc
-                data["rain_rate"] = await cnv.rain_rate(obs[12])
-                data["rain_intensity"] = await cnv.rain_intensity(data["rain_rate"])
-                data["uv_description"] = await cnv.uv_level(obs[10])
-                bft_value, bft_text = await cnv.beaufort(obs[2])
+                data["rain_rate"] = cnv.rain_rate(obs[12])
+                data["rain_intensity"] = cnv.rain_intensity(data["rain_rate"])
+                data["uv_description"] = cnv.uv_level(obs[10])
+                bft_value, bft_text = cnv.beaufort(obs[2])
                 data["beaufort"] = bft_value
                 data["beaufort_text"] = bft_text
                 data["last_reset_midnight"] = last_midnight
                 client.publish(state_topic, json.dumps(data))
-                await sql.updateHighLow(data)
-                # await sql.updateDayData(data)
+                sql.updateHighLow(data)
+                # sql.updateDayData(data)
                 await asyncio.sleep(0.01)
 
                 state_topic = "homeassistant/sensor/{}/{}/state".format(
                     DOMAIN, EVENT_AIR_DATA
                 )
                 data = OrderedDict()
-                data["station_pressure"] = await cnv.pressure(obs[6])
-                data["air_temperature"] = await cnv.temperature(obs[7])
+                data["station_pressure"] = cnv.pressure(obs[6])
+                data["air_temperature"] = cnv.temperature(obs[7])
                 data["relative_humidity"] = obs[8]
                 data["lightning_strike_count"] = obs[15]
-                data["lightning_strike_count_1hr"] = await sql.readLightningCount(1)
-                data["lightning_strike_count_3hr"] = await sql.readLightningCount(3)
+                data["lightning_strike_count_1hr"] = sql.readLightningCount(1)
+                data["lightning_strike_count_3hr"] = sql.readLightningCount(3)
                 data["lightning_strike_count_today"] = storage["lightning_count_today"]
                 data["lightning_strike_distance"] = storage["last_lightning_distance"]
                 data["lightning_strike_energy"] = storage["last_lightning_energy"]
                 data["lightning_strike_time"] = datetime.fromtimestamp(
                     storage["last_lightning_time"]
                 ).isoformat()
-                data["sealevel_pressure"] = await cnv.sea_level_pressure(
-                    obs[6], elevation
-                )
-                trend_text, trend_value = await sql.readPressureTrend(
+                data["sealevel_pressure"] = cnv.sea_level_pressure(obs[6], elevation)
+                trend_text, trend_value = sql.readPressureTrend(
                     data["sealevel_pressure"], translations
                 )
                 data["pressure_trend"] = trend_text
                 data["pressure_trend_value"] = trend_value
-                data["air_density"] = await cnv.air_density(obs[7], obs[6])
-                data["dewpoint"] = await cnv.dewpoint(obs[7], obs[8])
-                data["feelslike"] = await cnv.feels_like(obs[7], obs[8], wind_speed)
-                data["wetbulb"] = await cnv.wetbulb(obs[7], obs[8], obs[6])
-                data["delta_t"] = await cnv.delta_t(obs[7], obs[8], obs[6])
-                data["visibility"] = await cnv.visibility(elevation, obs[7], obs[8])
-                data["absolute_humidity"] = await cnv.absolute_humidity(obs[7], obs[8])
-                data["wbgt"] = await cnv.wbgt(obs[7], obs[8], obs[6], obs[11])
-                data["dewpoint_description"] = await cnv.dewpoint_level(
-                    data["dewpoint"]
-                )
-                data["temperature_description"] = await cnv.temperature_level(obs[7])
+                data["air_density"] = cnv.air_density(obs[7], obs[6])
+                data["dewpoint"] = cnv.dewpoint(obs[7], obs[8])
+                data["feelslike"] = cnv.feels_like(obs[7], obs[8], wind_speed)
+                data["wetbulb"] = cnv.wetbulb(obs[7], obs[8], obs[6])
+                data["delta_t"] = cnv.delta_t(obs[7], obs[8], obs[6])
+                data["visibility"] = cnv.visibility(elevation, obs[7], obs[8])
+                data["absolute_humidity"] = cnv.absolute_humidity(obs[7], obs[8])
+                data["wbgt"] = cnv.wbgt(obs[7], obs[8], obs[6], obs[11])
+                data["dewpoint_description"] = cnv.dewpoint_level(data["dewpoint"])
+                data["temperature_description"] = cnv.temperature_level(obs[7])
                 data["last_reset_midnight"] = last_midnight
                 client.publish(state_topic, json.dumps(data))
-                await sql.writePressure(data["sealevel_pressure"])
-                await sql.updateHighLow(data)
-                # await sql.updateDayData(data)
+                sql.writePressure(data["sealevel_pressure"])
+                sql.updateHighLow(data)
+                # sql.updateDayData(data)
                 await asyncio.sleep(0.01)
 
                 if obs[12] > 0:
                     storage["rain_duration_today"] += 1
-                    await sql.writeStorage(storage)
+                    sql.writeStorage(storage)
 
             if msg_type in EVENT_DEVICE_STATUS:
                 now = datetime.now()
                 serial_number = json_response.get("serial_number")
                 firmware_revision = json_response.get("firmware_revision")
                 voltage = json_response.get("voltage")
-                uptime = await cnv.humanize_time(json_response.get("uptime"))
+                uptime = cnv.humanize_time(json_response.get("uptime"))
                 sensor_status = json_response.get("sensor_status")
 
                 device_status = None
                 if sensor_status is not None and sensor_status != 0:
-                    device_status = await cnv.device_status(sensor_status)
+                    device_status = cnv.device_status(sensor_status)
                     if device_status and show_debug:
                         _LOGGER.debug(
                             "Device %s has reported a sensor fault. Reason: %s",
@@ -464,7 +458,9 @@ async def main():
                     device_name = "sky_status"
 
                 data[device_name] = uptime
-                attr_topic = "homeassistant/sensor/{}/{}/attributes".format(DOMAIN, device_name)
+                attr_topic = "homeassistant/sensor/{}/{}/attributes".format(
+                    DOMAIN, device_name
+                )
                 attr = OrderedDict()
                 attr[ATTR_ATTRIBUTION] = ATTRIBUTION
                 attr[ATTR_BRAND] = BRAND
