@@ -1,5 +1,14 @@
 # Home Assistant WeatherFlow2MQTT Changelog
 
+## Version 2.2.3
+
+**Release Date**: November 17th, 2021
+
+### Changes in release 2.2.3
+
+* `CHANGE`: @natekspencer optimized the unit conversion code.
+* `CHANGE`: New Logos for the Home Assistant Add-On
+
 ## Version 2.2.2
 
 **Release Date**: November 15th, 2021
