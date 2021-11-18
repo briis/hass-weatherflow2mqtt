@@ -21,6 +21,7 @@
     "environment": {
         "HA_SUPERVISOR": "True"
     },
+    "homeassistant_api": true,
     "services": [
         "mqtt:want"
     ],
@@ -29,23 +30,21 @@
     },
     "schema": {
         "TEMPEST_DEVICE": "bool",
+        "ELEVATION": "float?",
+        "RAPID_WIND_INTERVAL": "int?",
+        "STATION_ID": "str?",
+        "STATION_TOKEN": "str?",
+        "FORECAST_INTERVAL": "int?",
+        "LANGUAGE": "list(en|da|de|fr)?",
         "FILTER_SENSORS": "str?",
         "INVERT_FILTER": "bool?",
-        "UNIT_SYSTEM": "list(imperial|metric)?",
-        "LANGUAGE": "list(en|da|de|fr)?",
-        "RAPID_WIND_INTERVAL": "int?",
-        "ELEVATION": "float?",
-        "WF_HOST": "str?",
-        "WF_PORT": "port?",
         "MQTT_HOST": "str?",
         "MQTT_PORT": "port?",
         "MQTT_USERNAME": "str?",
         "MQTT_PASSWORD": "password?",
         "MQTT_DEBUG": "bool?",
-        "DEBUG": "bool?",
-        "ADD_FORECAST": "bool?",
-        "STATION_ID": "str?",
-        "STATION_TOKEN": "str?",
-        "FORECAST_INTERVAL": "int?"
+        "WF_HOST": "str?",
+        "WF_PORT": "port?",
+        "DEBUG": "bool?"
     }
 }

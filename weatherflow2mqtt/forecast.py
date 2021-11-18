@@ -1,13 +1,16 @@
 """Module to get forecast using REST from WeatherFlow."""
+from __future__ import annotations
+
 import asyncio
 import logging
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional, OrderedDict
+from typing import Any, OrderedDict
 
 from aiohttp import ClientSession, ClientTimeout
 from aiohttp.client_exceptions import ClientError
 
-from weatherflow2mqtt.const import (
+from .const import (
     ATTR_ATTRIBUTION,
     ATTR_BRAND,
     ATTR_FORECAST_CONDITION,
@@ -28,35 +31,69 @@ from weatherflow2mqtt.const import (
     FORECAST_HOURLY_HOURS,
     FORECAST_TYPE_DAILY,
     FORECAST_TYPE_HOURLY,
+    LANGUAGE_ENGLISH,
+    UNITS_METRIC,
     UTC,
 )
-from weatherflow2mqtt.helpers import ConversionFunctions
+from .helpers import ConversionFunctions
 
 _LOGGER = logging.getLogger(__name__)
 
 
+@dataclass
+class ForecastConfig:
+    """Forecast config."""
+
+    station_id: str
+    token: str
+    interval: int = 30
+
+
 class Forecast:
+    """Forecast."""
+
     def __init__(
         self,
-        station_id,
-        unit_system,
-        translations,
-        token,
-        session: Optional[ClientSession] = None,
+        station_id: str,
+        token: str,
+        interval: int = 30,
+        conversions: ConversionFunctions = ConversionFunctions(
+            unit_system=UNITS_METRIC, language=LANGUAGE_ENGLISH
+        ),
+        session: ClientSession | None = None,
     ):
-        self._station_id = station_id
-        self._token = token
-        self._unit_system = unit_system
-        self._translations = translations
+        """Initialize a Forecast object."""
+        self.station_id = station_id
+        self.token = token
+        self.interval = interval
+        self.conversions = conversions
         self._session: ClientSession = session
-        self.req = session
+
+    @classmethod
+    def from_config(
+        cls,
+        config: ForecastConfig,
+        conversions: ConversionFunctions = ConversionFunctions(
+            unit_system=UNITS_METRIC, language=LANGUAGE_ENGLISH
+        ),
+        session: ClientSession | None = None,
+    ) -> Forecast:
+        """Create a Forecast from a Forecast Config."""
+        return cls(
+            station_id=config.station_id,
+            token=config.token,
+            interval=config.interval,
+            conversions=conversions,
+            session=session,
+        )
 
     async def update_forecast(self):
         """Return the formatted forecast data."""
-        endpoint = f"better_forecast?station_id={self._station_id}&token={self._token}"
-        json_data = await self.async_request("get", endpoint)
+        json_data = await self.async_request(
+            method="get",
+            endpoint=f"better_forecast?station_id={self.station_id}&token={self.token}",
+        )
         items = []
-        cnv = ConversionFunctions(self._unit_system, self._translations)
 
         if json_data is not None:
             # We need a few Items from the Current Conditions section
@@ -66,16 +103,16 @@ class Forecast:
 
             # Prepare for MQTT
             condition_data = OrderedDict()
-            condition_state = await self.ha_condition_value(current_icon)
+            condition_state = self.ha_condition_value(current_icon)
             condition_data["weather"] = condition_state
 
             forecast_data = json_data.get("forecast")
 
             # We also need Day hign and low Temp from Today
-            temp_high_today = cnv.temperature(
+            temp_high_today = self.conversions.temperature(
                 forecast_data[FORECAST_TYPE_DAILY][0]["air_temp_high"]
             )
-            temp_low_today = cnv.temperature(
+            temp_low_today = self.conversions.temperature(
                 forecast_data[FORECAST_TYPE_DAILY][0]["air_temp_low"]
             )
 
@@ -113,16 +150,24 @@ class Forecast:
                     .replace(tzinfo=UTC)
                     .isoformat(),
                     "conditions": row["conditions"],
-                    ATTR_FORECAST_CONDITION: await self.ha_condition_value(row["icon"]),
-                    ATTR_FORECAST_TEMP: cnv.temperature(row["air_temp_high"]),
-                    ATTR_FORECAST_TEMP_LOW: cnv.temperature(row["air_temp_low"]),
-                    ATTR_FORECAST_PRECIPITATION: cnv.rain(precip),
+                    ATTR_FORECAST_CONDITION: self.ha_condition_value(row["icon"]),
+                    ATTR_FORECAST_TEMP: self.conversions.temperature(
+                        row["air_temp_high"]
+                    ),
+                    ATTR_FORECAST_TEMP_LOW: self.conversions.temperature(
+                        row["air_temp_low"]
+                    ),
+                    ATTR_FORECAST_PRECIPITATION: self.conversions.rain(precip),
                     ATTR_FORECAST_PRECIPITATION_PROBABILITY: row["precip_probability"],
                     "precip_icon": row.get("precip_icon", ""),
                     "precip_type": row.get("precip_type", ""),
-                    ATTR_FORECAST_WIND_SPEED: cnv.speed(sum_wind_avg, True),
+                    ATTR_FORECAST_WIND_SPEED: self.conversions.speed(
+                        sum_wind_avg, True
+                    ),
                     ATTR_FORECAST_WIND_BEARING: int(sum_wind_bearing),
-                    "wind_direction_cardinal": cnv.direction(int(sum_wind_bearing)),
+                    "wind_direction_cardinal": self.conversions.direction(
+                        int(sum_wind_bearing)
+                    ),
                 }
                 items.append(item)
             fcst_data["daily_forecast"] = items
@@ -140,24 +185,28 @@ class Forecast:
                     .replace(tzinfo=UTC)
                     .isoformat(),
                     "conditions": row["conditions"],
-                    ATTR_FORECAST_CONDITION: await self.ha_condition_value(
-                        row.get("icon")
+                    ATTR_FORECAST_CONDITION: self.ha_condition_value(row.get("icon")),
+                    ATTR_FORECAST_TEMP: self.conversions.temperature(
+                        row["air_temperature"]
                     ),
-                    ATTR_FORECAST_TEMP: cnv.temperature(row["air_temperature"]),
-                    ATTR_FORECAST_PRESSURE: cnv.pressure(row["sea_level_pressure"]),
+                    ATTR_FORECAST_PRESSURE: self.conversions.pressure(
+                        row["sea_level_pressure"]
+                    ),
                     ATTR_FORECAST_HUMIDITY: row["relative_humidity"],
-                    ATTR_FORECAST_PRECIPITATION: cnv.rain(row["precip"]),
+                    ATTR_FORECAST_PRECIPITATION: self.conversions.rain(row["precip"]),
                     ATTR_FORECAST_PRECIPITATION_PROBABILITY: row["precip_probability"],
                     "precip_icon": row.get("precip_icon", ""),
                     "precip_type": row.get("precip_type", ""),
-                    ATTR_FORECAST_WIND_SPEED: cnv.speed(row["wind_avg"], True),
-                    "wind_gust": cnv.speed(row["wind_gust"], True),
+                    ATTR_FORECAST_WIND_SPEED: self.conversions.speed(
+                        row["wind_avg"], True
+                    ),
+                    "wind_gust": self.conversions.speed(row["wind_gust"], True),
                     ATTR_FORECAST_WIND_BEARING: row["wind_direction"],
-                    "wind_direction_cardinal": self._translations["wind_dir"][
-                        row["wind_direction_cardinal"]
-                    ],
+                    "wind_direction_cardinal": self.conversions.translations[
+                        "wind_dir"
+                    ][row["wind_direction_cardinal"]],
                     "uv": row["uv"],
-                    "feels_like": cnv.temperature(row["feels_like"]),
+                    "feels_like": self.conversions.temperature(row["feels_like"]),
                 }
                 items.append(item)
                 # Limit number of Hours
@@ -172,20 +221,7 @@ class Forecast:
         _LOGGER.warning("Forecast Server was unresponsive. Skipping forecast update")
         return None, None
 
-    async def ha_condition_value(self, value):
-        """Returns the Home Assistant Condition."""
-        try:
-            return next(
-                (k for k, v in CONDITION_CLASSES.items() if value in v),
-                None,
-            )
-        except Exception as e:
-            _LOGGER.debug(
-                "Could not find icon with value:  %s. Error message: %s", value, e
-            )
-            return None
-
-    async def async_request(self, method: str, endpoint: str) -> dict:
+    async def async_request(self, method: str, endpoint: str) -> dict[str, Any]:
         """Make a request against the SmartWeather API."""
 
         use_running_session = self._session and not self._session.closed
@@ -215,3 +251,16 @@ class Forecast:
         finally:
             if not use_running_session:
                 await session.close()
+
+    def ha_condition_value(self, value: str) -> str | None:
+        """Returns the Home Assistant Condition."""
+        try:
+            return next(
+                (k for k, v in CONDITION_CLASSES.items() if value in v),
+                None,
+            )
+        except Exception as e:
+            _LOGGER.debug(
+                "Could not find icon with value: %s. Error message: %s", value, e
+            )
+            return None

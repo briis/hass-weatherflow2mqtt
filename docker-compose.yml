@@ -18,7 +18,6 @@ services:
       - MQTT_USERNAME=
       - MQTT_PASSWORD=
       - MQTT_DEBUG=False
-      - ADD_FORECAST=True
       - STATION_ID=
       - STATION_TOKEN=
       - FORECAST_INTERVAL=30

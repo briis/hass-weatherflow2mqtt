@@ -12,8 +12,7 @@ from typing import Any
 import pytz
 import yaml
 
-from weatherflow2mqtt.__version__ import VERSION
-from weatherflow2mqtt.const import (
+from .const import (
     BATTERY_MODE_DESCRIPTION,
     DEVICE_STATUS_MASKS,
     EXTERNAL_DIRECTORY,
@@ -34,17 +33,50 @@ def truebool(val: Any | None) -> bool:
     return val is not None and str(val).lower() in ("true", "t", "yes", "y", "on", "1")
 
 
+def read_config() -> list[str] | None:
+    """Reads the config file to look for sensors."""
+    try:
+        filepath = f"{EXTERNAL_DIRECTORY}/config.yaml"
+        with open(filepath, "r") as file:
+            data = yaml.load(file, Loader=yaml.FullLoader)
+            sensors = data.get("sensors")
+
+            return sensors
+
+    except FileNotFoundError as e:
+        return None
+    except Exception as e:
+        _LOGGER.error("Could not read config.yaml file. Error message: %s", e)
+        return None
+
+
 class ConversionFunctions:
     """Class to help with converting from different units."""
 
-    def __init__(self, unit_system, translations):
-        self._unit_system = unit_system
-        self._translations = translations
+    def __init__(self, unit_system: str, language: str) -> None:
+        self.unit_system = unit_system
+        self.translations = self.get_language_file(language)
+
+    def get_language_file(self, language: str) -> dict[str, Any] | None:
+        """Return the language file json array."""
+        filename = (
+            f"translations/{language if language in SUPPORTED_LANGUAGES else 'en'}.json"
+        )
+
+        try:
+            with open(filename, "r") as json_file:
+                return json.load(json_file)
+        except FileNotFoundError as e:
+            _LOGGER.error("Could not read language file. Error message: %s", e)
+            return None
+        except Exception as e:
+            _LOGGER.error("Could not read language file. Error message: %s", e)
+            return None
 
     def temperature(self, value) -> float:
         """Convert Temperature Value."""
         if value is not None:
-            if self._unit_system == UNITS_IMPERIAL:
+            if self.unit_system == UNITS_IMPERIAL:
                 return round((value * 9 / 5) + 32, 1)
             return round(value, 1)
 
@@ -55,7 +87,7 @@ class ConversionFunctions:
     def pressure(self, value) -> float:
         """Convert Pressure Value."""
         if value is not None:
-            if self._unit_system == UNITS_IMPERIAL:
+            if self.unit_system == UNITS_IMPERIAL:
                 return round(value * 0.02953, 3)
             return round(value, 2)
 
@@ -66,7 +98,7 @@ class ConversionFunctions:
     def speed(self, value, kmh=False) -> float:
         """Convert Wind Speed."""
         if value is not None:
-            if self._unit_system == UNITS_IMPERIAL:
+            if self.unit_system == UNITS_IMPERIAL:
                 return round(value * 2.2369362920544, 2)
             if kmh:
                 return round((value * 18 / 5), 1)
@@ -79,7 +111,7 @@ class ConversionFunctions:
     def distance(self, value) -> float:
         """Convert distance."""
         if value is not None:
-            if self._unit_system == UNITS_IMPERIAL:
+            if self.unit_system == UNITS_IMPERIAL:
                 return round(value / 1.609344, 2)
             return value
 
@@ -90,7 +122,7 @@ class ConversionFunctions:
     def rain(self, value) -> float:
         """Convert rain."""
         if value is not None:
-            if self._unit_system == UNITS_IMPERIAL:
+            if self.unit_system == UNITS_IMPERIAL:
                 return round(value * 0.0393700787, 2)
             return round(value, 2)
 
@@ -103,7 +135,7 @@ class ConversionFunctions:
         type_array = ["none", "rain", "hail", "heavy"]
         try:
             precip_type = type_array[int(value)]
-            return self._translations["precip_type"][precip_type]
+            return self.translations["precip_type"][precip_type]
         except IndexError as e:
             _LOGGER.warning("VALUE is: %s", value)
             return f"Unknown - {value}"
@@ -133,7 +165,7 @@ class ConversionFunctions:
             "N",
         ]
         direction_str = direction_array[int((value + 11.25) / 22.5)]
-        return self._translations["wind_dir"][direction_str]
+        return self.translations["wind_dir"][direction_str]
 
     def air_density(self, temperature, station_pressure):
         """Returns the Air Density."""
@@ -145,7 +177,7 @@ class ConversionFunctions:
 
             air_dens = (pressure * 100) / (r_specific * kelvin)
 
-            if self._unit_system == UNITS_IMPERIAL:
+            if self.unit_system == UNITS_IMPERIAL:
                 air_dens = air_dens * 0.06243
                 decimals = 4
 
@@ -266,7 +298,7 @@ class ConversionFunctions:
         else:
             intensity = "EXTREME"
 
-        return self._translations["rain_intensity"][intensity]
+        return self.translations["rain_intensity"][intensity]
 
     def feels_like(self, temperature, humidity, windspeed):
         """Calculates the feel like temperature."""
@@ -321,7 +353,7 @@ class ConversionFunctions:
         # Visibility in km to horizon
         vis = float(mv * pr)
 
-        if self._unit_system == UNITS_IMPERIAL:
+        if self.unit_system == UNITS_IMPERIAL:
             # Originally was in nautical miles; HA displays miles as imperial, therfore converted to miles
             return round(vis / 1.609344, 1)
         return round(vis, 1)
@@ -418,7 +450,7 @@ class ConversionFunctions:
 
         wbgt = round(0.7 * twb + 0.002996 * sr + 0.3368 * ta - 0.01578 * rh - 0.5478, 1)
 
-        if self._unit_system == UNITS_IMPERIAL:
+        if self.unit_system == UNITS_IMPERIAL:
             return self.temperature(wbgt)
         return wbgt
 
@@ -540,7 +572,7 @@ class ConversionFunctions:
         """Returns the Beaufort Scale value based on Wind Speed."""
 
         if wind_speed is None:
-            return 0, self._translations["beaufort"][str(0)]
+            return 0, self.translations["beaufort"][str(0)]
 
         if wind_speed > 32.7:
             bft_value = 12
@@ -569,7 +601,7 @@ class ConversionFunctions:
         else:
             bft_value = 0
 
-        bft_text = self._translations["beaufort"][str(bft_value)]
+        bft_text = self.translations["beaufort"][str(bft_value)]
 
         return bft_value, bft_text
 
@@ -578,33 +610,33 @@ class ConversionFunctions:
         if dewpoint_c is None:
             return "no-data"
 
-        if self._unit_system == UNITS_IMPERIAL:
+        if self.unit_system == UNITS_IMPERIAL:
             dewpoint = dewpoint_c
         else:
             dewpoint = (dewpoint_c * 9 / 5) + 32
 
         if dewpoint >= 80:
-            return self._translations["dewpoint"]["severely-high"]
+            return self.translations["dewpoint"]["severely-high"]
         if dewpoint >= 75:
-            return self._translations["dewpoint"]["miserable"]
+            return self.translations["dewpoint"]["miserable"]
         if dewpoint >= 70:
-            return self._translations["dewpoint"]["oppressive"]
+            return self.translations["dewpoint"]["oppressive"]
         if dewpoint >= 65:
-            return self._translations["dewpoint"]["uncomfortable"]
+            return self.translations["dewpoint"]["uncomfortable"]
         if dewpoint >= 60:
-            return self._translations["dewpoint"]["ok-for-most"]
+            return self.translations["dewpoint"]["ok-for-most"]
         if dewpoint >= 55:
-            return self._translations["dewpoint"]["comfortable"]
+            return self.translations["dewpoint"]["comfortable"]
         if dewpoint >= 50:
-            return self._translations["dewpoint"]["very-comfortable"]
+            return self.translations["dewpoint"]["very-comfortable"]
         if dewpoint >= 30:
-            return self._translations["dewpoint"]["somewhat-dry"]
+            return self.translations["dewpoint"]["somewhat-dry"]
         if dewpoint >= 0.5:
-            return self._translations["dewpoint"]["dry"]
+            return self.translations["dewpoint"]["dry"]
         if dewpoint >= 0:
-            return self._translations["dewpoint"]["very-dry"]
+            return self.translations["dewpoint"]["very-dry"]
 
-        return self._translations["dewpoint"]["undefined"]
+        return self.translations["dewpoint"]["undefined"]
 
     def temperature_level(self, temperature_c):
         """Returns a text based comfort level, based on Air Temperature value."""
@@ -614,27 +646,27 @@ class ConversionFunctions:
         temperature = (temperature_c * 9 / 5) + 32
 
         if temperature >= 104:
-            return self._translations["temperature"]["inferno"]
+            return self.translations["temperature"]["inferno"]
         if temperature >= 95:
-            return self._translations["temperature"]["very-hot"]
+            return self.translations["temperature"]["very-hot"]
         if temperature >= 86:
-            return self._translations["temperature"]["hot"]
+            return self.translations["temperature"]["hot"]
         if temperature >= 77:
-            return self._translations["temperature"]["warm"]
+            return self.translations["temperature"]["warm"]
         if temperature >= 68:
-            return self._translations["temperature"]["nice"]
+            return self.translations["temperature"]["nice"]
         if temperature >= 59:
-            return self._translations["temperature"]["cool"]
+            return self.translations["temperature"]["cool"]
         if temperature >= 41:
-            return self._translations["temperature"]["chilly"]
+            return self.translations["temperature"]["chilly"]
         if temperature >= 32:
-            return self._translations["temperature"]["cold"]
+            return self.translations["temperature"]["cold"]
         if temperature >= 20:
-            return self._translations["temperature"]["freezing"]
+            return self.translations["temperature"]["freezing"]
         if temperature <= 20:
-            return self._translations["temperature"]["fridged"]
+            return self.translations["temperature"]["fridged"]
 
-        return self._translations["temperature"]["undefined"]
+        return self.translations["temperature"]["undefined"]
 
     def uv_level(self, uvi):
         """Returns a text based UV Description."""
@@ -643,17 +675,17 @@ class ConversionFunctions:
             return "no-data"
 
         if uvi >= 10.5:
-            return self._translations["uv"]["extreme"]
+            return self.translations["uv"]["extreme"]
         if uvi >= 7.5:
-            return self._translations["uv"]["very-high"]
+            return self.translations["uv"]["very-high"]
         if uvi >= 5.5:
-            return self._translations["uv"]["high"]
+            return self.translations["uv"]["high"]
         if uvi >= 2.5:
-            return self._translations["uv"]["moderate"]
+            return self.translations["uv"]["moderate"]
         if uvi > 0:
-            return self._translations["uv"]["low"]
+            return self.translations["uv"]["low"]
 
-        return self._translations["uv"]["none"]
+        return self.translations["uv"]["none"]
 
     def humanize_time(self, value):
         """Humanize Time in Seconds."""
@@ -686,47 +718,3 @@ class ConversionFunctions:
         midnight_ts = datetime.datetime.timestamp(midnight)
         midnight_dt = self.utc_from_timestamp(midnight_ts)
         return midnight_dt.isoformat()
-
-
-class DataStorage:
-    """Handles reading and writing of the external storage file."""
-
-    logging.basicConfig(level=logging.DEBUG)
-
-    def read_config(self) -> list[str] | None:
-        """Reads the config file, to look for sensors."""
-        try:
-            filepath = f"{EXTERNAL_DIRECTORY}/config.yaml"
-            with open(filepath, "r") as file:
-                data = yaml.load(file, Loader=yaml.FullLoader)
-                sensors = data.get("sensors")
-
-                return sensors
-
-        except FileNotFoundError as e:
-            return None
-        except Exception as e:
-            _LOGGER.error("Could not read config.yaml file. Error message: %s", e)
-            return None
-
-    def getLanguageFile(self, language: str):
-        """Return the language file json array."""
-        try:
-            if language not in SUPPORTED_LANGUAGES:
-                filename = "translations/en.json"
-            else:
-                filename = f"translations/{language}.json"
-
-            with open(filename, "r") as json_file:
-                return json.load(json_file)
-
-        except FileNotFoundError as e:
-            _LOGGER.error("Could not read language file. Error message: %s", e)
-            return None
-        except Exception as e:
-            _LOGGER.error("Could not read language file. Error message: %s", e)
-            return None
-
-    def getVersion(self):
-        """Returns the version number stored in the __version__.py file."""
-        return VERSION
