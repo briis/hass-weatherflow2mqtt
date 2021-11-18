@@ -64,7 +64,6 @@ docker run -d \
 -e MQTT_USERNAME= \
 -e MQTT_PASSWORD= \
 -e MQTT_DEBUG=False \
--e ADD_FORECAST=False \
 -e STATION_ID= \
 -e STATION_TOKEN= \
 -e FORECAST_INTERVAL=30 \
@@ -95,7 +94,6 @@ A description of the Environment Variables available for this container. All of 
 - `MQTT_PASSWORD`: The password used to connect to the mqtt server. Leave blank to use Anonymous connection. Default value is *blank*
 - `MQTT_DEBUG`: Set this to True, to get some more mqtt debugging messages in the Container log file. Default value is *False*
 - `DEBUG`: Set this to True to enable more debug data in the Container Log. Default is *False*
-- `ADD_FORECAST`: Set this to True if you want to retrieve Forecast Data from WeatherFlow. If set to True, *STATION_ID* and *STATION_TOKEN* must be filled also. **NOTE** If this is enabled the component will access the Internet to get the Forecast data. Default value is *False*
 - `STATION_ID`: Enter your Station ID for your WeatherFlow Station. Default value is *blank*.
 - `STATION_TOKEN`: Enter your personal access Token to allow retrieval of data. If you don't have the token [login with your account](https://tempestwx.com/settings/tokens) and create the token. **NOTE** You must own a WeatherFlow station to get this token. Default value is *blank*
 - `FORECAST_INTERVAL`: The interval in minutes, between updates of the Forecast data. Default value is *30* minutes.
@@ -368,7 +366,6 @@ export WF_PORT="50222"
 export MQTT_HOST="..."
 export MQTT_PORT="1883"
 export MQTT_DEBUG="False"
-export ADD_FORECAST="True"
 export STATION_ID="..."
 export STATION_TOKEN="..."
 export FORECAST_INTERVAL="30"

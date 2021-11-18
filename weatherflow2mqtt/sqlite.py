@@ -8,7 +8,7 @@ from datetime import timezone
 from sqlite3 import Error as SQLError
 from typing import OrderedDict
 
-from weatherflow2mqtt.const import (
+from .const import (
     COL_DEWPOINT,
     COL_HUMIDITY,
     COL_ILLUMINANCE,
@@ -33,6 +33,7 @@ from weatherflow2mqtt.const import (
     TABLE_LIGHTNING,
     TABLE_PRESSURE,
     TABLE_STORAGE,
+    UNITS_IMPERIAL,
     UTC,
 )
 
@@ -171,7 +172,7 @@ class SQLFunctions:
 
             min_value = -1
             max_value = 1
-            if self._unit_system == "imperial":
+            if self._unit_system == UNITS_IMPERIAL:
                 min_value = -0.0295
                 max_value = 0.0295
 
