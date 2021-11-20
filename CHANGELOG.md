@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - @natekspencer did inital work to implement a easier to manage class structure to ease future development.
+- **BREAKING CHANGE** If you run the Non-Supervised mode of the program, you must make a change in your docker configuration to ensure you point to the same data directory as before. Change this `-v $(pwd): /usr/local/config` to this `-v $(pwd): /data`
 
 ## [2.2.3] - 2021-11-17
 
