@@ -175,7 +175,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | wind_lull | Wind Lull | Lowest wind for the last minute | No | obs[1] |  | obs[4] | m/s |
 | wind_speed | Wind Speed | Current measured Wind Speed | No |  |  |  | m/s |
 | wind_speed_avg | Wind Speed Avg | Average wind speed for the last minute | No | obs[2] |  | obs[5] | m/s |
-| weather | Weather | Only available if Forecast option is enabled. State will be current condition, and forecast data will be in the attributes. | No |  |  |  |  |
+| weather | Weather | Only available if STATION_ID and STATION_TOKEN have valid data (See above). State will be current condition, and forecast data will be in the attributes. | No |  |  |  |  |
 
 ### Sensor Structure
 
