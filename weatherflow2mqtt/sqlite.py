@@ -28,7 +28,6 @@ from .const import (
     STORAGE_FILE,
     STORAGE_ID,
     STRIKE_COUNT_TIMER,
-    TABLE_DAY_DATA,
     TABLE_HIGH_LOW,
     TABLE_LIGHTNING,
     TABLE_PRESSURE,
@@ -44,6 +43,7 @@ class SQLFunctions:
     """Class to handle SQLLite functions."""
 
     def __init__(self, unit_system, debug=False):
+        """Initialize SQLFunctions."""
         self.connection = None
         self._unit_system = unit_system
         self._debug = debug
@@ -57,7 +57,8 @@ class SQLFunctions:
             _LOGGER.error("Could not create SQL Database. Error: %s", e)
 
     def create_table(self, create_table_sql):
-        """Create a table from the create_table_sql statement.
+        """Create table from the create_table_sql statement.
+
         :param conn: Connection object
         :param create_table_sql: a CREATE TABLE statement
         :return:
@@ -69,8 +70,8 @@ class SQLFunctions:
             _LOGGER.error("Could not create SQL Table. Error: %s", e)
 
     def create_storage_row(self, rowdata):
-        """
-        Create a new storage row into the storage table.
+        """Create new storage row into the storage table.
+
         :param conn:
         :param rowdata:
         :return: project id
@@ -88,7 +89,7 @@ class SQLFunctions:
             _LOGGER.error("Could not Insert data in table storage. Error: %s", e)
 
     def readStorage(self):
-        """Returns data from the storage table as JSON."""
+        """Return data from the storage table as JSON."""
         try:
             cursor = self.connection.cursor()
             cursor.execute(f"SELECT * FROM storage WHERE id = {STORAGE_ID};")
@@ -114,8 +115,7 @@ class SQLFunctions:
             _LOGGER.error("Could not access storage data. Error: %s", e)
 
     def writeStorage(self, json_data: OrderedDict):
-        """Stores data in the storage table from JSON."""
-
+        """Store data in the storage table from JSON."""
         try:
             cursor = self.connection.cursor()
             sql_statement = """UPDATE storage
@@ -153,7 +153,7 @@ class SQLFunctions:
             _LOGGER.error("Could not update storage data. Error: %s", e)
 
     def readPressureTrend(self, new_pressure, translations):
-        """Returns the Pressure Trend."""
+        """Return Pressure Trend."""
         if new_pressure is None:
             return "Steady", 0
 
@@ -189,10 +189,10 @@ class SQLFunctions:
             _LOGGER.error("Could not calculate pressure trend. Error message: %s", e)
 
     def readPressureData(self):
-        """Returns the formatted pressure data - USED FOR TESTING ONLY."""
+        """Return formatted pressure data - USED FOR TESTING ONLY."""
         try:
             cursor = self.connection.cursor()
-            cursor.execute(f"SELECT * FROM pressure;")
+            cursor.execute("SELECT * FROM pressure;")
             data = cursor.fetchall()
 
             for row in data:
@@ -203,8 +203,7 @@ class SQLFunctions:
             _LOGGER.error("Could not access storage data. Error: %s", e)
 
     def writePressure(self, pressure):
-        """Adds an entry to the Pressure Table."""
-
+        """Add entry to the Pressure Table."""
         try:
             cur = self.connection.cursor()
             cur.execute(
@@ -220,7 +219,7 @@ class SQLFunctions:
             return False
 
     def readLightningCount(self, hours: int):
-        """Returns the number of Lightning Strikes in the last x hours."""
+        """Return number of Lightning Strikes in the last x hours."""
         try:
             time_point = time.time() - hours * 60 * 60
             cursor = self.connection.cursor()
@@ -250,8 +249,7 @@ class SQLFunctions:
             return False
 
     def writeDailyLog(self, sensor_data):
-        """Adds an entry to the Daily Log Table."""
-
+        """Add entry to the Daily Log Table."""
         try:
             data = json.loads(json.dumps(sensor_data))
             temp = data.get("air_temperature")
@@ -271,8 +269,7 @@ class SQLFunctions:
             _LOGGER.error("Could not write to daily_log Table. Error message: %s", e)
 
     def updateDayData(self, sensor_data):
-        """Updates the Day Data Table."""
-
+        """Update Day Data Table."""
         try:
             data = json.loads(json.dumps(sensor_data))
             temp = data.get("air_temperature")
@@ -323,11 +320,11 @@ class SQLFunctions:
             _LOGGER.error("Could not write to day_data Table. Error message: %s", e)
 
     def updateHighLow(self, sensor_data):
-        """Updates the High and Low Values."""
+        """Update High and Low Values."""
         try:
             self.connection.row_factory = sqlite3.Row
             cursor = self.connection.cursor()
-            cursor.execute(f"SELECT * FROM high_low;")
+            cursor.execute("SELECT * FROM high_low;")
             table_data = cursor.fetchall()
 
             data = json.loads(json.dumps(sensor_data))
@@ -338,11 +335,11 @@ class SQLFunctions:
                 sensor_value = None
                 do_update = False
                 # Get Value of Sensor if available
-                if data.get(row["sensorid"]) != None:
+                if data.get(row["sensorid"]) is not None:
                     sensor_value = data[row["sensorid"]]
 
                 # If we have a value, check if min/max changes
-                if sensor_value != None:
+                if sensor_value is not None:
                     if sensor_value > row["max_day"]:
                         max_sql = (
                             f" max_day = {sensor_value}, max_day_time = {time.time()} "
@@ -369,7 +366,7 @@ class SQLFunctions:
                     cursor.execute(sql)
                     self.connection.commit()
                 else:
-                    if sensor_value != None:
+                    if sensor_value is not None:
                         sql = f"{sql} latest = {sensor_value} WHERE sensorid = '{row['sensorid']}'"
                         if self._debug:
                             _LOGGER.debug("Latest SQL: %s", sql)
@@ -378,16 +375,17 @@ class SQLFunctions:
 
         except SQLError as e:
             _LOGGER.error("Could not update High and Low data. Error: %s", e)
+            return False
         except Exception as e:
-            _LOGGER.error("Could write to High and Low Table. Error message: %s", e)
+            _LOGGER.error("Could not write to High and Low Table. Error message: %s", e)
             return False
 
     def readHighLow(self):
-        """Returns data from the high_low table as JSON."""
+        """Return data from the high_low table as JSON."""
         try:
             self.connection.row_factory = sqlite3.Row
             cursor = self.connection.cursor()
-            cursor.execute(f"SELECT * FROM high_low")
+            cursor.execute("SELECT * FROM high_low")
             data = cursor.fetchall()
 
             sensor_json = {}
@@ -444,8 +442,7 @@ class SQLFunctions:
             return sensor_json
 
     def migrateStorageFile(self):
-        """Migrates the old .storage.json file to the database."""
-
+        """Migrate old .storage.json file to the database."""
         try:
             with open(STORAGE_FILE, "r") as jsonFile:
                 old_data = json.load(jsonFile)
@@ -477,8 +474,7 @@ class SQLFunctions:
             _LOGGER.error("Could not Read storage file. Error message: %s", e)
 
     def createInitialDataset(self):
-        """Setup the Initial database, and migrate data if needed."""
-
+        """Initialize Initial database, and migrate data if needed."""
         try:
             with self.connection:
                 # Create Empty Tables
@@ -504,8 +500,7 @@ class SQLFunctions:
             _LOGGER.error("Could not Read storage file. Error message: %s", e)
 
     def upgradeDatabase(self):
-        """Upgrade the Database to ensure tables and columns are correct."""
-
+        """Upgrade Database to ensure tables and columns are correct."""
         try:
             # Get Database Version
             cursor = self.connection.cursor()
@@ -548,8 +543,7 @@ class SQLFunctions:
             _LOGGER.error("An undefined error occured. Error message: %s", e)
 
     def initializeHighLow(self):
-        """Writes the Initial Data to the High Low Tabble."""
-
+        """Write Initial Data to the High Low Tabble."""
         try:
             cursor = self.connection.cursor()
             cursor.execute(
@@ -602,8 +596,7 @@ class SQLFunctions:
             _LOGGER.error("Could write to high_low Table. Error message: %s", e)
 
     def dailyHousekeeping(self):
-        """This function is called once a day, to clean up old data."""
-
+        """Clean up old data, daily."""
         try:
             # Cleanup the Pressure Table
             pres_time_point = time.time() - PRESSURE_TREND_TIMER - 60
