@@ -34,7 +34,7 @@ def truebool(val: Any | None) -> bool:
 
 
 def read_config() -> list[str] | None:
-    """Reads the config file to look for sensors."""
+    """Read the config file to look for sensors."""
     try:
         filepath = f"{EXTERNAL_DIRECTORY}/config.yaml"
         with open(filepath, "r") as file:
@@ -43,7 +43,7 @@ def read_config() -> list[str] | None:
 
             return sensors
 
-    except FileNotFoundError as e:
+    except FileNotFoundError:
         return None
     except Exception as e:
         _LOGGER.error("Could not read config.yaml file. Error message: %s", e)
@@ -54,6 +54,7 @@ class ConversionFunctions:
     """Class to help with converting from different units."""
 
     def __init__(self, unit_system: str, language: str) -> None:
+        """Initialize Conversion Function."""
         self.unit_system = unit_system
         self.translations = self.get_language_file(language)
 
@@ -136,12 +137,12 @@ class ConversionFunctions:
         try:
             precip_type = type_array[int(value)]
             return self.translations["precip_type"][precip_type]
-        except IndexError as e:
+        except IndexError:
             _LOGGER.warning("VALUE is: %s", value)
             return f"Unknown - {value}"
 
     def direction(self, value) -> str:
-        """Returns a directional Wind Direction string."""
+        """Return directional Wind Direction string."""
         if value is None:
             return "N"
 
@@ -168,7 +169,7 @@ class ConversionFunctions:
         return self.translations["wind_dir"][direction_str]
 
     def air_density(self, temperature, station_pressure):
-        """Returns the Air Density."""
+        """Return Air Density."""
         if temperature is not None and station_pressure is not None:
             kelvin = temperature + 273.15
             pressure = station_pressure
@@ -188,7 +189,8 @@ class ConversionFunctions:
         )
 
     def sea_level_pressure(self, station_press, elevation):
-        """Returns Sea Level pressure.
+        """Return Sea Level pressure.
+
         Converted from a JS formula made by Gary W Funk
         """
         if station_press is not None:
@@ -201,12 +203,12 @@ class ConversionFunctions:
             std_pressure = 1013.25
             std_temp = 288.15
             # Sub Calculation
-            l = gravity / (gas_constant * atm_rate)
-            c = gas_constant * atm_rate / gravity
-            u = math.pow(
-                1 + math.pow(std_pressure / press, c) * (atm_rate * elev / std_temp), l
+            lp = gravity / (gas_constant * atm_rate)
+            cp = gas_constant * atm_rate / gravity
+            up = math.pow(
+                1 + math.pow(std_pressure / press, cp) * (atm_rate * elev / std_temp), lp
             )
-            sea_pressure = press * u
+            sea_pressure = press * up
 
             return self.pressure(sea_pressure)
 
@@ -215,7 +217,7 @@ class ConversionFunctions:
         )
 
     def dewpoint(self, temperature, humidity, no_conversion=False):
-        """Returns Dewpoint."""
+        """Return Dewpoint."""
         if temperature is not None and humidity is not None:
             dewpoint_c = round(
                 243.04
@@ -239,7 +241,9 @@ class ConversionFunctions:
         )
 
     def absolute_humidity(self, temp, humidity):
-        """Returns Absolute Humidity.  Grams of water per cubic meter of air (g/m^3)
+        """Return Absolute Humidity.
+
+        Grams of water per cubic meter of air (g/m^3)
         Input:
             Temperature in Celcius
             Relative Humidity in percent
@@ -260,7 +264,8 @@ class ConversionFunctions:
         AH = (1320.65 / TK) * RH * (10 ** ((7.4475 * (TK - 273.14)) / (TK - 39.44)))
 
         """
-        # lf/ft^3 is too small a value for that unit, will pass metric units just like Solar Radiation
+        # lf/ft^3 is too small a value for that unit, will pass metric units
+        # just like Solar Radiation
         # Leaving conversion here for future reference
         if self._unit_system == UNITS_IMPERIAL:
             # (g/m^3 * 0.000062) converts to lb/ft^3
@@ -269,13 +274,14 @@ class ConversionFunctions:
         return round(AH, 2)
 
     def rain_rate(self, value):
-        """Returns rain rate per hour."""
+        """Return rain rate per hour."""
         if not value:
             return 0
         return self.rain(value * 60)
 
     def rain_intensity(self, rain_rate) -> str:
-        """Returns a descriptive value of the rain rate.
+        """Return a descriptive value of the rain rate.
+
         VERY LIGHT: < 0.25 mm/hour
         LIGHT: ≥ 0.25, < 1.0 mm/hour
         MODERATE: ≥ 1.0, < 4.0 mm/hour
@@ -301,7 +307,7 @@ class ConversionFunctions:
         return self.translations["rain_intensity"][intensity]
 
     def feels_like(self, temperature, humidity, windspeed):
-        """Calculates the feel like temperature."""
+        """Calculate feel like temperature."""
         if temperature is None or humidity is None or windspeed is None:
             return 0
 
@@ -312,14 +318,15 @@ class ConversionFunctions:
         return self.temperature(feelslike_c)
 
     def average_bearing(self, bearing_arr) -> int:
-        """Returns the average Wind Bearing from an array of bearings."""
+        """Return average Wind Bearing from an array of bearings."""
         mean_angle = degrees(
             phase(sum(rect(1, radians(d)) for d in bearing_arr) / len(bearing_arr))
         )
         return int(abs(mean_angle))
 
     def visibility(self, elevation, temp, humidity):
-        """Returns the visibility.
+        """Return the visibility.
+
         Input:
             Elevation in Meters
             Temperature in Celcius
@@ -354,12 +361,14 @@ class ConversionFunctions:
         vis = float(mv * pr)
 
         if self.unit_system == UNITS_IMPERIAL:
-            # Originally was in nautical miles; HA displays miles as imperial, therfore converted to miles
+            # Originally was in nautical miles;
+            # HA displays miles as imperial, therfore converted to miles
             return round(vis / 1.609344, 1)
         return round(vis, 1)
 
     def wetbulb(self, temp, humidity, pressure, no_conversion=False):
-        """Returns the Wet Bulb Temperature.
+        """Return Wet Bulb Temperature.
+
         Converted from a JS formula made by Gary W Funk
         Input:
             Temperature in Celcius
@@ -410,7 +419,8 @@ class ConversionFunctions:
         return self.temperature(twguess)
 
     def wbgt(self, temp, humidity, pressure, solar_radiation):
-        """Returns the Wet Bulb Globe Temperature.
+        """Return Wet Bulb Globe Temperature.
+
         This is a way to show heat stress on the human body.
         Input:
             Temperature in Celcius
@@ -433,7 +443,6 @@ class ConversionFunctions:
             Rh is Relative Humidity in %
         WBGT = 0.7Twb + 0.002996SR + 0.3368Ta -0.01578Rh - 0.5478
         """
-
         if (
             temp is None
             or humidity is None
@@ -455,7 +464,7 @@ class ConversionFunctions:
         return wbgt
 
     def delta_t(self, temp, humidity, pressure):
-        """Returns Delta T temperature."""
+        """Return Delta T temperature."""
         if temp is None or humidity is None or pressure is None:
             return None
 
@@ -468,7 +477,8 @@ class ConversionFunctions:
         return round(deltat, 1)
 
     def battery_level(self, battery, is_tempest):
-        """Returns the battery percentage.
+        """Return battery percentage.
+
         Input:
             Voltage in Volts DC (depends on the weather station type, see below)
             is_tempest in Boolean
@@ -480,13 +490,15 @@ class ConversionFunctions:
         Air:
             # data["battery_level"] = cnv.battery_level(obs[6])
             4 AA batteries (2 in series, then parallel for 2 sets)
-            Battery voltage range is 1.2(x2) => 2.4 to 1.8(x2) => 3.6 Vdc (lowered to 3.5 based on observation)
+            Battery voltage range is 1.2(x2) => 2.4 to 1.8(x2) => 3.6 Vdc
+            (lowered to 3.5 based on observation)
                 > 3.5 is capped at 100%
                 < 2.4 is capped at 0%
         Sky:
             # data["battery_level"] = cnv.battery_level(obs[8])
             8 AA batteries (2 in series, then parallel for 4 sets)
-            Battery voltage range is 1.2(x2) => 2.4 to 1.8(x2) => 3.6 Vdc (lowered to 3.5 based on observation)
+            Battery voltage range is 1.2(x2) => 2.4 to 1.8(x2) => 3.6 Vdc
+            (lowered to 3.5 based on observation)
                 > 3.5 is capped at 100%
                 < 2.4 is capped at 0%
         """
@@ -519,7 +531,8 @@ class ConversionFunctions:
         return pb
 
     def battery_mode(self, voltage, solar_radiation):
-        """Returns the battery operating mode.
+        """Return battery operating mode.
+
         Input:
             Voltage in Volts DC (depends on the weather station type, see below)
             is_tempest in Boolean
@@ -569,8 +582,7 @@ class ConversionFunctions:
         return batt_mode, mode_description
 
     def beaufort(self, wind_speed):
-        """Returns the Beaufort Scale value based on Wind Speed."""
-
+        """Return Beaufort Scale value based on Wind Speed."""
         if wind_speed is None:
             return 0, self.translations["beaufort"][str(0)]
 
@@ -606,7 +618,7 @@ class ConversionFunctions:
         return bft_value, bft_text
 
     def dewpoint_level(self, dewpoint_c):
-        """Returns a text based comfort level, based on dewpoint F value."""
+        """Return text based comfort level, based on dewpoint F value."""
         if dewpoint_c is None:
             return "no-data"
 
@@ -639,7 +651,7 @@ class ConversionFunctions:
         return self.translations["dewpoint"]["undefined"]
 
     def temperature_level(self, temperature_c):
-        """Returns a text based comfort level, based on Air Temperature value."""
+        """Return text based comfort level, based on Air Temperature value."""
         if temperature_c is None:
             return "no-data"
 
@@ -669,8 +681,7 @@ class ConversionFunctions:
         return self.translations["temperature"]["undefined"]
 
     def uv_level(self, uvi):
-        """Returns a text based UV Description."""
-
+        """Return text based UV Description."""
         if uvi is None:
             return "no-data"
 

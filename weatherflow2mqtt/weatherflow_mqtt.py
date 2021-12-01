@@ -1,4 +1,7 @@
-"""Program listening to the UDP Broadcast from a WeatherFlow Weather Station and publishing sensor data to MQTT."""
+"""Program listening to the UDP Broadcast.
+
+from a WeatherFlow Weather Station and publishing sensor data to MQTT.
+"""
 from __future__ import annotations
 
 import asyncio
@@ -42,7 +45,6 @@ from .const import (
     SENSOR_EXTRA_ATT,
     SENSOR_ICON,
     SENSOR_ID,
-    SENSOR_LAST_RESET,
     SENSOR_NAME,
     SENSOR_SHOW_MIN_ATT,
     SENSOR_STATE_CLASS,
@@ -147,6 +149,7 @@ class WeatherFlowMqtt:
         self.storage = self.sql.readStorage()
 
     async def connect(self) -> None:
+        """Connect to MQTT and UDP."""
         if self.mqtt_client is None:
             self._setup_mqtt_client()
 
@@ -177,7 +180,7 @@ class WeatherFlowMqtt:
             sys.exit(1)
 
     def _setup_mqtt_client(self) -> MqttClient:
-        """Setup the MQTT client."""
+        """Initialize MQTT client."""
         if (
             anonymous := not self.mqtt_config.username or not self.mqtt_config.password
         ) and self.mqtt_config.debug:
@@ -201,7 +204,7 @@ class WeatherFlowMqtt:
     async def setup_sensors(
         self, filter_sensors: list[str] | None, invert_filter: bool
     ):
-        """Setup the Sensors in Home Assistant."""
+        """Create Sensors in Home Assistant."""
         # Get Hub Information
         while True:
             data, (host, port) = await self.endpoint.receive()
@@ -252,9 +255,6 @@ class WeatherFlowMqtt:
             discovery_topic = "homeassistant/sensor/{}/{}/config".format(
                 DOMAIN, sensor[SENSOR_ID]
             )
-            last_reset_topic = "homeassistant/sensor/{}/{}/last_reset_topic".format(
-                DOMAIN, sensor[SENSOR_ID]
-            )
             highlow_topic = "homeassistant/sensor/{}/{}/attributes".format(
                 DOMAIN, EVENT_HIGH_LOW
             )
@@ -283,9 +283,6 @@ class WeatherFlowMqtt:
                     sensor[SENSOR_ID]
                 )
                 payload["json_attributes_topic"] = attr_topic
-                # if sensor[SENSOR_LAST_RESET]:
-                #     payload["last_reset_topic"] = state_topic
-                #     payload["last_reset_value_template"] = "{{ value_json.last_reset_midnight }}"
                 payload["device"] = {
                     "identifiers": ["WeatherFlow_{}".format(serial_number)],
                     "connections": [["mac", serial_number]],
@@ -400,6 +397,7 @@ class WeatherFlowMqtt:
                 break
 
     async def listen(self) -> None:
+        """Data update loop."""
         data, (host, port) = await self.endpoint.receive()
         json_response = json.loads(data.decode("utf-8"))
         msg_type = json_response.get("type")
@@ -770,6 +768,7 @@ class WeatherFlowMqtt:
 
 
 async def main():
+    """Entry point for program."""
     logging.basicConfig(level=logging.INFO)
 
     if is_supervisor := truebool(os.getenv("HA_SUPERVISOR")):

@@ -222,8 +222,7 @@ class Forecast:
         return None, None
 
     async def async_request(self, method: str, endpoint: str) -> dict[str, Any]:
-        """Make a request against the SmartWeather API."""
-
+        """Request data from the WeatherFlow API."""
         use_running_session = self._session and not self._session.closed
 
         if use_running_session:
@@ -236,7 +235,7 @@ class Forecast:
                 resp.raise_for_status()
                 data = await resp.json()
                 return data
-        except asyncio.TimeoutError as timeout_err:
+        except asyncio.TimeoutError:
             _LOGGER.debug("Request to endpoint timed out: %s", endpoint)
         except ClientError as err:
             if "Unauthorized" in str(err):
@@ -253,7 +252,7 @@ class Forecast:
                 await session.close()
 
     def ha_condition_value(self, value: str) -> str | None:
-        """Returns the Home Assistant Condition."""
+        """Return Home Assistant Condition."""
         try:
             return next(
                 (k for k, v in CONDITION_CLASSES.items() if value in v),
