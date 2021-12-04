@@ -1,7 +1,7 @@
 """Several Helper Functions."""
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import json
 import logging
 import math
@@ -9,7 +9,6 @@ from cmath import phase, rect
 from math import degrees, radians
 from typing import Any
 
-import pytz
 import yaml
 
 from .const import (
@@ -20,7 +19,7 @@ from .const import (
     UNITS_IMPERIAL,
 )
 
-UTC = pytz.utc
+UTC = dt.timezone.utc
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -702,7 +701,7 @@ class ConversionFunctions:
         """Humanize Time in Seconds."""
         if value is None:
             return "None"
-        return str(datetime.timedelta(seconds=value))
+        return str(dt.timedelta(seconds=value))
 
     def device_status(self, value):
         """Return device status as string."""
@@ -717,15 +716,23 @@ class ConversionFunctions:
 
         return failed
 
-    def utc_from_timestamp(self, timestamp: float) -> datetime.datetime:
+    def utc_from_timestamp(self, timestamp: int) -> str:
         """Return a UTC time from a timestamp."""
-        return UTC.localize(datetime.datetime.utcfromtimestamp(timestamp))
+        if timestamp is None:
+            return None
+
+        dt_obj = dt.datetime.utcfromtimestamp(timestamp).replace(tzinfo=UTC)
+        utc_offset = dt_obj.strftime("%z")
+        utc_string = f"{utc_offset[:3]}:{utc_offset[3:]}"
+        dt_str = dt_obj.strftime("%Y-%m-%dT%H:%M:%S")
+
+        return f"{dt_str}{utc_string}"
 
     def utc_last_midnight(self) -> str:
         """Return UTC Time for last midnight."""
-        midnight = datetime.datetime.combine(
-            datetime.datetime.today(), datetime.time.min
+        midnight = dt.datetime.combine(
+            dt.datetime.today(), dt.time.min
         )
-        midnight_ts = datetime.datetime.timestamp(midnight)
+        midnight_ts = dt.datetime.timestamp(midnight)
         midnight_dt = self.utc_from_timestamp(midnight_ts)
-        return midnight_dt.isoformat()
+        return midnight_dt

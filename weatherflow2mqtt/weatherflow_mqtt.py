@@ -110,13 +110,13 @@ class WeatherFlowMqtt:
         self.unit_system = unit_system
         self.rapid_wind_interval = rapid_wind_interval
 
-        self.conversions = ConversionFunctions(unit_system, language)
+        self.cnv = ConversionFunctions(unit_system, language)
 
         self.mqtt_config = mqtt_config
         self.udp_config = udp_config
 
         self.forecast = (
-            Forecast.from_config(config=forecast_config, conversions=self.conversions)
+            Forecast.from_config(config=forecast_config, conversions=self.cnv)
             if forecast_config is not None
             else None
         )
@@ -130,7 +130,7 @@ class WeatherFlowMqtt:
         self.forecast_last_run = 1621229580.583215  # A time in the past
         self.high_low_last_run = 1621229580.583215  # A time in the past
         self.current_day = datetime.today().weekday()
-        self.last_midnight = self.conversions.utc_last_midnight()
+        self.last_midnight = self.cnv.utc_last_midnight()
 
         # Read stored Values and set variable values
         self.wind_speed = None
@@ -411,7 +411,7 @@ class WeatherFlowMqtt:
             self.storage["rain_today"] = 0
             self.storage["rain_duration_today"] = 0
             self.storage["lightning_count_today"] = 0
-            self.last_midnight = self.conversions.utc_last_midnight()
+            self.last_midnight = self.cnv.utc_last_midnight()
             self.sql.writeStorage(self.storage)
             self.sql.dailyHousekeeping()
             self.current_day = datetime.today().weekday()
@@ -454,14 +454,14 @@ class WeatherFlowMqtt:
                 now = datetime.now().timestamp()
                 if (now - self.rapid_last_run) >= self.rapid_wind_interval:
                     obs = json_response["ob"]
-                    data["wind_speed"] = self.conversions.speed(obs[1])
+                    data["wind_speed"] = self.cnv.speed(obs[1])
                     data["wind_bearing"] = obs[2]
-                    data["wind_direction"] = self.conversions.direction(obs[2])
+                    data["wind_direction"] = self.cnv.direction(obs[2])
                     self.wind_speed = obs[1]
                     await self.publish_mqtt(state_topic, json.dumps(data), retain=False)
                     self.rapid_last_run = datetime.now().timestamp()
             elif msg_type in EVENT_HUB_STATUS:
-                data["hub_status"] = self.conversions.humanize_time(
+                data["hub_status"] = self.cnv.humanize_time(
                     json_response.get("uptime")
                 )
                 await self.publish_mqtt(state_topic, json.dumps(data), retain=False)
@@ -488,7 +488,7 @@ class WeatherFlowMqtt:
                 obs = json_response["evt"]
                 self.sql.writeLightning()
                 self.storage["lightning_count_today"] += 1
-                self.storage["last_lightning_distance"] = self.conversions.distance(
+                self.storage["last_lightning_distance"] = self.cnv.distance(
                     obs[1]
                 )
                 self.storage["last_lightning_energy"] = obs[2]
@@ -496,8 +496,8 @@ class WeatherFlowMqtt:
                 self.sql.writeStorage(self.storage)
             elif msg_type in EVENT_AIR_DATA:
                 obs = json_response["obs"][0]
-                data["station_pressure"] = self.conversions.pressure(obs[1])
-                data["air_temperature"] = self.conversions.temperature(obs[2])
+                data["station_pressure"] = self.cnv.pressure(obs[1])
+                data["air_temperature"] = self.cnv.temperature(obs[2])
                 data["relative_humidity"] = obs[3]
                 data["lightning_strike_count"] = obs[4]
                 data["lightning_strike_count_1hr"] = self.sql.readLightningCount(1)
@@ -509,14 +509,14 @@ class WeatherFlowMqtt:
                     "last_lightning_distance"
                 ]
                 data["lightning_strike_energy"] = self.storage["last_lightning_energy"]
-                data["lightning_strike_time"] = datetime.fromtimestamp(
+                data["lightning_strike_time"] = self.cnv.utc_from_timestamp(
                     self.storage["last_lightning_time"]
-                ).isoformat()
+                )
                 data["battery_air"] = round(obs[6], 2)
-                data["battery_level_air"] = self.conversions.battery_level(
+                data["battery_level_air"] = self.cnv.battery_level(
                     obs[6], False
                 )
-                data["sealevel_pressure"] = self.conversions.sea_level_pressure(
+                data["sealevel_pressure"] = self.cnv.sea_level_pressure(
                     obs[1], self.elevation
                 )
                 trend_text, trend_value = self.sql.readPressureTrend(
@@ -524,26 +524,26 @@ class WeatherFlowMqtt:
                 )
                 data["pressure_trend"] = trend_text
                 data["pressure_trend_value"] = trend_value
-                data["air_density"] = self.conversions.air_density(obs[2], obs[1])
-                data["dewpoint"] = self.conversions.dewpoint(obs[2], obs[3])
-                data["feelslike"] = self.conversions.feels_like(
+                data["air_density"] = self.cnv.air_density(obs[2], obs[1])
+                data["dewpoint"] = self.cnv.dewpoint(obs[2], obs[3])
+                data["feelslike"] = self.cnv.feels_like(
                     obs[2], obs[3], self.wind_speed
                 )
-                data["wetbulb"] = self.conversions.wetbulb(obs[2], obs[3], obs[1])
-                data["delta_t"] = self.conversions.delta_t(obs[2], obs[3], obs[1])
-                data["dewpoint_description"] = self.conversions.dewpoint_level(
+                data["wetbulb"] = self.cnv.wetbulb(obs[2], obs[3], obs[1])
+                data["delta_t"] = self.cnv.delta_t(obs[2], obs[3], obs[1])
+                data["dewpoint_description"] = self.cnv.dewpoint_level(
                     data["dewpoint"]
                 )
-                data["temperature_description"] = self.conversions.temperature_level(
+                data["temperature_description"] = self.cnv.temperature_level(
                     obs[2]
                 )
-                data["visibility"] = self.conversions.visibility(
+                data["visibility"] = self.cnv.visibility(
                     self.elevation, obs[2], obs[3]
                 )
-                data["absolute_humidity"] = self.conversions.absolute_humidity(
+                data["absolute_humidity"] = self.cnv.absolute_humidity(
                     obs[2], obs[3]
                 )
-                data["wbgt"] = self.conversions.wbgt(
+                data["wbgt"] = self.cnv.wbgt(
                     obs[2], obs[3], obs[1], self.solar_radiation
                 )
                 data["last_reset_midnight"] = self.last_midnight
@@ -557,32 +557,32 @@ class WeatherFlowMqtt:
                 data["illuminance"] = obs[1]
                 data["uv"] = obs[2]
                 self.storage["rain_today"] += obs[3]
-                data["rain_today"] = self.conversions.rain(self.storage["rain_today"])
-                data["rain_yesterday"] = self.conversions.rain(
+                data["rain_today"] = self.cnv.rain(self.storage["rain_today"])
+                data["rain_yesterday"] = self.cnv.rain(
                     self.storage["rain_yesterday"]
                 )
                 data["rain_duration_today"] = self.storage["rain_duration_today"]
                 data["rain_duration_yesterday"] = self.storage[
                     "rain_duration_yesterday"
                 ]
-                data["rain_start_time"] = datetime.fromtimestamp(
+                data["rain_start_time"] = self.cnv.utc_from_timestamp(
                     self.storage["rain_start"]
-                ).isoformat()
-                data["wind_lull"] = self.conversions.speed(obs[4])
-                data["wind_speed_avg"] = self.conversions.speed(obs[5])
-                data["wind_gust"] = self.conversions.speed(obs[6])
+                )
+                data["wind_lull"] = self.cnv.speed(obs[4])
+                data["wind_speed_avg"] = self.cnv.speed(obs[5])
+                data["wind_gust"] = self.cnv.speed(obs[6])
                 data["wind_bearing_avg"] = obs[7]
-                data["wind_direction_avg"] = self.conversions.direction(obs[7])
+                data["wind_direction_avg"] = self.cnv.direction(obs[7])
                 data["battery"] = round(obs[8], 2)
-                data["battery_level_sky"] = self.conversions.battery_level(
+                data["battery_level_sky"] = self.cnv.battery_level(
                     obs[8], False
                 )
                 self.solar_radiation = obs[10]
                 data["solar_radiation"] = obs[10]
-                data["precipitation_type"] = self.conversions.rain_type(obs[12])
-                data["rain_rate"] = self.conversions.rain_rate(obs[3])
-                data["uv_description"] = self.conversions.uv_level(obs[2])
-                bft_value, bft_text = self.conversions.beaufort(obs[5])
+                data["precipitation_type"] = self.cnv.rain_type(obs[12])
+                data["rain_rate"] = self.cnv.rain_rate(obs[3])
+                data["uv_description"] = self.cnv.uv_level(obs[2])
+                bft_value, bft_text = self.cnv.beaufort(obs[5])
                 data["beaufort"] = bft_value
                 data["beaufort_text"] = bft_text
                 data["last_reset_midnight"] = self.last_midnight
@@ -599,40 +599,40 @@ class WeatherFlowMqtt:
                 state_topic = "homeassistant/sensor/{}/{}/state".format(
                     DOMAIN, EVENT_SKY_DATA
                 )
-                data["wind_lull"] = self.conversions.speed(obs[1])
-                data["wind_speed_avg"] = self.conversions.speed(obs[2])
-                data["wind_gust"] = self.conversions.speed(obs[3])
+                data["wind_lull"] = self.cnv.speed(obs[1])
+                data["wind_speed_avg"] = self.cnv.speed(obs[2])
+                data["wind_gust"] = self.cnv.speed(obs[3])
                 data["wind_bearing_avg"] = obs[4]
-                data["wind_direction_avg"] = self.conversions.direction(obs[4])
+                data["wind_direction_avg"] = self.cnv.direction(obs[4])
                 data["illuminance"] = obs[9]
                 data["uv"] = obs[10]
                 data["solar_radiation"] = obs[11]
                 self.storage["rain_today"] += obs[12]
-                data["rain_today"] = self.conversions.rain(self.storage["rain_today"])
-                data["rain_yesterday"] = self.conversions.rain(
+                data["rain_today"] = self.cnv.rain(self.storage["rain_today"])
+                data["rain_yesterday"] = self.cnv.rain(
                     self.storage["rain_yesterday"]
                 )
                 data["rain_duration_today"] = self.storage["rain_duration_today"]
                 data["rain_duration_yesterday"] = self.storage[
                     "rain_duration_yesterday"
                 ]
-                data["rain_start_time"] = datetime.fromtimestamp(
+                data["rain_start_time"] = self.cnv.utc_from_timestamp(
                     self.storage["rain_start"]
-                ).isoformat()
-                data["precipitation_type"] = self.conversions.rain_type(obs[13])
+                )
+                data["precipitation_type"] = self.cnv.rain_type(obs[13])
                 data["battery"] = round(obs[16], 2)
-                data["battery_level_tempest"] = self.conversions.battery_level(
+                data["battery_level_tempest"] = self.cnv.battery_level(
                     obs[16], True
                 )
-                bat_mode, bat_desc = self.conversions.battery_mode(obs[16], obs[11])
+                bat_mode, bat_desc = self.cnv.battery_mode(obs[16], obs[11])
                 data["battery_mode"] = bat_mode
                 data["battery_desc"] = bat_desc
-                data["rain_rate"] = self.conversions.rain_rate(obs[12])
-                data["rain_intensity"] = self.conversions.rain_intensity(
+                data["rain_rate"] = self.cnv.rain_rate(obs[12])
+                data["rain_intensity"] = self.cnv.rain_intensity(
                     data["rain_rate"]
                 )
-                data["uv_description"] = self.conversions.uv_level(obs[10])
-                bft_value, bft_text = self.conversions.beaufort(obs[2])
+                data["uv_description"] = self.cnv.uv_level(obs[10])
+                bft_value, bft_text = self.cnv.beaufort(obs[2])
                 data["beaufort"] = bft_value
                 data["beaufort_text"] = bft_text
                 data["last_reset_midnight"] = self.last_midnight
@@ -645,8 +645,8 @@ class WeatherFlowMqtt:
                     DOMAIN, EVENT_AIR_DATA
                 )
                 data = OrderedDict()
-                data["station_pressure"] = self.conversions.pressure(obs[6])
-                data["air_temperature"] = self.conversions.temperature(obs[7])
+                data["station_pressure"] = self.cnv.pressure(obs[6])
+                data["air_temperature"] = self.cnv.temperature(obs[7])
                 data["relative_humidity"] = obs[8]
                 data["lightning_strike_count"] = obs[15]
                 data["lightning_strike_count_1hr"] = self.sql.readLightningCount(1)
@@ -658,35 +658,35 @@ class WeatherFlowMqtt:
                     "last_lightning_distance"
                 ]
                 data["lightning_strike_energy"] = self.storage["last_lightning_energy"]
-                data["lightning_strike_time"] = datetime.fromtimestamp(
+                data["lightning_strike_time"] = self.cnv.utc_from_timestamp(
                     self.storage["last_lightning_time"]
-                ).isoformat()
-                data["sealevel_pressure"] = self.conversions.sea_level_pressure(
+                )
+                data["sealevel_pressure"] = self.cnv.sea_level_pressure(
                     obs[6], self.elevation
                 )
                 trend_text, trend_value = self.sql.readPressureTrend(
-                    data["sealevel_pressure"], self.conversions.translations
+                    data["sealevel_pressure"], self.cnv.translations
                 )
                 data["pressure_trend"] = trend_text
                 data["pressure_trend_value"] = trend_value
-                data["air_density"] = self.conversions.air_density(obs[7], obs[6])
-                data["dewpoint"] = self.conversions.dewpoint(obs[7], obs[8])
-                data["feelslike"] = self.conversions.feels_like(
+                data["air_density"] = self.cnv.air_density(obs[7], obs[6])
+                data["dewpoint"] = self.cnv.dewpoint(obs[7], obs[8])
+                data["feelslike"] = self.cnv.feels_like(
                     obs[7], obs[8], self.wind_speed
                 )
-                data["wetbulb"] = self.conversions.wetbulb(obs[7], obs[8], obs[6])
-                data["delta_t"] = self.conversions.delta_t(obs[7], obs[8], obs[6])
-                data["visibility"] = self.conversions.visibility(
+                data["wetbulb"] = self.cnv.wetbulb(obs[7], obs[8], obs[6])
+                data["delta_t"] = self.cnv.delta_t(obs[7], obs[8], obs[6])
+                data["visibility"] = self.cnv.visibility(
                     self.elevation, obs[7], obs[8]
                 )
-                data["absolute_humidity"] = self.conversions.absolute_humidity(
+                data["absolute_humidity"] = self.cnv.absolute_humidity(
                     obs[7], obs[8]
                 )
-                data["wbgt"] = self.conversions.wbgt(obs[7], obs[8], obs[6], obs[11])
-                data["dewpoint_description"] = self.conversions.dewpoint_level(
+                data["wbgt"] = self.cnv.wbgt(obs[7], obs[8], obs[6], obs[11])
+                data["dewpoint_description"] = self.cnv.dewpoint_level(
                     data["dewpoint"]
                 )
-                data["temperature_description"] = self.conversions.temperature_level(
+                data["temperature_description"] = self.cnv.temperature_level(
                     obs[7]
                 )
                 data["last_reset_midnight"] = self.last_midnight
@@ -704,12 +704,12 @@ class WeatherFlowMqtt:
                 serial_number = json_response.get("serial_number")
                 firmware_revision = json_response.get("firmware_revision")
                 voltage = json_response.get("voltage")
-                uptime = self.conversions.humanize_time(json_response.get("uptime"))
+                uptime = self.cnv.humanize_time(json_response.get("uptime"))
                 sensor_status = json_response.get("sensor_status")
 
                 device_status = None
                 if sensor_status is not None and sensor_status != 0:
-                    device_status = self.conversions.device_status(sensor_status)
+                    device_status = self.cnv.device_status(sensor_status)
                     if device_status:  # and show_debug:
                         _LOGGER.debug(
                             "Device %s has reported a sensor fault. Reason: %s",
