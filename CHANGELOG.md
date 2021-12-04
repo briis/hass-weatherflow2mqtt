@@ -1,21 +1,31 @@
 # Change Log
+
 All notable changes to this project will be documented in this file.
+
+## [2.2.5] - 2021-12-04
+
+### Fixed
+
+- With HA V2021.12 all date and time values need to be in utc time with timezone information. #105
 
 ## [2.2.4] - 2021-11-20
 
 ### Changed
+
 - @natekspencer did inital work to implement a easier to manage class structure to ease future development.
 - **BREAKING CHANGE** If you run the Non-Supervised mode of the program, you must make a change in your docker configuration to ensure you point to the same data directory as before. Change this `-v $(pwd): /usr/local/config` to this `-v $(pwd): /data`
 
 ## [2.2.3] - 2021-11-17
 
 ### Changed
+
 - @natekspencer optimized the unit conversion code.
 - New Logos for the Home Assistant Add-On
 
 ## [2.2.2] - 2021-11-15
 
 ### Changed
+
 - Issue #93. A user reported that Temperature sensors creates an error when being exported to `homekit`. This is not a consistent error, but might be due to unicoding of the degree symbol. The `unit_of_measurement` value has now been changed so that it reflects the constants from Home Assistant.
 
 ## [2.2.1] - 2021-11-13
