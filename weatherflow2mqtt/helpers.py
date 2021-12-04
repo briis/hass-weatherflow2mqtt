@@ -453,7 +453,7 @@ class ConversionFunctions:
         ta = float(temp)
         twb = self.wetbulb(temp, humidity, pressure, True)
         rh = float(humidity)
-        p = float(pressure)
+        # p = float(pressure)
         sr = float(solar_radiation)
 
         wbgt = round(0.7 * twb + 0.002996 * sr + 0.3368 * ta - 0.01578 * rh - 0.5478, 1)
@@ -721,6 +721,7 @@ class ConversionFunctions:
         if timestamp is None:
             return None
 
+        # Convert to String as MQTT does not like data objects
         dt_obj = dt.datetime.utcfromtimestamp(timestamp).replace(tzinfo=UTC)
         utc_offset = dt_obj.strftime("%z")
         utc_string = f"{utc_offset[:3]}:{utc_offset[3:]}"

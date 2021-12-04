@@ -144,11 +144,9 @@ class Forecast:
                 sum_wind_bearing = sum(wind_bearing) / len(wind_bearing) % 360
 
                 item = {
-                    ATTR_FORECAST_TIME: datetime.utcfromtimestamp(
+                    ATTR_FORECAST_TIME: self.conversions.utc_from_timestamp(
                         row["day_start_local"]
-                    )
-                    .replace(tzinfo=UTC)
-                    .isoformat(),
+                    ),
                     "conditions": row["conditions"],
                     ATTR_FORECAST_CONDITION: self.ha_condition_value(row["icon"]),
                     ATTR_FORECAST_TEMP: self.conversions.temperature(
@@ -181,9 +179,7 @@ class Forecast:
                     continue
 
                 item = {
-                    ATTR_FORECAST_TIME: datetime.utcfromtimestamp(row["time"])
-                    .replace(tzinfo=UTC)
-                    .isoformat(),
+                    ATTR_FORECAST_TIME: self.conversions.utc_from_timestamp(row["time"]),
                     "conditions": row["conditions"],
                     ATTR_FORECAST_CONDITION: self.ha_condition_value(row.get("icon")),
                     ATTR_FORECAST_TEMP: self.conversions.temperature(
