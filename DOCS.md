@@ -10,17 +10,13 @@ To install the add-on, first follow the installation steps from the [README on G
 
 ## Configuration
 
-### Option: `TEMPEST_DEVICE`: (default: True)
-
-If you have a Tempest Weather Station set this to True. If False, the program will assume you have the older AIR and SKY units. Default is *True*
-
 ### Option: `ELEVATION`: (default: Home Assistant Elevation)
 
-Set the height above sea level for where the station is placed. This is used when calculating some of the sensor values. Station elevation plus Device height above ground. The value has to be in meters (`meters = feet * 0.3048`). Default is *Home Assistant Elevation*
+Set the height above sea level for where the station is placed. This is used when calculating some of the sensor values. Station elevation plus Device height above ground. The value has to be in meters (`meters = feet * 0.3048`). Default is _Home Assistant Elevation_
 
 ### Option: `RAPID_WIND_INTERVAL`: (default: 0)
 
-The weather stations delivers wind speed and bearing every 2 seconds. If you don't want to update the HA sensors so often, you can set a number here (in seconds), for how often they are updated. Default is *0*, which means data are updated when received from the station.
+The weather stations delivers wind speed and bearing every 2 seconds. If you don't want to update the HA sensors so often, you can set a number here (in seconds), for how often they are updated. Default is _0_, which means data are updated when received from the station.
 
 ### Option: `STATION_ID`: (default: None)
 
@@ -52,7 +48,7 @@ The IP address of your mqtt server. Even though you have the MQTT Server on the 
 
 ### Option: `MQTT_PORT`: (default: 1883)
 
-The Port for your mqtt server. Default value is *1883*
+The Port for your mqtt server. Default value is _1883_
 
 ### Option: `MQTT_USERNAME`: (default: Installed MQTT Add-On username)
 
@@ -68,11 +64,11 @@ Set this to True, to get some more mqtt debugging messages in the Container log 
 
 ### Option: `WF_HOST`: (default: 0.0.0.0)
 
-Unless you have a very special IP setup or the Weatherflow hub is on a different network, you should not change this. Default is *0.0.0.0*
+Unless you have a very special IP setup or the Weatherflow hub is on a different network, you should not change this. Default is _0.0.0.0_
 
 ### Option: `WF_PORT`: (default: 50222)
 
-Weatherflow always broadcasts on port 50222/udp, so don't change this. Default is *50222*
+Weatherflow always broadcasts on port 50222/udp, so don't change this. Default is _50222_
 
 ### Option: `DEBUG`: (default: False)
 

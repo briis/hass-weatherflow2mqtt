@@ -5,7 +5,6 @@ services:
     restart: unless-stopped
     environment:
       - TZ=America/Los_Angeles
-      - TEMPEST_DEVICE=True
       - UNIT_SYSTEM=imperial
       - LANGUAGE=en
       - RAPID_WIND_INTERVAL=0

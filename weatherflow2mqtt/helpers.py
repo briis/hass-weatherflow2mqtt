@@ -13,15 +13,19 @@ import yaml
 
 from .const import (
     BATTERY_MODE_DESCRIPTION,
-    DEVICE_STATUS_MASKS,
     EXTERNAL_DIRECTORY,
     SUPPORTED_LANGUAGES,
     UNITS_IMPERIAL,
 )
 
-UTC = dt.timezone.utc
-
 _LOGGER = logging.getLogger(__name__)
+
+UTC = dt.timezone.utc
+NO_CONVERSION = object()
+
+
+def no_conversion_to_none(val: Any) -> Any | None:
+    return None if val is NO_CONVERSION else val
 
 
 def truebool(val: Any | None) -> bool:
@@ -57,7 +61,7 @@ class ConversionFunctions:
         self.unit_system = unit_system
         self.translations = self.get_language_file(language)
 
-    def get_language_file(self, language: str) -> dict[str, Any] | None:
+    def get_language_file(self, language: str) -> dict[str, dict[str, str]] | None:
         """Return the language file json array."""
         filename = (
             f"translations/{language if language in SUPPORTED_LANGUAGES else 'en'}.json"
@@ -166,26 +170,6 @@ class ConversionFunctions:
         ]
         direction_str = direction_array[int((value + 11.25) / 22.5)]
         return self.translations["wind_dir"][direction_str]
-
-    def air_density(self, temperature, station_pressure):
-        """Return Air Density."""
-        if temperature is not None and station_pressure is not None:
-            kelvin = temperature + 273.15
-            pressure = station_pressure
-            r_specific = 287.058
-            decimals = 2
-
-            air_dens = (pressure * 100) / (r_specific * kelvin)
-
-            if self.unit_system == UNITS_IMPERIAL:
-                air_dens = air_dens * 0.06243
-                decimals = 4
-
-            return round(air_dens, decimals)
-
-        _LOGGER.error(
-            "FUNC: air_density ERROR: Temperature or Pressure value was reported as NoneType. Check the sensor"
-        )
 
     def sea_level_pressure(self, station_press, elevation):
         """Return Sea Level pressure.
@@ -315,13 +299,6 @@ class ConversionFunctions:
         )
         feelslike_c = temperature + 0.348 * e_value - 0.7 * windspeed - 4.25
         return self.temperature(feelslike_c)
-
-    def average_bearing(self, bearing_arr) -> int:
-        """Return average Wind Bearing from an array of bearings."""
-        mean_angle = degrees(
-            phase(sum(rect(1, radians(d)) for d in bearing_arr) / len(bearing_arr))
-        )
-        return int(abs(mean_angle))
 
     def visibility(self, elevation, temp, humidity):
         """Return the visibility.
@@ -461,19 +438,6 @@ class ConversionFunctions:
         if self.unit_system == UNITS_IMPERIAL:
             return self.temperature(wbgt)
         return wbgt
-
-    def delta_t(self, temp, humidity, pressure):
-        """Return Delta T temperature."""
-        if temp is None or humidity is None or pressure is None:
-            return None
-
-        # Ensure both Wetbulb and Temperature is same unit system
-        wb = self.wetbulb(temp, humidity, pressure)
-        temp_u = self.temperature(temp)
-
-        deltat = temp_u - wb
-
-        return round(deltat, 1)
 
     def battery_level(self, battery, is_tempest):
         """Return battery percentage.
@@ -616,15 +580,15 @@ class ConversionFunctions:
 
         return bft_value, bft_text
 
-    def dewpoint_level(self, dewpoint_c):
+    def dewpoint_level(self, dewpoint: float, is_metric: bool = None) -> str:
         """Return text based comfort level, based on dewpoint F value."""
-        if dewpoint_c is None:
+        if dewpoint is None:
             return "no-data"
+        if is_metric is None:
+            is_metric = self.unit_system != UNITS_IMPERIAL
 
-        if self.unit_system == UNITS_IMPERIAL:
-            dewpoint = dewpoint_c
-        else:
-            dewpoint = (dewpoint_c * 9 / 5) + 32
+        if is_metric:
+            dewpoint = (dewpoint * 9 / 5) + 32
 
         if dewpoint >= 80:
             return self.translations["dewpoint"]["severely-high"]
@@ -696,25 +660,6 @@ class ConversionFunctions:
             return self.translations["uv"]["low"]
 
         return self.translations["uv"]["none"]
-
-    def humanize_time(self, value):
-        """Humanize Time in Seconds."""
-        if value is None:
-            return "None"
-        return str(dt.timedelta(seconds=value))
-
-    def device_status(self, value):
-        """Return device status as string."""
-        if value is None:
-            return
-
-        failed = []
-
-        for mask in DEVICE_STATUS_MASKS:
-            if mask & value:
-                failed.append(DEVICE_STATUS_MASKS[mask])
-
-        return failed
 
     def utc_from_timestamp(self, timestamp: int) -> str:
         """Return a UTC time from a timestamp."""
