@@ -142,7 +142,7 @@ class WeatherFlowMqtt:
 
         # Set timer variables
         self.rapid_last_run = 1621229580.583215  # A time in the past
-        self.forecast_last_run = 1621229580.583215  # A time in the past
+        self.forecast_last_run: float | None = None
         self.high_low_last_run = 1621229580.583215  # A time in the past
         self.current_day = datetime.today().weekday()
         self.last_midnight = self.cnv.utc_last_midnight()
@@ -218,23 +218,7 @@ class WeatherFlowMqtt:
             )
             self.high_low_last_run = datetime.now().timestamp()
 
-        # Update the Forecast if it is time and enabled
-        if (
-            self.forecast is not None
-            and ((now := datetime.now().timestamp()) - self.forecast_last_run)
-            >= self.forecast.interval * 60
-        ):
-            fcst_state_topic = MQTT_TOPIC_FORMAT.format(
-                DOMAIN, FORECAST_ENTITY, "state"
-            )
-            fcst_attr_topic = MQTT_TOPIC_FORMAT.format(
-                DOMAIN, FORECAST_ENTITY, "attributes"
-            )
-            condition_data, fcst_data = await self.forecast.update_forecast()
-            if condition_data is not None:
-                self._add_to_queue(fcst_state_topic, json.dumps(condition_data))
-                self._add_to_queue(fcst_attr_topic, json.dumps(fcst_data))
-            self.forecast_last_run = now
+        await self._update_forecast()
 
     def _add_to_queue(
         self, topic: str, payload: str | None = None, qos: int = 0, retain: bool = False
@@ -377,8 +361,10 @@ class WeatherFlowMqtt:
 
                     # Check if rounding is needed
                     if (
-                        decimals := sensor.decimals[1 if self.is_imperial else 0]
-                    ) is not None:
+                        attr is not None
+                        and (decimals := sensor.decimals[1 if self.is_imperial else 0])
+                        is not None
+                    ):
                         attr = round(attr, decimals)
 
                 elif isinstance(sensor, SqlSensorDescription):
@@ -633,6 +619,7 @@ class WeatherFlowMqtt:
             self._add_to_queue(attr_topic, json.dumps(attribution), qos=1, retain=True)
 
         if isinstance(device, HubDevice):
+            run_forecast = False
             fcst_state_topic = MQTT_TOPIC_FORMAT.format(
                 DOMAIN, FORECAST_ENTITY, "state"
             )
@@ -644,6 +631,7 @@ class WeatherFlowMqtt:
                 payload: OrderedDict | None = None
                 if self.forecast is not None:
                     _LOGGER.info("Setting up %s sensor: %s", device.model, sensor.name)
+                    run_forecast = True
                     payload = self._get_sensor_payload(
                         sensor=sensor,
                         device=device,
@@ -653,6 +641,9 @@ class WeatherFlowMqtt:
                 self._add_to_queue(
                     discovery_topic, json.dumps(payload or {}), qos=1, retain=True
                 )
+
+            if run_forecast:
+                asyncio.ensure_future(self._update_forecast())
 
         # cleanup obsolete sensors
         for sensor in OBSOLETE_SENSORS:
@@ -676,6 +667,29 @@ class WeatherFlowMqtt:
         except Exception as e:
             _LOGGER.error("Could not connect to MQTT Server. Error is: %s", e)
         await asyncio.sleep(0.01)
+
+    async def _update_forecast(self) -> None:
+        """Attempt to update the forecast."""
+        # Update the Forecast if it is time and enabled
+        if (
+            self.forecast is not None
+            and (
+                (now := datetime.now().timestamp())
+                - (0 if self.forecast_last_run is None else self.forecast_last_run)
+            )
+            >= self.forecast.interval * 60
+        ):
+            fcst_state_topic = MQTT_TOPIC_FORMAT.format(
+                DOMAIN, FORECAST_ENTITY, "state"
+            )
+            fcst_attr_topic = MQTT_TOPIC_FORMAT.format(
+                DOMAIN, FORECAST_ENTITY, "attributes"
+            )
+            condition_data, fcst_data = await self.forecast.update_forecast()
+            if condition_data is not None:
+                self._add_to_queue(fcst_state_topic, json.dumps(condition_data))
+                self._add_to_queue(fcst_attr_topic, json.dumps(fcst_data))
+                self.forecast_last_run = now
 
 
 async def main():
@@ -747,8 +761,8 @@ async def main():
 
     # Watch for message from the UDP socket
     while weatherflowmqtt.listener.is_listening:
-        await weatherflowmqtt.run_time_based_updates()
         await asyncio.sleep(60)
+        await weatherflowmqtt.run_time_based_updates()
 
 
 async def get_supervisor_configuration() -> dict[str, Any]:

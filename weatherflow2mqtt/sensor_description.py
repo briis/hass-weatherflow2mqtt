@@ -235,7 +235,9 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         event=EVENT_OBSERVATION,
         attr="air_temperature",
         decimals=(1, 1),
-        custom_fn=lambda cnv, device, wind_speed: cnv.feels_like(
+        custom_fn=lambda cnv, device, wind_speed: None
+        if wind_speed is None
+        else cnv.feels_like(
             device.air_temperature.m, device.relative_humidity.m, wind_speed
         ),
     ),
