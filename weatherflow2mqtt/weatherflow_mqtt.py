@@ -39,9 +39,7 @@ from pyweatherflowudp.event import (
 
 from .const import (
     ATTR_ATTRIBUTION,
-    ATTR_BRAND,
     ATTRIBUTION,
-    BRAND,
     DATABASE,
     DOMAIN,
     EVENT_HIGH_LOW,
@@ -49,6 +47,7 @@ from .const import (
     FORECAST_ENTITY,
     HIGH_LOW_TIMER,
     LANGUAGE_ENGLISH,
+    MANUFACTURER,
     TEMP_CELSIUS,
     UNITS_IMPERIAL,
     UNITS_METRIC,
@@ -300,7 +299,7 @@ class WeatherFlowMqtt:
         payload["json_attributes_topic"] = attr_topic
         payload["device"] = {
             "identifiers": [f"{DOMAIN}_{device.serial_number}"],
-            "manufacturer": "WeatherFlow",
+            "manufacturer": MANUFACTURER,
             "name": device.model,
             "model": device.model,
             "sw_version": device.firmware_revision,
@@ -436,9 +435,7 @@ class WeatherFlowMqtt:
         attr_topic = MQTT_TOPIC_FORMAT.format(device_serial, "status", "attributes")
         attr_data = OrderedDict()
         attr_data[ATTR_ATTRIBUTION] = ATTRIBUTION
-        attr_data[ATTR_BRAND] = BRAND
         attr_data["serial_number"] = device.serial_number
-        attr_data["firmware_revision"] = device.firmware_revision
         attr_data["rssi"] = device.rssi.m
 
         if isinstance(device, HubDevice):
@@ -529,7 +526,6 @@ class WeatherFlowMqtt:
     def _setup_sensors(self, device: WeatherFlowDevice) -> None:
         """Create Sensors in Home Assistant."""
         serial_number = device.serial_number
-        firmware = device.firmware_revision
         domain_serial = DEVICE_SERIAL_FORMAT.format(DOMAIN, serial_number)
 
         # Create the config for the Sensors
@@ -573,7 +569,6 @@ class WeatherFlowMqtt:
 
                 # Attributes
                 attribution[ATTR_ATTRIBUTION] = ATTRIBUTION
-                attribution[ATTR_BRAND] = BRAND
 
                 # Add description if needed
                 if sensor.has_description:
