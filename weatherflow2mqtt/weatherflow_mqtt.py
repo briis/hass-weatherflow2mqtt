@@ -37,7 +37,6 @@ from pyweatherflowudp.event import (
     WindEvent,
 )
 
-from .__version__ import VERSION
 from .const import (
     ATTR_ATTRIBUTION,
     ATTR_BRAND,
@@ -192,21 +191,6 @@ class WeatherFlowMqtt:
         self._queue = asyncio.Queue()
         self._queue_task = asyncio.ensure_future(self._mqtt_queue_processor())
 
-        fcst_state_topic = MQTT_TOPIC_FORMAT.format(DOMAIN, FORECAST_ENTITY, "state")
-        fcst_attr_topic = MQTT_TOPIC_FORMAT.format(
-            DOMAIN, FORECAST_ENTITY, "attributes"
-        )
-        for sensor in FORECAST_SENSORS:
-            discovery_topic = MQTT_TOPIC_FORMAT.format(DOMAIN, sensor.id, "config")
-            payload: OrderedDict | None = None
-            if self.forecast is not None:
-                payload = self._get_sensor_payload(
-                    sensor, DOMAIN, fcst_state_topic, fcst_attr_topic, VERSION
-                )
-            self._add_to_queue(
-                discovery_topic, json.dumps(payload or {}), qos=1, retain=True
-            )
-
     async def run_time_based_updates(self) -> None:
         """Data update loop."""
         # Run New day function if Midnight
@@ -294,16 +278,15 @@ class WeatherFlowMqtt:
     def _get_sensor_payload(
         self,
         sensor: BaseSensorDescription,
-        serial_number: str,
+        device: WeatherFlowDevice,
         state_topic: str,
         attr_topic: str,
-        firmware: str,
     ) -> OrderedDict:
         """Construct and return a sensor payload."""
         payload = OrderedDict()
 
         payload["name"] = f"WF {sensor.name}"
-        payload["unique_id"] = f"{serial_number}-{sensor.id}"
+        payload["unique_id"] = f"{device.serial_number}-{sensor.id}"
         if (units := sensor.unit_i if self.is_imperial else sensor.unit_m) is not None:
             payload["unit_of_measurement"] = units
         if (device_class := sensor.device_class) is not None:
@@ -316,12 +299,17 @@ class WeatherFlowMqtt:
         payload["value_template"] = f"{{{{ value_json.{sensor.id} }}}}"
         payload["json_attributes_topic"] = attr_topic
         payload["device"] = {
-            "identifiers": [f"WeatherFlow_{serial_number}"],
-            "connections": [["mac", serial_number]],
+            "identifiers": [f"{DOMAIN}_{device.serial_number}"],
             "manufacturer": "WeatherFlow",
-            "name": "WeatherFlow2MQTT",
-            "model": f"WeatherFlow Weather Station V{VERSION}",
-            "sw_version": firmware,
+            "name": device.model,
+            "model": device.model,
+            "sw_version": device.firmware_revision,
+            "suggested_area": "Backyard",
+            **(
+                {"via_device": f"{DOMAIN}_{device.serial_number}"}
+                if isinstance(device, WeatherFlowSensorDevice)
+                else {}
+            ),
         }
 
         return payload
@@ -573,12 +561,14 @@ class WeatherFlowMqtt:
             if self._filter_sensors is None or (
                 (sensor_id in self._filter_sensors) is not self._invert_filter
             ):
-                sensor_name = sensor.name
-                _LOGGER.info("SETTING UP SENSOR: %s", sensor_name)
+                _LOGGER.info("Setting up %s sensor: %s", device.model, sensor.name)
 
                 # Payload
                 payload = self._get_sensor_payload(
-                    sensor, serial_number, state_topic, attr_topic, firmware
+                    sensor=sensor,
+                    device=device,
+                    state_topic=state_topic,
+                    attr_topic=attr_topic,
                 )
 
                 # Attributes
@@ -647,6 +637,28 @@ class WeatherFlowMqtt:
                 discovery_topic, json.dumps(payload or {}), qos=1, retain=True
             )
             self._add_to_queue(attr_topic, json.dumps(attribution), qos=1, retain=True)
+
+        if isinstance(device, HubDevice):
+            fcst_state_topic = MQTT_TOPIC_FORMAT.format(
+                DOMAIN, FORECAST_ENTITY, "state"
+            )
+            fcst_attr_topic = MQTT_TOPIC_FORMAT.format(
+                DOMAIN, FORECAST_ENTITY, "attributes"
+            )
+            for sensor in FORECAST_SENSORS:
+                discovery_topic = MQTT_TOPIC_FORMAT.format(DOMAIN, sensor.id, "config")
+                payload: OrderedDict | None = None
+                if self.forecast is not None:
+                    _LOGGER.info("Setting up %s sensor: %s", device.model, sensor.name)
+                    payload = self._get_sensor_payload(
+                        sensor=sensor,
+                        device=device,
+                        state_topic=fcst_state_topic,
+                        attr_topic=fcst_attr_topic,
+                    )
+                self._add_to_queue(
+                    discovery_topic, json.dumps(payload or {}), qos=1, retain=True
+                )
 
         # cleanup obsolete sensors
         for sensor in OBSOLETE_SENSORS:
