@@ -303,7 +303,6 @@ class WeatherFlowMqtt:
             "name": f"{device.model} {device.serial_number}",
             "model": device.model,
             "sw_version": device.firmware_revision,
-            "suggested_area": "Backyard",
             **(
                 {"via_device": f"{DOMAIN}_{device.hub_sn}"}
                 if isinstance(device, WeatherFlowSensorDevice)
