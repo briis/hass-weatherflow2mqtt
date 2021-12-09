@@ -45,7 +45,6 @@ from .const import (
     BRAND,
     DATABASE,
     DOMAIN,
-    EVENT_FORECAST,
     EVENT_HIGH_LOW,
     EXTERNAL_DIRECTORY,
     FORECAST_ENTITY,
@@ -550,21 +549,11 @@ class WeatherFlowMqtt:
             sensor_id = sensor.id
             sensor_event = sensor.event
 
-            # Don't add the Weather Sensor if forecast disabled
-            if self.forecast is None and sensor_event == EVENT_FORECAST:
-                _LOGGER.debug(
-                    "Skipping Forecast sensor %s",
-                    sensor_event,
-                )
-                continue
-
             if (
                 getattr(device, sensor.device_attr, ATTRIBUTE_MISSING)
                 is ATTRIBUTE_MISSING
             ):
-                _LOGGER.debug(
-                    "Skipping %s sensor since it is missing from %s", sensor_id, device
-                )
+                # Don't add sensors for devices that don't report on that attribute
                 continue
 
             state_topic = MQTT_TOPIC_FORMAT.format(domain_serial, sensor_event, "state")
