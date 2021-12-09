@@ -14,12 +14,12 @@ There is support for both the AIR & SKY devices and the TEMPEST device.
 
 1. [Installation](#installation)
 2. [Docker Setup](#docker-setup)
-    1. [Docker Volume](#docker-volume)
-    2. [Docker Environment Variables](#docker-environment-variables)
+   1. [Docker Volume](#docker-volume)
+   2. [Docker Environment Variables](#docker-environment-variables)
 3. [Available Sensors](#available-sensors)
-    1. [Sensor Structure](#sensor-structure)
-    2. [High and Low Values](#high-and-low-values)
-    3. [Long Term Statistics](#Home-Assistant-Long-Term-Statistics)
+   1. [Sensor Structure](#sensor-structure)
+   2. [High and Low Values](#high-and-low-values)
+   3. [Long Term Statistics](#Home-Assistant-Long-Term-Statistics)
 4. [Creating a Home Assistant Weather Entity](#creating-a-home-assistant-weather-entity)
 
 ## Installation
@@ -51,7 +51,6 @@ docker run -d \
 -v $(pwd):/data \
 -p 0.0.0.0:50222:50222/udp \
 -e TZ=Europe/Copenhagen \
--e TEMPEST_DEVICE=True \
 -e UNIT_SYSTEM=metric \
 -e LANGUAGE=en \
 -e RAPID_WIND_INTERVAL=0 \
@@ -80,24 +79,23 @@ The container is build for both Intel and ARM platforms, so it should work on mo
 
 A description of the Environment Variables available for this container. All of them have a default value, so you only need to add the onces where you want to change that.
 
-- `TZ`: Set your local Timezone. It is important that you use the right timezone here, or else some of the calculations done by the container will not be correct. Default Timezone is *Europe/Copenhagen* (**Required**)
-- `TEMPEST_DEVICE`: If you have a Tempest Weather Station set this to True. If False, the program will assume you have the older AIR and SKY units. Default is *True*
-- `UNIT_SYSTEM`: Enter *imperial* or *metric*. This will determine the unit system used when displaying the values. Default is *metric*
+- `TZ`: Set your local Timezone. It is important that you use the right timezone here, or else some of the calculations done by the container will not be correct. Default Timezone is _Europe/Copenhagen_ (**Required**)
+- `UNIT_SYSTEM`: Enter _imperial_ or _metric_. This will determine the unit system used when displaying the values. Default is _metric_
 - `LANGUAGE`: Use this to set the language for Wind Direction cardinals and other sensors with text strings as state value. These strings will then be displayed in HA in the selected language. See section [Supported Languages](#supported-languages)
-- `RAPID_WIND_INTERVAL`: The weather stations delivers wind speed and bearing every 2 seconds. If you don't want to update the HA sensors so often, you can set a number here (in seconds), for how often they are updated. Default is *0*, which means data are updated when received from the station.
-- `ELEVATION`: Set the hight above sea level for where the station is placed. This is used when calculating some of the sensor values. Station elevation plus Device height above ground. The value has to be in meters (`meters = feet * 0.3048`). Default is *0*
-- `WF_HOST`: Unless you have a very special IP setup or the Weatherflow hub is on a different network, you should not change this. Default is *0.0.0.0*
-- `WF_PORT`: Weatherflow always broadcasts on port 50222/udp, so don't change this. Default is *50222*
-- `MQTT_HOST`: The IP address of your mqtt server. Even though you have the MQTT Server on the same machine as this Container, don't use `127.0.0.1` as this will resolve to an IP Address inside your container. Use the external IP Address. Default value is *127.0.0.1* (**Required**)
-- `MQTT_PORT`: The Port for your mqtt server. Default value is *1883*
-- `MQTT_USERNAME`: The username used to connect to the mqtt server. Leave blank to use Anonymous connection. Default value is *blank*
-- `MQTT_PASSWORD`: The password used to connect to the mqtt server. Leave blank to use Anonymous connection. Default value is *blank*
-- `MQTT_DEBUG`: Set this to True, to get some more mqtt debugging messages in the Container log file. Default value is *False*
-- `DEBUG`: Set this to True to enable more debug data in the Container Log. Default is *False*
-- `STATION_ID`: Enter your Station ID for your WeatherFlow Station. Default value is *blank*.
-- `STATION_TOKEN`: Enter your personal access Token to allow retrieval of data. If you don't have the token [login with your account](https://tempestwx.com/settings/tokens) and create the token. **NOTE** You must own a WeatherFlow station to get this token. Default value is *blank*
-- `FORECAST_INTERVAL`: The interval in minutes, between updates of the Forecast data. Default value is *30* minutes.
-- `briis/weatherflow2mqtt:<tag>`: *latest* for the latest stable build, *dev* for the latest build (may not be stable due to development/testing build). Once dev build is verified latest build and dev will be identical.  Latest features will be tested in dev build before released to latest.
+- `RAPID_WIND_INTERVAL`: The weather stations delivers wind speed and bearing every 2 seconds. If you don't want to update the HA sensors so often, you can set a number here (in seconds), for how often they are updated. Default is _0_, which means data are updated when received from the station.
+- `ELEVATION`: Set the hight above sea level for where the station is placed. This is used when calculating some of the sensor values. Station elevation plus Device height above ground. The value has to be in meters (`meters = feet * 0.3048`). Default is _0_
+- `WF_HOST`: Unless you have a very special IP setup or the Weatherflow hub is on a different network, you should not change this. Default is _0.0.0.0_
+- `WF_PORT`: Weatherflow always broadcasts on port 50222/udp, so don't change this. Default is _50222_
+- `MQTT_HOST`: The IP address of your mqtt server. Even though you have the MQTT Server on the same machine as this Container, don't use `127.0.0.1` as this will resolve to an IP Address inside your container. Use the external IP Address. Default value is _127.0.0.1_ (**Required**)
+- `MQTT_PORT`: The Port for your mqtt server. Default value is _1883_
+- `MQTT_USERNAME`: The username used to connect to the mqtt server. Leave blank to use Anonymous connection. Default value is _blank_
+- `MQTT_PASSWORD`: The password used to connect to the mqtt server. Leave blank to use Anonymous connection. Default value is _blank_
+- `MQTT_DEBUG`: Set this to True, to get some more mqtt debugging messages in the Container log file. Default value is _False_
+- `DEBUG`: Set this to True to enable more debug data in the Container Log. Default is _False_
+- `STATION_ID`: Enter your Station ID for your WeatherFlow Station. Default value is _blank_.
+- `STATION_TOKEN`: Enter your personal access Token to allow retrieval of data. If you don't have the token [login with your account](https://tempestwx.com/settings/tokens) and create the token. **NOTE** You must own a WeatherFlow station to get this token. Default value is _blank_
+- `FORECAST_INTERVAL`: The interval in minutes, between updates of the Forecast data. Default value is _30_ minutes.
+- `briis/weatherflow2mqtt:<tag>`: _latest_ for the latest stable build, _dev_ for the latest build (may not be stable due to development/testing build). Once dev build is verified latest build and dev will be identical. Latest features will be tested in dev build before released to latest.
 
 ### Supported Languages
 
@@ -117,65 +115,61 @@ If you would like to assist in translating to a new language, do the following:
 
 ## Available Sensors
 
-Here is the list of sensors that the program generates. Calculated Sensor means, if No, then data comes directly from the Weather Station, if yes, it is a sensor that is derived from some of the other sensors. For a *copy ready* list see [further below](#sensor-structure)
+Here is the list of sensors that the program generates. Calculated Sensor means, if No, then data comes directly from the Weather Station, if yes, it is a sensor that is derived from some of the other sensors. For a _copy ready_ list see [further below](#sensor-structure)
 
-| Sensor ID   | Name   | Description   | Calculated Sensor   | Input (Tempest)  | Input (Air)   | Input (Sky)   | Default Units   
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| absolute_humidity | Absolute Humidity | The amount of water per volume of air | Yes | obs[7], obs[8] | obs[2], obs[3] |  | g/m^3 |
-| air_density | Air Density | The Air density | Yes | obs[7], obs[6] | obs[2], obs[1] |  | kg/m^3 |
-| air_status | AIR Status | How long has the AIR device been running and other HW details | No | hub_status |  |  |  |
-| air_temperature | Temperature | Outside Temperature | No | obs[7] | obs[2] |  | C° |
-| voltage_air | Voltage AIR | The voltage on the AIR unit (If present) | No |  | obs[6] |  | Volts |
-| battery_air | Battery AIR | The battery level on the AIR unit (If present) | Yes |  | obs[6] |  | % |
-| voltage_sky | Voltage SKY | voltage on the SKY unit (If present) | No |  |  | obs[8] | Volts |
-| battery_sky | Battery SKY | The battery level on the SKY unit (If present) | Yes |  |  | obs[8] | % |
-| voltage_tempest | Voltage TEMPEST | The voltage on the TEMPEST unit (If present) | No | obs[16] |  |  | Volts |
-| battery_tempest | Battery TEMPEST | The battery level on the TEMPEST unit (If present) | Yes | obs[16] |  |  | % |
-| battery_mode | Battery Mode| The battery operating mode on the TEMPEST unit (If present) | Yes | obs[16], obs[11] |  |  | https://help.weatherflow.com/hc/en-us/articles/360048877194-Solar-Power-Rechargeable-Battery |
-| beaufort | Beaufort Scale | Beaufort scale is an empirical measure that relates wind speed to observed conditions at sea or on land | Yes | obs[2] |  | obs[5] | # |
-| delta_t | Delta T | Difference between Air Temperature and Wet Bulb Temperature | Yes | obs[7], obs[8], obs[6] | obs[2], obs[3], obs[1] |  | C° |
-| dewpoint | Dew Point | Dewpoint in degrees | Yes | obs[7], obs[8] | obs{2], obs[3] |  | C° |
-| dewpoint_description | Dewpoint Comfort Level | Textual representation of the Dewpoint value | Yes | dewpoint | dewpoint |  |  |
-| feelslike | Feels Like Temperature | The apparent temperature, a mix of Heat Index and Wind Chill | Yes | obs[7], obs[8], wind_speed | obs[2], obs[3], wind_speed |  | C° |
-| hub_status | Hub Status | How long has the HUB been running and other HW details | No | hub_status |  |  |  |
-| illuminance | Illuminance | How much the incident light illuminates the surface | No | obs[9] |  | obs[1] | Lux |
-| lightning_strike_count | Lightning Count | Number of lightning strikes in the last minute | Yes | obs[15] | obs[4] |  | # |
-| lightning_strike_count_1hr | Lightning Count (Last hour) | Number of lightning strikes during the last hour | Yes |  |  |  |  |
-| lightning_strike_count_3hr | Lightning Count (3 hours) | Number of lightning strikes the last 3 hours | Yes |  |  |  |  |
-| lightning_strike_count_today | Lightning Count (Today) | Number of lightning strikes current day | Yes |  |  |  |  |
-| lightning_strike_distance | Lightning Distance | Distance of the last strike | No |  |  |  | km |
-| lightning_strike_energy | Lightning Energy | Energy of the last strike | No |  |  |  |  |
-| lightning_strike_time | Last Lightning Strike | When the last lightning strike occurred | Yes |  | seconds |  |  |
-| precipitation_type | Precipitation Type | Can be one of None, Rain or Hail | No | obs[13] |  |  | 0 = none, 1 = rain, 2 = hail, 3 = rain + hail (heavy rain) |
-| rain_intensity | Rain Intensity | A descriptive text of how much is it raining right now | Yes | rain_rate |  | rain_rate |  |
-| rain_rate | Rain Rate | How much is it raining right now | Yes | obs[12] |  | obs[3] | mm/h |
-| rain_start_time | Last Rain | When was the last time it rained | No | rain_start |  | rain_start | seconds |
-| rain_today | Rain Today | Total rain for the current day. (Reset at midnight) | Yes | rain_today |  | rain_today | mm |
-| rain_yesterday | Rain Yesterday | Total rain for yesterday (Reset at midnight) | Yes | rain_yesterday |  | rain_yesterday | mm |
-| rain_duration_today | Rain Duration (Today) | Total rain minutes for the current day. (Reset at midnight) | Yes | rain_duration_today |  | rain_duration_today | minutes |
-| rain_duration_yesterday | Rain Duration (Yesterday) | Total rain minutes yesterday | Yes | rain_duration_yesterday |  | rain_duration_yesterday | minutes |
-| relative_humidity | Humidity | Relative Humidity | No | obs[8] |  | obs[3] | % |
-| sealevel_pressure | Station Pressure | Preasure measurement at Sea Level | Yes | obs[6], elevation | obs[1], elevation |  | MB |
-| sky_status | SKY Status | How long has the SKY device been running and other HW details | No | hub_status |  |  |  |
-| pressure_trend | Pressure Trend | Returns Steady, Falling or Rising determined by the rate of change over the past 3 hours| trend_text | trend_text |  |  | Yes |
-| solar_radiation | Solar Radiation | Electromagnetic radiation emitted by the sun | No | obs[11] |  | obs[10] | W/m^2 |
-| station_pressure | Station Pressure | Pressure measurement where the station is located | No | obs[6] | obs[1] |  | MB |
-| temperature_description | Temperature Level | Textual representation of the Outside Air Temperature value | Yes | obs[7] | obs[2] |  | Text |
-| tempest_status | Tempest Status | How long has the Tempest device been running and other HW details | No | hub_status |  |  |  |
-| uv | UV Index | The UV index | No | obs[10] |  | obs[2] | Index |
-| uv_description | UV Level | Textual representation of the UV Index value | Yes | obs[10] |  |  | obs[2] |
-| visibility | Visibility | Distance to the horizon | Yes | elevation, obs[7], obs[8] | elevation, obs[2], obs[3] |  | km |
-| wetbulb | Wet Bulb Temperature | Temperature of a parcel of air cooled to saturation (100% relative humidity) | Yes | obs[7], obs[8], obs[6] | obs[2], obs[3], obs[1] |  | C° |
-| wet_bulb_globe_temperature | Wet Bulb Globe Temperature | The WetBulb Globe Temperature (WBGT) is a measure of the heat stress in direct sunlight, which takes into account: temperature, humidity, wind speed, sun angle and cloud cover (solar radiation). | Yes | obs[7], obs[8], obs[6], obs[11] |  |  | C° |
-| wind_bearing | Wind Bearing | Current measured Wind bearing in degrees | No |  |  |  | Degrees |
-| wind_bearing_avg | Wind Bearing Avg | The average wind bearing in degrees | No | obs[4] |  | obs[7] | Degrees |
-| wind_direction | Wind Direction | Current measured Wind bearing as compass symbol | Yes |  |  |  | Cardinal |
-| wind_direction_avg | Wind Direction Avg | The average wind direction as a compass string | Yes | obs[4] |  | obs[7] | Cardinal |
-| wind_gust | Wind Gust | Highest wind speed for the last minute | No | obs[3] |  | obs[6] | m/s |
-| wind_lull | Wind Lull | Lowest wind for the last minute | No | obs[1] |  | obs[4] | m/s |
-| wind_speed | Wind Speed | Current measured Wind Speed | No |  |  |  | m/s |
-| wind_speed_avg | Wind Speed Avg | Average wind speed for the last minute | No | obs[2] |  | obs[5] | m/s |
-| weather | Weather | Only available if STATION_ID and STATION_TOKEN have valid data (See above). State will be current condition, and forecast data will be in the attributes. | No |  |  |  |  |
+| Sensor ID                    | Name                        | Description                                                                                                                                                                                        | Calculated Sensor | Input (Tempest)                 | Input (Air)                | Input (Sky)             | Default Units                                                                                |
+| ---------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- | ------------------------------- | -------------------------- | ----------------------- | -------------------------------------------------------------------------------------------- |
+| absolute_humidity            | Absolute Humidity           | The amount of water per volume of air                                                                                                                                                              | Yes               | obs[7], obs[8]                  | obs[2], obs[3]             |                         | g/m^3                                                                                        |
+| air_density                  | Air Density                 | The Air density                                                                                                                                                                                    | Yes               | obs[7], obs[6]                  | obs[2], obs[1]             |                         | kg/m^3                                                                                       |
+| air_temperature              | Temperature                 | Outside Temperature                                                                                                                                                                                | No                | obs[7]                          | obs[2]                     |                         | C°                                                                                           |
+| battery                      | Battery                     | The battery level on the sensor (If present)                                                                                                                                                       | Yes               |                                 | obs[6]                     |                         | %                                                                                            |
+| battery_mode                 | Battery Mode                | The battery operating mode on the TEMPEST unit (If present)                                                                                                                                        | Yes               | obs[16], obs[11]                |                            |                         | https://help.weatherflow.com/hc/en-us/articles/360048877194-Solar-Power-Rechargeable-Battery |
+| beaufort                     | Beaufort Scale              | Beaufort scale is an empirical measure that relates wind speed to observed conditions at sea or on land                                                                                            | Yes               | obs[2]                          |                            | obs[5]                  | #                                                                                            |
+| delta_t                      | Delta T                     | Difference between Air Temperature and Wet Bulb Temperature                                                                                                                                        | Yes               | obs[7], obs[8], obs[6]          | obs[2], obs[3], obs[1]     |                         | C°                                                                                           |
+| dewpoint                     | Dew Point                   | Dewpoint in degrees                                                                                                                                                                                | Yes               | obs[7], obs[8]                  | obs{2], obs[3]             |                         | C°                                                                                           |
+| dewpoint_description         | Dewpoint Comfort Level      | Textual representation of the Dewpoint value                                                                                                                                                       | Yes               | dewpoint                        | dewpoint                   |                         |                                                                                              |
+| feelslike                    | Feels Like Temperature      | The apparent temperature, a mix of Heat Index and Wind Chill                                                                                                                                       | Yes               | obs[7], obs[8], wind_speed      | obs[2], obs[3], wind_speed |                         | C°                                                                                           |
+| hub_status                   | Hub Status                  | How long has the HUB been running and other HW details                                                                                                                                             | No                | hub_status                      |                            |                         |                                                                                              |
+| illuminance                  | Illuminance                 | How much the incident light illuminates the surface                                                                                                                                                | No                | obs[9]                          |                            | obs[1]                  | Lux                                                                                          |
+| lightning_strike_count       | Lightning Count             | Number of lightning strikes in the last minute                                                                                                                                                     | Yes               | obs[15]                         | obs[4]                     |                         | #                                                                                            |
+| lightning_strike_count_1hr   | Lightning Count (Last hour) | Number of lightning strikes during the last hour                                                                                                                                                   | Yes               |                                 |                            |                         |                                                                                              |
+| lightning_strike_count_3hr   | Lightning Count (3 hours)   | Number of lightning strikes the last 3 hours                                                                                                                                                       | Yes               |                                 |                            |                         |                                                                                              |
+| lightning_strike_count_today | Lightning Count (Today)     | Number of lightning strikes current day                                                                                                                                                            | Yes               |                                 |                            |                         |                                                                                              |
+| lightning_strike_distance    | Lightning Distance          | Distance of the last strike                                                                                                                                                                        | No                |                                 |                            |                         | km                                                                                           |
+| lightning_strike_energy      | Lightning Energy            | Energy of the last strike                                                                                                                                                                          | No                |                                 |                            |                         |                                                                                              |
+| lightning_strike_time        | Last Lightning Strike       | When the last lightning strike occurred                                                                                                                                                            | Yes               |                                 | seconds                    |                         |                                                                                              |
+| precipitation_type           | Precipitation Type          | Can be one of None, Rain or Hail                                                                                                                                                                   | No                | obs[13]                         |                            |                         | 0 = none, 1 = rain, 2 = hail, 3 = rain + hail (heavy rain)                                   |
+| rain_intensity               | Rain Intensity              | A descriptive text of how much is it raining right now                                                                                                                                             | Yes               | rain_rate                       |                            | rain_rate               |                                                                                              |
+| rain_rate                    | Rain Rate                   | How much is it raining right now                                                                                                                                                                   | Yes               | obs[12]                         |                            | obs[3]                  | mm/h                                                                                         |
+| rain_start_time              | Last Rain                   | When was the last time it rained                                                                                                                                                                   | No                | rain_start                      |                            | rain_start              | seconds                                                                                      |
+| rain_today                   | Rain Today                  | Total rain for the current day. (Reset at midnight)                                                                                                                                                | Yes               | rain_today                      |                            | rain_today              | mm                                                                                           |
+| rain_yesterday               | Rain Yesterday              | Total rain for yesterday (Reset at midnight)                                                                                                                                                       | Yes               | rain_yesterday                  |                            | rain_yesterday          | mm                                                                                           |
+| rain_duration_today          | Rain Duration (Today)       | Total rain minutes for the current day. (Reset at midnight)                                                                                                                                        | Yes               | rain_duration_today             |                            | rain_duration_today     | minutes                                                                                      |
+| rain_duration_yesterday      | Rain Duration (Yesterday)   | Total rain minutes yesterday                                                                                                                                                                       | Yes               | rain_duration_yesterday         |                            | rain_duration_yesterday | minutes                                                                                      |
+| relative_humidity            | Humidity                    | Relative Humidity                                                                                                                                                                                  | No                | obs[8]                          |                            | obs[3]                  | %                                                                                            |
+| sealevel_pressure            | Station Pressure            | Preasure measurement at Sea Level                                                                                                                                                                  | Yes               | obs[6], elevation               | obs[1], elevation          |                         | MB                                                                                           |
+| status                       | Status                      | How long has the device been running and other HW details                                                                                                                                          | No                | hub_status                      |                            |                         |                                                                                              |
+| sky_status                   | SKY Status                  | How long has the SKY device been running and other HW details                                                                                                                                      | No                | hub_status                      |                            |                         |                                                                                              |
+| pressure_trend               | Pressure Trend              | Returns Steady, Falling or Rising determined by the rate of change over the past 3 hours                                                                                                           | trend_text        | trend_text                      |                            |                         | Yes                                                                                          |
+| solar_radiation              | Solar Radiation             | Electromagnetic radiation emitted by the sun                                                                                                                                                       | No                | obs[11]                         |                            | obs[10]                 | W/m^2                                                                                        |
+| station_pressure             | Station Pressure            | Pressure measurement where the station is located                                                                                                                                                  | No                | obs[6]                          | obs[1]                     |                         | MB                                                                                           |
+| temperature_description      | Temperature Level           | Textual representation of the Outside Air Temperature value                                                                                                                                        | Yes               | obs[7]                          | obs[2]                     |                         | Text                                                                                         |
+| tempest_status               | Tempest Status              | How long has the Tempest device been running and other HW details                                                                                                                                  | No                | hub_status                      |                            |                         |                                                                                              |
+| uv                           | UV Index                    | The UV index                                                                                                                                                                                       | No                | obs[10]                         |                            | obs[2]                  | Index                                                                                        |
+| uv_description               | UV Level                    | Textual representation of the UV Index value                                                                                                                                                       | Yes               | obs[10]                         |                            |                         | obs[2]                                                                                       |
+| visibility                   | Visibility                  | Distance to the horizon                                                                                                                                                                            | Yes               | elevation, obs[7], obs[8]       | elevation, obs[2], obs[3]  |                         | km                                                                                           |
+| voltage                      | Voltage                     | The voltage on the sensor (If present)                                                                                                                                                             | No                |                                 | obs[6]                     |                         | Volts                                                                                        |
+| wetbulb                      | Wet Bulb Temperature        | Temperature of a parcel of air cooled to saturation (100% relative humidity)                                                                                                                       | Yes               | obs[7], obs[8], obs[6]          | obs[2], obs[3], obs[1]     |                         | C°                                                                                           |
+| wet_bulb_globe_temperature   | Wet Bulb Globe Temperature  | The WetBulb Globe Temperature (WBGT) is a measure of the heat stress in direct sunlight, which takes into account: temperature, humidity, wind speed, sun angle and cloud cover (solar radiation). | Yes               | obs[7], obs[8], obs[6], obs[11] |                            |                         | C°                                                                                           |
+| wind_bearing                 | Wind Bearing                | Current measured Wind bearing in degrees                                                                                                                                                           | No                |                                 |                            |                         | Degrees                                                                                      |
+| wind_bearing_avg             | Wind Bearing Avg            | The average wind bearing in degrees                                                                                                                                                                | No                | obs[4]                          |                            | obs[7]                  | Degrees                                                                                      |
+| wind_direction               | Wind Direction              | Current measured Wind bearing as compass symbol                                                                                                                                                    | Yes               |                                 |                            |                         | Cardinal                                                                                     |
+| wind_direction_avg           | Wind Direction Avg          | The average wind direction as a compass string                                                                                                                                                     | Yes               | obs[4]                          |                            | obs[7]                  | Cardinal                                                                                     |
+| wind_gust                    | Wind Gust                   | Highest wind speed for the last minute                                                                                                                                                             | No                | obs[3]                          |                            | obs[6]                  | m/s                                                                                          |
+| wind_lull                    | Wind Lull                   | Lowest wind for the last minute                                                                                                                                                                    | No                | obs[1]                          |                            | obs[4]                  | m/s                                                                                          |
+| wind_speed                   | Wind Speed                  | Current measured Wind Speed                                                                                                                                                                        | No                |                                 |                            |                         | m/s                                                                                          |
+| wind_speed_avg               | Wind Speed Avg              | Average wind speed for the last minute                                                                                                                                                             | No                | obs[2]                          |                            | obs[5]                  | m/s                                                                                          |
+| weather                      | Weather                     | Only available if STATION_ID and STATION_TOKEN have valid data (See above). State will be current condition, and forecast data will be in the attributes.                                          | No                |                                 |                            |                         |                                                                                              |
 
 ### Sensor Structure
 
@@ -183,13 +177,9 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 sensors:
   - absolute_humidity
   - air_density
-  - air_status # Only for AIR Device
   - air_temperature
-  - battery_air # Voltage AIR 
-  - battery_level_air # Battery Level AIR
-  - battery_level_sky # Battery Level SKY
-  - battery # Voltage for either SKY or TEMPEST
-  - battery_level_tempest # Battery Level TEMPEST
+  - battery # Voltage
+  - battery_level
   - battery_mode # Only for Tempest Devices
   - beaufort
   - dewpoint
@@ -219,6 +209,7 @@ sensors:
   - sky_status # Only for SKY Devices
   - solar_radiation
   - station_pressure
+  - status # Only for AIR Device
   - temperature_description
   - tempest_status # Only for Tempest devices
   - uv
@@ -243,54 +234,49 @@ For selected sensors high and low values are calculated and published to the att
 
 Here are the current attributes, that will be applied to the selected sensor:
 
-| Attribute Name   | Description   |
-| --- | --- |
-| `max_day` | Maximum value for the current day. Reset at midnight. |
-| `max_day_time` | UTC time when the max value was recorded. Reset at midnight. |
-| `min_day` | Minimum value for the current day. Reset at midnight. |
-| `min_day_time` | UTC time when the min value was recorded. Reset at midnight. |
-| `max_month` | Maximum value for the current month. Reset when new month. |
-| `max_month_time` | UTC time when the max value was recorded. Reset when new month. |
-| `min_month` | Minimum value for the current month. Reset when new month. |
-| `min_month_time` | UTC time when the min value was recorded. Reset when new month. |
-| `max_all` | Maximum value ever recorded. Updated at midnight every day. |
-| `max_all_time` | UTC time when the all-time max value was recorded. Updated at midnight every day. |
-| `min_all` | Minimum value ever recorded. Updated at midnight every day. |
-| `min_all_time` | UTC time when the all-time min value was recorded. Updated at midnight every day. |
+| Attribute Name   | Description                                                                       |
+| ---------------- | --------------------------------------------------------------------------------- |
+| `max_day`        | Maximum value for the current day. Reset at midnight.                             |
+| `max_day_time`   | UTC time when the max value was recorded. Reset at midnight.                      |
+| `min_day`        | Minimum value for the current day. Reset at midnight.                             |
+| `min_day_time`   | UTC time when the min value was recorded. Reset at midnight.                      |
+| `max_month`      | Maximum value for the current month. Reset when new month.                        |
+| `max_month_time` | UTC time when the max value was recorded. Reset when new month.                   |
+| `min_month`      | Minimum value for the current month. Reset when new month.                        |
+| `min_month_time` | UTC time when the min value was recorded. Reset when new month.                   |
+| `max_all`        | Maximum value ever recorded. Updated at midnight every day.                       |
+| `max_all_time`   | UTC time when the all-time max value was recorded. Updated at midnight every day. |
+| `min_all`        | Minimum value ever recorded. Updated at midnight every day.                       |
+| `min_all_time`   | UTC time when the all-time min value was recorded. Updated at midnight every day. |
 
 The following sensors are displaying High and Low values:
 
-| Sensor ID   | High Value   | Low Value   |
-| --- | --- | --- |
-| `air_temperature` | Yes | Yes |
-| `dewpoint` | Yes | Yes |
-| `illuminance` | Yes | No |
-| `lightning_strike_count_today` | Yes | No |
-| `lightning_strike_energy` | Yes | No |
-| `rain_rate` | Yes | No |
-| `rain_duration_today` | Yes | No |
-| `relative_humidity` | Yes | Yes |
-| `sealevel_pressure` | Yes | Yes |
-| `solar_radiation` | Yes | No |
-| `uv` | Yes | No |
-| `wind_gust` | Yes | No |
-| `wind_lull` | Yes | No |
-| `wind_speed_avg` | Yes | No |
+| Sensor ID                      | High Value | Low Value |
+| ------------------------------ | ---------- | --------- |
+| `air_temperature`              | Yes        | Yes       |
+| `dewpoint`                     | Yes        | Yes       |
+| `illuminance`                  | Yes        | No        |
+| `lightning_strike_count_today` | Yes        | No        |
+| `lightning_strike_energy`      | Yes        | No        |
+| `rain_rate`                    | Yes        | No        |
+| `rain_duration_today`          | Yes        | No        |
+| `relative_humidity`            | Yes        | Yes       |
+| `sealevel_pressure`            | Yes        | Yes       |
+| `solar_radiation`              | Yes        | No        |
+| `uv`                           | Yes        | No        |
+| `wind_gust`                    | Yes        | No        |
+| `wind_lull`                    | Yes        | No        |
+| `wind_speed_avg`               | Yes        | No        |
 
 ### Home Assistant Long Term Statistics
 
-These sensors have long term statistics (LTS) enabled in Home Assistant (HA), no action by user is required to have LTS collected by HA this is done with MQTT autodiscovery.  To display LTS in HA using the Statistics Graph Card (type: statistics-graph) the 'stat types' that can be used with this integration are Mean, Min, and Max.  It is the user's discreation as to how to display the information, but cases such as rain today 'Max' would be a more logical selection without 'Mean' or 'Min'.  During testing there has not been a use case for this integration that 'Sum' was of any valid use.  Air, Sky, and Tempest sensors are specific to those units.
+These sensors have long term statistics (LTS) enabled in Home Assistant (HA), no action by user is required to have LTS collected by HA this is done with MQTT autodiscovery. To display LTS in HA using the Statistics Graph Card (type: statistics-graph) the 'stat types' that can be used with this integration are Mean, Min, and Max. It is the user's discreation as to how to display the information, but cases such as rain today 'Max' would be a more logical selection without 'Mean' or 'Min'. During testing there has not been a use case for this integration that 'Sum' was of any valid use. Air, Sky, and Tempest sensors are specific to those units.
 
 https://data.home-assistant.io/docs/statistics/
 
 ```yaml
-voltage_air
-battery_air
-voltage_sky
-battery_sky
-voltage_tempest
-battery_tempest
 air_density
+battery
 beaufort
 delta_t
 dewpoint
@@ -306,9 +292,10 @@ rain_today
 sealevel_pressure
 solar_radiation
 station_pressure
-air_temperature 
+air_temperature
 uv
 visibility
+voltage
 wet_bulb_globe_temperature
 wetbulb
 wind_bearing
@@ -321,7 +308,7 @@ wind_speed_avg
 
 ## Creating a Home Assistant Weather Entity
 
-If you have enabled the *Forecast* option, then there is a possibility to create a Weather Entity, that can be used in all the different Lovelace Cards there is for *Weather*. We will do this by using the [Weather Template](https://www.home-assistant.io/integrations/weather.template/). The naming of the sensors might vary based on your configuration, so check that if it does not work.
+If you have enabled the _Forecast_ option, then there is a possibility to create a Weather Entity, that can be used in all the different Lovelace Cards there is for _Weather_. We will do this by using the [Weather Template](https://www.home-assistant.io/integrations/weather.template/). The naming of the sensors might vary based on your configuration, so check that if it does not work.
 
 Edit `configuration.yaml` and insert the following:
 
@@ -339,9 +326,8 @@ weather:
     forecast_template: "{{ state_attr('sensor.wf_weather', 'hourly_forecast') }}"
 ```
 
-- The weather entity expects km/h when having metric units, so the above example converts m/s to km/h. If you are using *imperial* units, the line should just be `{{ states('sensor.wf_wind_speed_avg') }}`
-- For the *forecast_template* you can either use `hourly_forecast` or `daily_forecast` to get Hourly or Day based forecast.
-
+- The weather entity expects km/h when having metric units, so the above example converts m/s to km/h. If you are using _imperial_ units, the line should just be `{{ states('sensor.wf_wind_speed_avg') }}`
+- For the _forecast_template_ you can either use `hourly_forecast` or `daily_forecast` to get Hourly or Day based forecast.
 
 ## Setup Dev environment
 
@@ -352,9 +338,9 @@ python setup.py install
 ```
 
 Then you just need to export the configuration
+
 ```
 export TZ="America/Toronto"
-export TEMPEST_DEVICE="True"
 export UNIT_SYSTEM="metric"
 export LANGUAGE="en"
 export RAPID_WIND_INTERVAL="0"

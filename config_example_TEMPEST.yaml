@@ -1,15 +1,14 @@
- sensors:
+sensors:
   - absolute_humidity
   - air_temperature
   - battery
-  - battery_level_tempest
+  - battery_level
   - battery_mode
   - beaufort
   - dewpoint
   - dewpoint_description
   - delta_t
   - feelslike
-  - hub_status
   - illuminance
   - lightning_strike_count
   - lightning_strike_count_1hr

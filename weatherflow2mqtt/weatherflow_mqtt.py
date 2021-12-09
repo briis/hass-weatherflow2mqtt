@@ -9,57 +9,67 @@ import json
 import logging
 import os
 import sys
-import time
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, OrderedDict
 
 from paho.mqtt.client import Client as MqttClient
+from pint.quantity import Quantity
+from pyweatherflowudp.client import EVENT_DEVICE_DISCOVERED, WeatherFlowListener
+from pyweatherflowudp.device import (
+    EVENT_LOAD_COMPLETE,
+    EVENT_OBSERVATION,
+    EVENT_RAIN_START,
+    EVENT_RAPID_WIND,
+    EVENT_STATUS_UPDATE,
+    EVENT_STRIKE,
+    AirSensorType,
+    HubDevice,
+    SkySensorType,
+    TempestDevice,
+    WeatherFlowDevice,
+    WeatherFlowSensorDevice,
+)
+from pyweatherflowudp.event import (
+    CustomEvent,
+    LightningStrikeEvent,
+    RainStartEvent,
+    WindEvent,
+)
 
-from .__version__ import VERSION
-from .aioudp import LocalEndpoint, open_local_endpoint
 from .const import (
     ATTR_ATTRIBUTION,
-    ATTR_BRAND,
     ATTRIBUTION,
-    BRAND,
     DATABASE,
     DOMAIN,
-    EVENT_AIR_DATA,
-    EVENT_DEVICE_STATUS,
-    EVENT_FORECAST,
     EVENT_HIGH_LOW,
-    EVENT_HUB_STATUS,
-    EVENT_PRECIP_START,
-    EVENT_RAPID_WIND,
-    EVENT_SKY_DATA,
-    EVENT_STRIKE,
-    EVENT_TEMPEST_DATA,
     EXTERNAL_DIRECTORY,
     FORECAST_ENTITY,
     HIGH_LOW_TIMER,
     LANGUAGE_ENGLISH,
-    OBSOLETE_SENSORS,
-    SENSOR_CLASS,
-    SENSOR_DEVICE,
-    SENSOR_EXTRA_ATT,
-    SENSOR_ICON,
-    SENSOR_ID,
-    SENSOR_NAME,
-    SENSOR_SHOW_MIN_ATT,
-    SENSOR_STATE_CLASS,
-    SENSOR_UNIT_I,
-    SENSOR_UNIT_M,
+    MANUFACTURER,
     TEMP_CELSIUS,
     UNITS_IMPERIAL,
     UNITS_METRIC,
-    WEATHERFLOW_SENSORS,
 )
 from .forecast import Forecast, ForecastConfig
 from .helpers import ConversionFunctions, read_config, truebool
+from .sensor_description import (
+    DEVICE_SENSORS,
+    FORECAST_SENSORS,
+    OBSOLETE_SENSORS,
+    BaseSensorDescription,
+    SensorDescription,
+    SqlSensorDescription,
+    StorageSensorDescription,
+)
 from .sqlite import SQLFunctions
 
 _LOGGER = logging.getLogger(__name__)
+
+ATTRIBUTE_MISSING = object()
+MQTT_TOPIC_FORMAT = "homeassistant/sensor/{}/{}/{}"
+DEVICE_SERIAL_FORMAT = "{}_{}"
 
 
 @dataclass
@@ -94,7 +104,6 @@ class WeatherFlowMqtt:
 
     def __init__(
         self,
-        is_tempest: bool = True,
         elevation: float = 0,
         unit_system: str = UNITS_METRIC,
         rapid_wind_interval: int = 0,
@@ -103,9 +112,10 @@ class WeatherFlowMqtt:
         udp_config: WeatherFlowUdpConfig = WeatherFlowUdpConfig(),
         forecast_config: ForecastConfig = None,
         database_file: str = None,
+        filter_sensors: list[str] | None = None,
+        invert_filter: bool = False,
     ) -> None:
         """Initialize a WeatherFlow MQTT."""
-        self.is_tempest = is_tempest
         self.elevation = elevation
         self.unit_system = unit_system
         self.rapid_wind_interval = rapid_wind_interval
@@ -122,12 +132,17 @@ class WeatherFlowMqtt:
         )
 
         self.mqtt_client: MqttClient = None
-        self.endpoint: LocalEndpoint = None
+        self.listener: WeatherFlowListener | None = None
+        self._queue: asyncio.Queue | None = None
+        self._queue_task: asyncio.Task | None = None
         self._init_sql_db(database_file=database_file)
+
+        self._filter_sensors = filter_sensors
+        self._invert_filter = invert_filter
 
         # Set timer variables
         self.rapid_last_run = 1621229580.583215  # A time in the past
-        self.forecast_last_run = 1621229580.583215  # A time in the past
+        self.forecast_last_run: float | None = None
         self.high_low_last_run = 1621229580.583215  # A time in the past
         self.current_day = datetime.today().weekday()
         self.last_midnight = self.cnv.utc_last_midnight()
@@ -136,17 +151,10 @@ class WeatherFlowMqtt:
         self.wind_speed = None
         self.solar_radiation = None
 
-    def _init_sql_db(self, database_file: str = None) -> None:
-        """Initialize the self.sqlite DB."""
-        self.sql = SQLFunctions(self.unit_system)
-        database_exist = os.path.isfile(database_file)
-        self.sql.create_connection(database_file)
-        if not database_exist:
-            self.sql.createInitialDataset()
-        # Upgrade Database if needed
-        self.sql.upgradeDatabase()
-
-        self.storage = self.sql.readStorage()
+    @property
+    def is_imperial(self) -> bool:
+        """Return `True` if the unit system is imperial, else `False`."""
+        return self.unit_system == UNITS_IMPERIAL
 
     async def connect(self) -> None:
         """Connect to MQTT and UDP."""
@@ -166,18 +174,317 @@ class WeatherFlowMqtt:
             _LOGGER.error("Could not connect to MQTT Server. Error is: %s", e)
             sys.exit(1)
 
+        self.listener = WeatherFlowListener(self.udp_config.host, self.udp_config.port)
+        self.listener.on(
+            EVENT_DEVICE_DISCOVERED, lambda device: self._device_discovered(device)
+        )
         try:
-            self.endpoint = await open_local_endpoint(
-                host=self.udp_config.host, port=self.udp_config.port
-            )
-            _LOGGER.info(
-                "The UDP server is listening on port %s", self.endpoint.address[1]
-            )
+            await self.listener.start_listening()
+            _LOGGER.info("The UDP server is listening on port %s", self.udp_config.port)
         except Exception as e:
             _LOGGER.error(
                 "Could not start listening to the UDP Socket. Error is: %s", e
             )
             sys.exit(1)
+
+        self._queue = asyncio.Queue()
+        self._queue_task = asyncio.ensure_future(self._mqtt_queue_processor())
+
+    async def run_time_based_updates(self) -> None:
+        """Data update loop."""
+        # Run New day function if Midnight
+        if self.current_day != datetime.today().weekday():
+            self.storage["rain_yesterday"] = self.storage["rain_today"]
+            self.storage["rain_duration_yesterday"] = self.storage[
+                "rain_duration_today"
+            ]
+            self.storage["rain_today"] = 0
+            self.storage["rain_duration_today"] = 0
+            self.storage["lightning_count_today"] = 0
+            self.last_midnight = self.cnv.utc_last_midnight()
+            self.sql.writeStorage(self.storage)
+            self.sql.dailyHousekeeping()
+            self.current_day = datetime.today().weekday()
+
+        # Update High and Low values if it is time
+        now = datetime.now().timestamp()
+        if (now - self.high_low_last_run) >= HIGH_LOW_TIMER:
+            highlow_topic = MQTT_TOPIC_FORMAT.format(
+                DOMAIN, EVENT_HIGH_LOW, "attributes"
+            )
+            high_low_data = self.sql.readHighLow()
+            self._add_to_queue(
+                highlow_topic, json.dumps(high_low_data), qos=1, retain=True
+            )
+            self.high_low_last_run = datetime.now().timestamp()
+
+        await self._update_forecast()
+
+    def _add_to_queue(
+        self, topic: str, payload: str | None = None, qos: int = 0, retain: bool = False
+    ) -> None:
+        """Add an item to the queue."""
+        self._queue.put_nowait((topic, payload, qos, retain))
+
+    def _device_discovered(self, device: WeatherFlowDevice) -> None:
+        """Handle a discovered device."""
+
+        def _load_complete():
+            print(device, "was loaded")
+            self._setup_sensors(device)
+            device.on(
+                EVENT_STATUS_UPDATE,
+                lambda event: self._handle_status_update_event(device, event),
+            )
+            if isinstance(device, WeatherFlowSensorDevice):
+                device.on(
+                    EVENT_OBSERVATION,
+                    lambda event: self._handle_observation_event(device, event),
+                )
+                if isinstance(device, AirSensorType):
+                    device.on(
+                        EVENT_STRIKE,
+                        lambda event: self._handle_strike_event(device, event),
+                    )
+                if isinstance(device, SkySensorType):
+                    device.on(
+                        EVENT_RAPID_WIND,
+                        lambda event: self._handle_wind_event(device, event),
+                    )
+                    device.on(
+                        EVENT_RAIN_START,
+                        lambda event: self._handle_rain_start_event(device, event),
+                    )
+
+        device.on(EVENT_LOAD_COMPLETE, lambda _: _load_complete())
+
+    def _get_sensor_payload(
+        self,
+        sensor: BaseSensorDescription,
+        device: WeatherFlowDevice,
+        state_topic: str,
+        attr_topic: str,
+    ) -> OrderedDict:
+        """Construct and return a sensor payload."""
+        payload = OrderedDict()
+
+        payload["name"] = f"WF {sensor.name}"
+        payload["unique_id"] = f"{device.serial_number}-{sensor.id}"
+        if (units := sensor.unit_i if self.is_imperial else sensor.unit_m) is not None:
+            payload["unit_of_measurement"] = units
+        if (device_class := sensor.device_class) is not None:
+            payload["device_class"] = device_class
+        if (state_class := sensor.state_class) is not None:
+            payload["state_class"] = state_class
+        if (icon := sensor.icon) is not None:
+            payload["icon"] = f"mdi:{icon}"
+        payload["state_topic"] = state_topic
+        payload["value_template"] = f"{{{{ value_json.{sensor.id} }}}}"
+        payload["json_attributes_topic"] = attr_topic
+        payload["device"] = {
+            "identifiers": [f"{DOMAIN}_{device.serial_number}"],
+            "manufacturer": MANUFACTURER,
+            "name": f"{device.model} {device.serial_number}",
+            "model": device.model,
+            "sw_version": device.firmware_revision,
+            **(
+                {"via_device": f"{DOMAIN}_{device.hub_sn}"}
+                if isinstance(device, WeatherFlowSensorDevice)
+                else {}
+            ),
+        }
+
+        return payload
+
+    def _handle_observation_event(
+        self, device: WeatherFlowSensorDevice, event: CustomEvent
+    ) -> None:
+        """Handle an observation event."""
+        # Set some class level variables to help with sensors that may not have all data points available:
+        if (val := getattr(device, "solar_radiation", None)) is not None:
+            self.solar_radiation = val.m
+        if (val := getattr(device, "rain_amount_previous_minute", None)) is not None:
+            self.storage["rain_today"] += val.m
+            if val.m > 0:
+                self.storage["rain_duration_today"] += 1
+                self.sql.writeStorage(self.storage)
+
+        state_topic = MQTT_TOPIC_FORMAT.format(
+            DEVICE_SERIAL_FORMAT.format(DOMAIN, device.serial_number),
+            EVENT_OBSERVATION,
+            "state",
+        )
+        data = OrderedDict()
+
+        for sensor in DEVICE_SENSORS:
+            # Skip if this device is missing the attribute
+            if (
+                attr := getattr(device, sensor.device_attr, ATTRIBUTE_MISSING)
+            ) is ATTRIBUTE_MISSING or (
+                sensor.id == "battery_mode" and not isinstance(device, TempestDevice)
+            ):
+                continue
+            try:
+                if isinstance(sensor, SensorDescription):
+                    # TODO: Handle unique data points more elegantly...
+                    if sensor.id == "pressure_trend":
+                        continue
+
+                    # Check for a custom function
+                    if (fn := sensor.custom_fn) is not None:
+                        # TODO: Handle unique data points more elegantly
+                        if sensor.id == "feelslike":
+                            attr = fn(self.cnv, device, self.wind_speed)
+                        elif sensor.id in ("sealevel_pressure", "visibility"):
+                            attr = fn(self.cnv, device, self.elevation)
+                        elif sensor.id == "wbgt":
+                            attr = fn(self.cnv, device, self.solar_radiation)
+                        else:
+                            attr = fn(self.cnv, device)
+
+                        # Check if a description is included
+                        if sensor.has_description and isinstance(attr, tuple):
+                            attr, data[f"{sensor.id}_description"] = attr
+
+                    # Check if the attr is a Quantity object
+                    elif isinstance(attr, Quantity):
+                        # See if conversion is needed
+                        if (
+                            unit := sensor.imperial_unit
+                            if self.is_imperial
+                            else sensor.metric_unit
+                        ) is not None:
+                            attr = attr.to(unit)
+
+                        # Set the attribute to the Quantity's magnitude
+                        attr = attr.m
+
+                    # Check if rounding is needed
+                    if (
+                        attr is not None
+                        and (decimals := sensor.decimals[1 if self.is_imperial else 0])
+                        is not None
+                    ):
+                        attr = round(attr, decimals)
+
+                elif isinstance(sensor, SqlSensorDescription):
+                    attr = sensor.sql_fn(self.sql)
+
+                elif isinstance(sensor, StorageSensorDescription):
+                    attr = sensor.value(self.storage)
+
+                    if (fn := sensor.cnv_fn) is not None:
+                        attr = fn(self.cnv, attr)
+
+                # Set the attribute in the payload
+                data[sensor.id] = attr
+            except Exception as ex:
+                _LOGGER.error("Error setting sensor data for %s: %s", sensor.id, ex)
+
+        # TODO: Handle unique data points more elegantly...
+        if data["sealevel_pressure"]:
+            (
+                data["pressure_trend"],
+                data["pressure_trend_value"],
+            ) = self.sql.readPressureTrend(
+                data["sealevel_pressure"], self.cnv.translations
+            )
+            self.sql.writePressure(data["sealevel_pressure"])
+
+        data["last_reset_midnight"] = self.last_midnight
+
+        self._add_to_queue(state_topic, json.dumps(data))
+        self.sql.updateHighLow(data)
+        # self.sql.updateDayData(data)
+
+    def _handle_rain_start_event(
+        self, device: SkySensorType, event: RainStartEvent
+    ) -> None:
+        """Handle a rain start event."""
+        self.storage["rain_start"] = event.epoch
+        self.sql.writeStorage(self.storage)
+
+    def _handle_status_update_event(
+        self, device: HubDevice | WeatherFlowSensorDevice, event: CustomEvent
+    ) -> None:
+        """Handle a hub status event."""
+        device_serial = DEVICE_SERIAL_FORMAT.format(DOMAIN, device.serial_number)
+
+        state_topic = MQTT_TOPIC_FORMAT.format(
+            device_serial, EVENT_STATUS_UPDATE, "state"
+        )
+        state_data = OrderedDict()
+        state_data["status"] = device.up_since.isoformat()
+        self._add_to_queue(state_topic, json.dumps(state_data))
+
+        attr_topic = MQTT_TOPIC_FORMAT.format(device_serial, "status", "attributes")
+        attr_data = OrderedDict()
+        attr_data[ATTR_ATTRIBUTION] = ATTRIBUTION
+        attr_data["serial_number"] = device.serial_number
+        attr_data["rssi"] = device.rssi.m
+
+        if isinstance(device, HubDevice):
+            attr_data["reset_flags"] = device.reset_flags
+            _LOGGER.debug("HUB Reset Flags: %s", device.reset_flags)
+        else:
+            attr_data["voltage"] = device._voltage
+            attr_data["sensor_status"] = device.sensor_status
+
+            if device.sensor_status:
+                _LOGGER.debug(
+                    "Device %s has reported a sensor fault. Reason: %s",
+                    device.serial_number,
+                    device.sensor_status,
+                )
+            _LOGGER.debug(
+                "DEVICE STATUS TRIGGERED AT %s\n -- Device: %s\n -- Firmware Revision: %s\n -- Voltage: %s",
+                str(datetime.now()),
+                device.serial_number,
+                device.firmware_revision,
+                device._voltage,
+            )
+
+        self._add_to_queue(attr_topic, json.dumps(attr_data))
+
+    def _handle_strike_event(
+        self, device: AirSensorType, event: LightningStrikeEvent
+    ) -> None:
+        """Handle a strike event."""
+        self.sql.writeLightning()
+        self.storage["lightning_count_today"] += 1
+        self.storage["last_lightning_distance"] = self.cnv.distance(event.distance.m)
+        self.storage["last_lightning_energy"] = event.energy
+        self.storage["last_lightning_time"] = event.epoch
+        self.sql.writeStorage(self.storage)
+
+    def _handle_wind_event(self, device: SkySensorType, event: WindEvent) -> None:
+        """Handle a wind event."""
+        data = OrderedDict()
+        state_topic = MQTT_TOPIC_FORMAT.format(
+            DEVICE_SERIAL_FORMAT.format(DOMAIN, device.serial_number),
+            EVENT_RAPID_WIND,
+            "state",
+        )
+        now = datetime.now().timestamp()
+        if (now - self.rapid_last_run) >= self.rapid_wind_interval:
+            data["wind_speed"] = self.cnv.speed(event.speed.m)
+            data["wind_bearing"] = event.direction.m
+            data["wind_direction"] = self.cnv.direction(event.direction.m)
+            self.wind_speed = event.speed.m
+            self._add_to_queue(state_topic, json.dumps(data))
+            self.rapid_last_run = datetime.now().timestamp()
+
+    def _init_sql_db(self, database_file: str = None) -> None:
+        """Initialize the self.sqlite DB."""
+        self.sql = SQLFunctions(self.unit_system)
+        database_exist = os.path.isfile(database_file)
+        self.sql.create_connection(database_file)
+        if not database_exist:
+            self.sql.createInitialDataset()
+        # Upgrade Database if needed
+        self.sql.upgradeDatabase()
+
+        self.storage = self.sql.readStorage()
 
     def _setup_mqtt_client(self) -> MqttClient:
         """Initialize MQTT client."""
@@ -201,570 +508,188 @@ class WeatherFlowMqtt:
                 self.mqtt_config.password,
             )
 
-    async def setup_sensors(
-        self, filter_sensors: list[str] | None, invert_filter: bool
-    ):
+    def _setup_sensors(self, device: WeatherFlowDevice) -> None:
         """Create Sensors in Home Assistant."""
-        # Get Hub Information
-        while True:
-            data, (host, port) = await self.endpoint.receive()
-            json_response = json.loads(data.decode("utf-8"))
-            msg_type = json_response.get("type")
-            if msg_type == EVENT_HUB_STATUS:
-                serial_number = json_response.get("serial_number")
-                firmware = json_response.get("firmware_revision")
-                break
+        serial_number = device.serial_number
+        domain_serial = DEVICE_SERIAL_FORMAT.format(DOMAIN, serial_number)
 
         # Create the config for the Sensors
-        units = SENSOR_UNIT_I if self.unit_system == UNITS_IMPERIAL else SENSOR_UNIT_M
-        for sensor in WEATHERFLOW_SENSORS:
-            sensor_name = sensor[SENSOR_NAME]
-            # Don't add the Weather Sensor if forecast disabled
-            if self.forecast is None and sensor[SENSOR_DEVICE] == EVENT_FORECAST:
-                _LOGGER.debug(
-                    "Skipping Forecast sensor %s",
-                    sensor[SENSOR_DEVICE],
-                )
-                continue
-            # Don't add the AIR & SKY Unit Battery and device sensors if this is a Tempest Device
-            if self.is_tempest and (
-                sensor[SENSOR_ID] == "battery_air"
-                or sensor[SENSOR_ID] == "battery_level_air"
-                or sensor[SENSOR_ID] == "battery_level_sky"
-                or sensor[SENSOR_ID] == "air_status"
-                or sensor[SENSOR_ID] == "sky_status"
-            ):
-                continue
-            # Don't add the TEMPEST Battery sensor and Battery Mode if this is a AIR or SKY Device
-            if not self.is_tempest and (
-                sensor[SENSOR_ID] == "battery_level_tempest"
-                or sensor[SENSOR_ID] == "battery_mode"
-                or sensor[SENSOR_ID] == "tempest_status"
-            ):
-                continue
-            # Modify name of Battery Device if Tempest Unit
-            if self.is_tempest and sensor[SENSOR_ID] == "battery":
-                sensor_name = "Voltage TEMPEST"
+        for sensor in DEVICE_SENSORS:
+            sensor_id = sensor.id
+            sensor_event = sensor.event
 
-            state_topic = "homeassistant/sensor/{}/{}/state".format(
-                DOMAIN, sensor[SENSOR_DEVICE]
+            if (
+                getattr(device, sensor.device_attr, ATTRIBUTE_MISSING)
+                is ATTRIBUTE_MISSING
+            ):
+                # Don't add sensors for devices that don't report on that attribute
+                continue
+
+            state_topic = MQTT_TOPIC_FORMAT.format(domain_serial, sensor_event, "state")
+            attr_topic = MQTT_TOPIC_FORMAT.format(
+                domain_serial, sensor_id, "attributes"
             )
-            attr_topic = "homeassistant/sensor/{}/{}/attributes".format(
-                DOMAIN, sensor[SENSOR_ID]
+            discovery_topic = MQTT_TOPIC_FORMAT.format(
+                domain_serial, sensor_id, "config"
             )
-            discovery_topic = "homeassistant/sensor/{}/{}/config".format(
-                DOMAIN, sensor[SENSOR_ID]
-            )
-            highlow_topic = "homeassistant/sensor/{}/{}/attributes".format(
-                DOMAIN, EVENT_HIGH_LOW
+            highlow_topic = MQTT_TOPIC_FORMAT.format(
+                domain_serial, EVENT_HIGH_LOW, "attributes"
             )
 
             attribution = OrderedDict()
-            payload = OrderedDict()
+            payload: OrderedDict | None = None
 
-            if filter_sensors is None or (
-                (sensor[SENSOR_ID] in filter_sensors) is not invert_filter
+            if self._filter_sensors is None or (
+                (sensor_id in self._filter_sensors) is not self._invert_filter
             ):
-                _LOGGER.info("SETTING UP %s SENSOR", sensor_name)
+                _LOGGER.info("Setting up %s sensor: %s", device.model, sensor.name)
 
                 # Payload
-                payload["name"] = "{}".format(f"WF {sensor_name}")
-                payload["unique_id"] = "{}-{}".format(serial_number, sensor[SENSOR_ID])
-                if sensor[units] is not None:
-                    payload["unit_of_measurement"] = sensor[units]
-                if sensor[SENSOR_CLASS] is not None:
-                    payload["device_class"] = sensor[SENSOR_CLASS]
-                if sensor[SENSOR_STATE_CLASS] is not None:
-                    payload["state_class"] = sensor[SENSOR_STATE_CLASS]
-                if sensor[SENSOR_ICON] is not None:
-                    payload["icon"] = f"mdi:{sensor[SENSOR_ICON]}"
-                payload["state_topic"] = state_topic
-                payload["value_template"] = "{{{{ value_json.{} }}}}".format(
-                    sensor[SENSOR_ID]
+                payload = self._get_sensor_payload(
+                    sensor=sensor,
+                    device=device,
+                    state_topic=state_topic,
+                    attr_topic=attr_topic,
                 )
-                payload["json_attributes_topic"] = attr_topic
-                payload["device"] = {
-                    "identifiers": ["WeatherFlow_{}".format(serial_number)],
-                    "connections": [["mac", serial_number]],
-                    "manufacturer": "WeatherFlow",
-                    "name": "WeatherFlow2MQTT",
-                    "model": f"WeatherFlow Weather Station V{VERSION}",
-                    "sw_version": firmware,
-                }
 
                 # Attributes
                 attribution[ATTR_ATTRIBUTION] = ATTRIBUTION
-                attribution[ATTR_BRAND] = BRAND
+
+                # Add description if needed
+                if sensor.has_description:
+                    payload["json_attributes_topic"] = state_topic
+                    template = OrderedDict()
+                    template = attribution
+                    template[
+                        "description"
+                    ] = f"{{{{ value_json.{sensor_id}_description }}}}"
+                    payload["json_attributes_template"] = json.dumps(template)
+
                 # Add additional attributes to some sensors
-                if sensor[SENSOR_ID] == "pressure_trend":
+                if sensor_id == "pressure_trend":
                     payload["json_attributes_topic"] = state_topic
                     template = OrderedDict()
                     template = attribution
                     template["trend_value"] = "{{ value_json.pressure_trend_value }}"
                     payload["json_attributes_template"] = json.dumps(template)
-                if sensor[SENSOR_ID] == "battery_mode":
-                    payload["json_attributes_topic"] = state_topic
-                    template = OrderedDict()
-                    template = attribution
-                    template["description"] = "{{ value_json.battery_desc }}"
-                    payload["json_attributes_template"] = json.dumps(template)
-                if sensor[SENSOR_ID] == "beaufort":
-                    payload["json_attributes_topic"] = state_topic
-                    template = OrderedDict()
-                    template = attribution
-                    template["description"] = "{{ value_json.beaufort_text }}"
-                    payload["json_attributes_template"] = json.dumps(template)
-                if sensor[SENSOR_EXTRA_ATT]:
+
+                # Add extra attributes if needed
+                if sensor.extra_att:
                     payload["json_attributes_topic"] = highlow_topic
                     template = OrderedDict()
                     template = attribution
-                    template["max_day"] = "{{{{ value_json.{}['max_day'] }}}}".format(
-                        sensor[SENSOR_ID]
-                    )
+                    template["max_day"] = f"{{{{ value_json.{sensor_id}['max_day'] }}}}"
                     template[
                         "max_day_time"
-                    ] = "{{{{ value_json.{}['max_day_time'] }}}}".format(
-                        sensor[SENSOR_ID]
-                    )
+                    ] = f"{{{{ value_json.{sensor_id}['max_day_time'] }}}}"
                     template[
                         "max_month"
-                    ] = "{{{{ value_json.{}['max_month'] }}}}".format(sensor[SENSOR_ID])
+                    ] = f"{{{{ value_json.{sensor_id}['max_month'] }}}}"
                     template[
                         "max_month_time"
-                    ] = "{{{{ value_json.{}['max_month_time'] }}}}".format(
-                        sensor[SENSOR_ID]
-                    )
-                    template["max_all"] = "{{{{ value_json.{}['max_all'] }}}}".format(
-                        sensor[SENSOR_ID]
-                    )
+                    ] = f"{{{{ value_json.{sensor_id}['max_month_time'] }}}}"
+                    template["max_all"] = f"{{{{ value_json.{sensor_id}['max_all'] }}}}"
                     template[
                         "max_all_time"
-                    ] = "{{{{ value_json.{}['max_all_time'] }}}}".format(
-                        sensor[SENSOR_ID]
-                    )
-                    if sensor[SENSOR_SHOW_MIN_ATT]:
+                    ] = f"{{{{ value_json.{sensor_id}['max_all_time'] }}}}"
+                    if sensor.show_min_att:
                         template[
                             "min_day"
-                        ] = "{{{{ value_json.{}['min_day'] }}}}".format(
-                            sensor[SENSOR_ID]
-                        )
+                        ] = f"{{{{ value_json.{sensor_id}['min_day'] }}}}"
                         template[
                             "min_day_time"
-                        ] = "{{{{ value_json.{}['min_day_time'] }}}}".format(
-                            sensor[SENSOR_ID]
-                        )
+                        ] = f"{{{{ value_json.{sensor_id}['min_day_time'] }}}}"
                         template[
                             "min_month"
-                        ] = "{{{{ value_json.{}['min_month'] }}}}".format(
-                            sensor[SENSOR_ID]
-                        )
+                        ] = f"{{{{ value_json.{sensor_id}['min_month'] }}}}"
                         template[
                             "min_month_time"
-                        ] = "{{{{ value_json.{}['min_month_time'] }}}}".format(
-                            sensor[SENSOR_ID]
-                        )
+                        ] = f"{{{{ value_json.{sensor_id}['min_month_time'] }}}}"
                         template[
                             "min_all"
-                        ] = "{{{{ value_json.{}['min_all'] }}}}".format(
-                            sensor[SENSOR_ID]
-                        )
+                        ] = f"{{{{ value_json.{sensor_id}['min_all'] }}}}"
                         template[
                             "min_all_time"
-                        ] = "{{{{ value_json.{}['min_all_time'] }}}}".format(
-                            sensor[SENSOR_ID]
-                        )
+                        ] = f"{{{{ value_json.{sensor_id}['min_all_time'] }}}}"
                     payload["json_attributes_template"] = json.dumps(template)
 
-            try:
-                await self.publish_mqtt(
-                    discovery_topic, json.dumps(payload), qos=1, retain=True
+            self._add_to_queue(
+                discovery_topic, json.dumps(payload or {}), qos=1, retain=True
+            )
+            self._add_to_queue(attr_topic, json.dumps(attribution), qos=1, retain=True)
+
+        if isinstance(device, HubDevice):
+            run_forecast = False
+            fcst_state_topic = MQTT_TOPIC_FORMAT.format(
+                DOMAIN, FORECAST_ENTITY, "state"
+            )
+            fcst_attr_topic = MQTT_TOPIC_FORMAT.format(
+                DOMAIN, FORECAST_ENTITY, "attributes"
+            )
+            for sensor in FORECAST_SENSORS:
+                discovery_topic = MQTT_TOPIC_FORMAT.format(DOMAIN, sensor.id, "config")
+                payload: OrderedDict | None = None
+                if self.forecast is not None:
+                    _LOGGER.info("Setting up %s sensor: %s", device.model, sensor.name)
+                    run_forecast = True
+                    payload = self._get_sensor_payload(
+                        sensor=sensor,
+                        device=device,
+                        state_topic=fcst_state_topic,
+                        attr_topic=fcst_attr_topic,
+                    )
+                self._add_to_queue(
+                    discovery_topic, json.dumps(payload or {}), qos=1, retain=True
                 )
-                await self.publish_mqtt(
-                    attr_topic, json.dumps(attribution), qos=1, retain=True
-                )
-            except Exception as e:
-                _LOGGER.error("Could not connect to MQTT Server. Error is: %s", e)
-                break
+
+            if run_forecast:
+                asyncio.ensure_future(self._update_forecast())
 
         # cleanup obsolete sensors
         for sensor in OBSOLETE_SENSORS:
-            try:
-                await self.publish_mqtt(
-                    topic=f"homeassistant/sensor/{DOMAIN}/{sensor}/config"
-                )
-            except Exception as e:
-                _LOGGER.error("Could not connect to MQTT Server. Error is: %s", e)
-                break
-
-    async def listen(self) -> None:
-        """Data update loop."""
-        data, (host, port) = await self.endpoint.receive()
-        json_response = json.loads(data.decode("utf-8"))
-        msg_type = json_response.get("type")
-
-        # Run New day function if Midnight
-        if self.current_day != datetime.today().weekday():
-            self.storage["rain_yesterday"] = self.storage["rain_today"]
-            self.storage["rain_duration_yesterday"] = self.storage[
-                "rain_duration_today"
-            ]
-            self.storage["rain_today"] = 0
-            self.storage["rain_duration_today"] = 0
-            self.storage["lightning_count_today"] = 0
-            self.last_midnight = self.cnv.utc_last_midnight()
-            self.sql.writeStorage(self.storage)
-            self.sql.dailyHousekeeping()
-            self.current_day = datetime.today().weekday()
-
-        # Update High and Low values if it is time
-        now = datetime.now().timestamp()
-        if (now - self.high_low_last_run) >= HIGH_LOW_TIMER:
-            highlow_topic = "homeassistant/sensor/{}/{}/attributes".format(
-                DOMAIN, EVENT_HIGH_LOW
+            self._add_to_queue(
+                topic=MQTT_TOPIC_FORMAT.format(domain_serial, sensor, "config")
             )
-            high_low_data = self.sql.readHighLow()
-            await self.publish_mqtt(
-                highlow_topic, json.dumps(high_low_data), qos=1, retain=True
-            )
-            self.high_low_last_run = datetime.now().timestamp()
 
+    async def _mqtt_queue_processor(self) -> None:
+        """MQTT queue processor."""
+        while True:
+            topic, payload, qos, retain = await self._queue.get()
+            await self._publish_mqtt(topic, payload, qos, retain)
+            self._queue.task_done()
+
+    async def _publish_mqtt(
+        self, topic: str, payload: str | None = None, qos: int = 0, retain: bool = False
+    ) -> None:
+        """Publish a MQTT topic with payload."""
+        try:
+            self.mqtt_client.publish(topic, payload, qos=qos, retain=retain)
+        except Exception as e:
+            _LOGGER.error("Could not connect to MQTT Server. Error is: %s", e)
+        await asyncio.sleep(0.01)
+
+    async def _update_forecast(self) -> None:
+        """Attempt to update the forecast."""
         # Update the Forecast if it is time and enabled
         if (
             self.forecast is not None
-            and ((now := datetime.now().timestamp()) - self.forecast_last_run)
+            and (
+                (now := datetime.now().timestamp())
+                - (0 if self.forecast_last_run is None else self.forecast_last_run)
+            )
             >= self.forecast.interval * 60
         ):
-            fcst_state_topic = "homeassistant/sensor/{}/{}/state".format(
-                DOMAIN, FORECAST_ENTITY
+            fcst_state_topic = MQTT_TOPIC_FORMAT.format(
+                DOMAIN, FORECAST_ENTITY, "state"
             )
-            fcst_attr_topic = "homeassistant/sensor/{}/{}/attributes".format(
-                DOMAIN, FORECAST_ENTITY
+            fcst_attr_topic = MQTT_TOPIC_FORMAT.format(
+                DOMAIN, FORECAST_ENTITY, "attributes"
             )
             condition_data, fcst_data = await self.forecast.update_forecast()
             if condition_data is not None:
-                await self.publish_mqtt(fcst_state_topic, json.dumps(condition_data))
-                await self.publish_mqtt(fcst_attr_topic, json.dumps(fcst_data))
-            self.forecast_last_run = now
-
-        # Process the data
-        if msg_type is not None:
-            data = OrderedDict()
-            state_topic = "homeassistant/sensor/{}/{}/state".format(DOMAIN, msg_type)
-            if msg_type in EVENT_RAPID_WIND:
-                now = datetime.now().timestamp()
-                if (now - self.rapid_last_run) >= self.rapid_wind_interval:
-                    obs = json_response["ob"]
-                    data["wind_speed"] = self.cnv.speed(obs[1])
-                    data["wind_bearing"] = obs[2]
-                    data["wind_direction"] = self.cnv.direction(obs[2])
-                    self.wind_speed = obs[1]
-                    await self.publish_mqtt(state_topic, json.dumps(data), retain=False)
-                    self.rapid_last_run = datetime.now().timestamp()
-            elif msg_type in EVENT_HUB_STATUS:
-                data["hub_status"] = self.cnv.humanize_time(
-                    json_response.get("uptime")
-                )
-                await self.publish_mqtt(state_topic, json.dumps(data), retain=False)
-                attr_topic = "homeassistant/sensor/{}/{}/attributes".format(
-                    DOMAIN, "hub_status"
-                )
-                attr = OrderedDict()
-                attr[ATTR_ATTRIBUTION] = ATTRIBUTION
-                attr[ATTR_BRAND] = BRAND
-                attr["serial_number"] = json_response.get("serial_number")
-                attr["firmware_revision"] = json_response.get("firmware_revision")
-                attr["rssi"] = json_response.get("rssi")
-                attr["reset_flags"] = json_response.get("reset_flags")
-                await self.publish_mqtt(attr_topic, json.dumps(attr), retain=False)
-                await asyncio.sleep(0.01)
-
-                # if show_debug:
-                _LOGGER.debug("HUB Reset Flags: %s", json_response.get("reset_flags"))
-            elif msg_type in EVENT_PRECIP_START:
-                obs = json_response["evt"]
-                self.storage["rain_start"] = obs[0]
-                self.sql.writeStorage(self.storage)
-            elif msg_type in EVENT_STRIKE:
-                obs = json_response["evt"]
-                self.sql.writeLightning()
-                self.storage["lightning_count_today"] += 1
-                self.storage["last_lightning_distance"] = self.cnv.distance(
-                    obs[1]
-                )
-                self.storage["last_lightning_energy"] = obs[2]
-                self.storage["last_lightning_time"] = time.time()
-                self.sql.writeStorage(self.storage)
-            elif msg_type in EVENT_AIR_DATA:
-                obs = json_response["obs"][0]
-                data["station_pressure"] = self.cnv.pressure(obs[1])
-                data["air_temperature"] = self.cnv.temperature(obs[2])
-                data["relative_humidity"] = obs[3]
-                data["lightning_strike_count"] = obs[4]
-                data["lightning_strike_count_1hr"] = self.sql.readLightningCount(1)
-                data["lightning_strike_count_3hr"] = self.sql.readLightningCount(3)
-                data["lightning_strike_count_today"] = self.storage[
-                    "lightning_count_today"
-                ]
-                data["lightning_strike_distance"] = self.storage[
-                    "last_lightning_distance"
-                ]
-                data["lightning_strike_energy"] = self.storage["last_lightning_energy"]
-                data["lightning_strike_time"] = self.cnv.utc_from_timestamp(
-                    self.storage["last_lightning_time"]
-                )
-                data["battery_air"] = round(obs[6], 2)
-                data["battery_level_air"] = self.cnv.battery_level(
-                    obs[6], False
-                )
-                data["sealevel_pressure"] = self.cnv.sea_level_pressure(
-                    obs[1], self.elevation
-                )
-                trend_text, trend_value = self.sql.readPressureTrend(
-                    data["sealevel_pressure"], self.translations
-                )
-                data["pressure_trend"] = trend_text
-                data["pressure_trend_value"] = trend_value
-                data["air_density"] = self.cnv.air_density(obs[2], obs[1])
-                data["dewpoint"] = self.cnv.dewpoint(obs[2], obs[3])
-                data["feelslike"] = self.cnv.feels_like(
-                    obs[2], obs[3], self.wind_speed
-                )
-                data["wetbulb"] = self.cnv.wetbulb(obs[2], obs[3], obs[1])
-                data["delta_t"] = self.cnv.delta_t(obs[2], obs[3], obs[1])
-                data["dewpoint_description"] = self.cnv.dewpoint_level(
-                    data["dewpoint"]
-                )
-                data["temperature_description"] = self.cnv.temperature_level(
-                    obs[2]
-                )
-                data["visibility"] = self.cnv.visibility(
-                    self.elevation, obs[2], obs[3]
-                )
-                data["absolute_humidity"] = self.cnv.absolute_humidity(
-                    obs[2], obs[3]
-                )
-                data["wbgt"] = self.cnv.wbgt(
-                    obs[2], obs[3], obs[1], self.solar_radiation
-                )
-                data["last_reset_midnight"] = self.last_midnight
-                await self.publish_mqtt(state_topic, json.dumps(data), retain=False)
-                self.sql.writePressure(data["sealevel_pressure"])
-                self.sql.updateHighLow(data)
-                # self.sql.updateDayData(data)
-                await asyncio.sleep(0.01)
-            elif msg_type in EVENT_SKY_DATA:
-                obs = json_response["obs"][0]
-                data["illuminance"] = obs[1]
-                data["uv"] = obs[2]
-                self.storage["rain_today"] += obs[3]
-                data["rain_today"] = self.cnv.rain(self.storage["rain_today"])
-                data["rain_yesterday"] = self.cnv.rain(
-                    self.storage["rain_yesterday"]
-                )
-                data["rain_duration_today"] = self.storage["rain_duration_today"]
-                data["rain_duration_yesterday"] = self.storage[
-                    "rain_duration_yesterday"
-                ]
-                data["rain_start_time"] = self.cnv.utc_from_timestamp(
-                    self.storage["rain_start"]
-                )
-                data["wind_lull"] = self.cnv.speed(obs[4])
-                data["wind_speed_avg"] = self.cnv.speed(obs[5])
-                data["wind_gust"] = self.cnv.speed(obs[6])
-                data["wind_bearing_avg"] = obs[7]
-                data["wind_direction_avg"] = self.cnv.direction(obs[7])
-                data["battery"] = round(obs[8], 2)
-                data["battery_level_sky"] = self.cnv.battery_level(
-                    obs[8], False
-                )
-                self.solar_radiation = obs[10]
-                data["solar_radiation"] = obs[10]
-                data["precipitation_type"] = self.cnv.rain_type(obs[12])
-                data["rain_rate"] = self.cnv.rain_rate(obs[3])
-                data["uv_description"] = self.cnv.uv_level(obs[2])
-                bft_value, bft_text = self.cnv.beaufort(obs[5])
-                data["beaufort"] = bft_value
-                data["beaufort_text"] = bft_text
-                data["last_reset_midnight"] = self.last_midnight
-                await self.publish_mqtt(state_topic, json.dumps(data), retain=False)
-                self.sql.updateHighLow(data)
-                # self.sql.updateDayData(data)
-                await asyncio.sleep(0.01)
-                if obs[3] > 0:
-                    self.storage["rain_duration_today"] += 1
-                    self.sql.writeStorage(self.storage)
-            elif msg_type in EVENT_TEMPEST_DATA:
-                obs = json_response["obs"][0]
-
-                state_topic = "homeassistant/sensor/{}/{}/state".format(
-                    DOMAIN, EVENT_SKY_DATA
-                )
-                data["wind_lull"] = self.cnv.speed(obs[1])
-                data["wind_speed_avg"] = self.cnv.speed(obs[2])
-                data["wind_gust"] = self.cnv.speed(obs[3])
-                data["wind_bearing_avg"] = obs[4]
-                data["wind_direction_avg"] = self.cnv.direction(obs[4])
-                data["illuminance"] = obs[9]
-                data["uv"] = obs[10]
-                data["solar_radiation"] = obs[11]
-                self.storage["rain_today"] += obs[12]
-                data["rain_today"] = self.cnv.rain(self.storage["rain_today"])
-                data["rain_yesterday"] = self.cnv.rain(
-                    self.storage["rain_yesterday"]
-                )
-                data["rain_duration_today"] = self.storage["rain_duration_today"]
-                data["rain_duration_yesterday"] = self.storage[
-                    "rain_duration_yesterday"
-                ]
-                data["rain_start_time"] = self.cnv.utc_from_timestamp(
-                    self.storage["rain_start"]
-                )
-                data["precipitation_type"] = self.cnv.rain_type(obs[13])
-                data["battery"] = round(obs[16], 2)
-                data["battery_level_tempest"] = self.cnv.battery_level(
-                    obs[16], True
-                )
-                bat_mode, bat_desc = self.cnv.battery_mode(obs[16], obs[11])
-                data["battery_mode"] = bat_mode
-                data["battery_desc"] = bat_desc
-                data["rain_rate"] = self.cnv.rain_rate(obs[12])
-                data["rain_intensity"] = self.cnv.rain_intensity(
-                    data["rain_rate"]
-                )
-                data["uv_description"] = self.cnv.uv_level(obs[10])
-                bft_value, bft_text = self.cnv.beaufort(obs[2])
-                data["beaufort"] = bft_value
-                data["beaufort_text"] = bft_text
-                data["last_reset_midnight"] = self.last_midnight
-                await self.publish_mqtt(state_topic, json.dumps(data))
-                self.sql.updateHighLow(data)
-                # self.sql.updateDayData(data)
-                await asyncio.sleep(0.01)
-
-                state_topic = "homeassistant/sensor/{}/{}/state".format(
-                    DOMAIN, EVENT_AIR_DATA
-                )
-                data = OrderedDict()
-                data["station_pressure"] = self.cnv.pressure(obs[6])
-                data["air_temperature"] = self.cnv.temperature(obs[7])
-                data["relative_humidity"] = obs[8]
-                data["lightning_strike_count"] = obs[15]
-                data["lightning_strike_count_1hr"] = self.sql.readLightningCount(1)
-                data["lightning_strike_count_3hr"] = self.sql.readLightningCount(3)
-                data["lightning_strike_count_today"] = self.storage[
-                    "lightning_count_today"
-                ]
-                data["lightning_strike_distance"] = self.storage[
-                    "last_lightning_distance"
-                ]
-                data["lightning_strike_energy"] = self.storage["last_lightning_energy"]
-                data["lightning_strike_time"] = self.cnv.utc_from_timestamp(
-                    self.storage["last_lightning_time"]
-                )
-                data["sealevel_pressure"] = self.cnv.sea_level_pressure(
-                    obs[6], self.elevation
-                )
-                trend_text, trend_value = self.sql.readPressureTrend(
-                    data["sealevel_pressure"], self.cnv.translations
-                )
-                data["pressure_trend"] = trend_text
-                data["pressure_trend_value"] = trend_value
-                data["air_density"] = self.cnv.air_density(obs[7], obs[6])
-                data["dewpoint"] = self.cnv.dewpoint(obs[7], obs[8])
-                data["feelslike"] = self.cnv.feels_like(
-                    obs[7], obs[8], self.wind_speed
-                )
-                data["wetbulb"] = self.cnv.wetbulb(obs[7], obs[8], obs[6])
-                data["delta_t"] = self.cnv.delta_t(obs[7], obs[8], obs[6])
-                data["visibility"] = self.cnv.visibility(
-                    self.elevation, obs[7], obs[8]
-                )
-                data["absolute_humidity"] = self.cnv.absolute_humidity(
-                    obs[7], obs[8]
-                )
-                data["wbgt"] = self.cnv.wbgt(obs[7], obs[8], obs[6], obs[11])
-                data["dewpoint_description"] = self.cnv.dewpoint_level(
-                    data["dewpoint"]
-                )
-                data["temperature_description"] = self.cnv.temperature_level(
-                    obs[7]
-                )
-                data["last_reset_midnight"] = self.last_midnight
-                await self.publish_mqtt(state_topic, json.dumps(data))
-                self.sql.writePressure(data["sealevel_pressure"])
-                self.sql.updateHighLow(data)
-                # self.sql.updateDayData(data)
-                await asyncio.sleep(0.01)
-
-                if obs[12] > 0:
-                    self.storage["rain_duration_today"] += 1
-                    self.sql.writeStorage(self.storage)
-            elif msg_type in EVENT_DEVICE_STATUS:
-                now = datetime.now()
-                serial_number = json_response.get("serial_number")
-                firmware_revision = json_response.get("firmware_revision")
-                voltage = json_response.get("voltage")
-                uptime = self.cnv.humanize_time(json_response.get("uptime"))
-                sensor_status = json_response.get("sensor_status")
-
-                device_status = None
-                if sensor_status is not None and sensor_status != 0:
-                    device_status = self.cnv.device_status(sensor_status)
-                    if device_status:  # and show_debug:
-                        _LOGGER.debug(
-                            "Device %s has reported a sensor fault. Reason: %s",
-                            serial_number,
-                            device_status,
-                        )
-
-                data = OrderedDict()
-                if (prefix := serial_number[0:2]) == "ST":
-                    device_name = "tempest_status"
-                elif prefix == "AR":
-                    device_name = "air_status"
-                elif prefix == "SK":
-                    device_name = "sky_status"
-
-                data[device_name] = uptime
-                attr_topic = "homeassistant/sensor/{}/{}/attributes".format(
-                    DOMAIN, device_name
-                )
-                attr = OrderedDict()
-                attr[ATTR_ATTRIBUTION] = ATTRIBUTION
-                attr[ATTR_BRAND] = BRAND
-                attr["serial_number"] = serial_number
-                attr["firmware_revision"] = firmware_revision
-                attr["voltage"] = voltage
-                attr["rssi"] = json_response.get("rssi")
-                attr["sensor_status"] = device_status
-                await self.publish_mqtt(attr_topic, json.dumps(attr))
-
-                await self.publish_mqtt(state_topic, json.dumps(data))
-
-                # if show_debug:
-                _LOGGER.debug(
-                    "DEVICE STATUS TRIGGERED AT %s\n  -- Device: %s\n -- Firmware Revision: %s\n -- Voltage: %s",
-                    str(now),
-                    serial_number,
-                    firmware_revision,
-                    voltage,
-                )
-            else:
-                _LOGGER.debug(
-                    "Received unknown message: %s - %s", msg_type, json_response
-                )
-
-            # if show_debug:
-            _LOGGER.debug(
-                "Event type %s has been processed, with payload: %s",
-                msg_type,
-                json.dumps(data),
-            )
-
-    async def publish_mqtt(self, topic, payload=None, qos=0, retain=False) -> None:
-        """Publish a MQTT topic with payload."""
-        self.mqtt_client.publish(topic, payload, qos=qos, retain=retain)
-        await asyncio.sleep(0.01)
+                self._add_to_queue(fcst_state_topic, json.dumps(condition_data))
+                self._add_to_queue(fcst_attr_topic, json.dumps(fcst_data))
+                self.forecast_last_run = now
 
 
 async def main():
@@ -779,7 +704,6 @@ async def main():
     _LOGGER.info("Timezone is %s", os.environ.get("TZ"))
 
     # Read the config Settings
-    is_tempest = truebool(config.get("TEMPEST_DEVICE", True))
     elevation = float(config.get("ELEVATION", 0))
     unit_system = config.get("UNIT_SYSTEM", UNITS_METRIC)
     rw_interval = int(config.get("RAPID_WIND_INTERVAL", 0))
@@ -810,7 +734,7 @@ async def main():
         else None
     )
 
-    if show_debug := truebool(config.get("DEBUG")):
+    if truebool(config.get("DEBUG")):
         logging.getLogger().setLevel(logging.DEBUG)
 
     if isinstance(filter_sensors := config.get("FILTER_SENSORS"), str):
@@ -822,7 +746,6 @@ async def main():
         filter_sensors = read_config()
 
     weatherflowmqtt = WeatherFlowMqtt(
-        is_tempest=is_tempest,
         elevation=elevation,
         unit_system=unit_system,
         rapid_wind_interval=rw_interval,
@@ -831,16 +754,15 @@ async def main():
         udp_config=udp_config,
         forecast_config=forecast_config,
         database_file=DATABASE,
+        filter_sensors=filter_sensors,
+        invert_filter=invert_filter,
     )
     await weatherflowmqtt.connect()
 
-    # Configure Sensors in MQTT
-    _LOGGER.info("Defining Sensors for Home Assistant")
-    await weatherflowmqtt.setup_sensors(filter_sensors, invert_filter)
-
     # Watch for message from the UDP socket
-    while True:
-        await weatherflowmqtt.listen()
+    while weatherflowmqtt.listener.is_listening:
+        await asyncio.sleep(60)
+        await weatherflowmqtt.run_time_based_updates()
 
 
 async def get_supervisor_configuration() -> dict[str, Any]:

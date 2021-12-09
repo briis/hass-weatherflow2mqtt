@@ -12,7 +12,6 @@ from aiohttp.client_exceptions import ClientError
 
 from .const import (
     ATTR_ATTRIBUTION,
-    ATTR_BRAND,
     ATTR_FORECAST_CONDITION,
     ATTR_FORECAST_HUMIDITY,
     ATTR_FORECAST_PRECIPITATION,
@@ -25,7 +24,6 @@ from .const import (
     ATTR_FORECAST_WIND_SPEED,
     ATTRIBUTION,
     BASE_URL,
-    BRAND,
     CONDITION_CLASSES,
     DEFAULT_TIMEOUT,
     FORECAST_HOURLY_HOURS,
@@ -33,7 +31,6 @@ from .const import (
     FORECAST_TYPE_HOURLY,
     LANGUAGE_ENGLISH,
     UNITS_METRIC,
-    UTC,
 )
 from .helpers import ConversionFunctions
 
@@ -119,7 +116,6 @@ class Forecast:
             # Process Daily Forecast
             fcst_data = OrderedDict()
             fcst_data[ATTR_ATTRIBUTION] = ATTRIBUTION
-            fcst_data[ATTR_BRAND] = BRAND
             fcst_data["temp_high_today"] = temp_high_today
             fcst_data["temp_low_today"] = temp_low_today
 
@@ -179,7 +175,9 @@ class Forecast:
                     continue
 
                 item = {
-                    ATTR_FORECAST_TIME: self.conversions.utc_from_timestamp(row["time"]),
+                    ATTR_FORECAST_TIME: self.conversions.utc_from_timestamp(
+                        row["time"]
+                    ),
                     "conditions": row["conditions"],
                     ATTR_FORECAST_CONDITION: self.ha_condition_value(row.get("icon")),
                     ATTR_FORECAST_TEMP: self.conversions.temperature(

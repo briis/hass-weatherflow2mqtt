@@ -1,17 +1,13 @@
- sensors:
+sensors:
   - absolute_humidity
-  - air_status
   - air_temperature
   - battery
-  - battery_air
-  - battery_level_air
-  - battery_level_sky
+  - battery_level
   - beaufort
   - dewpoint
   - dewpoint_description
   - delta_t
   - feelslike
-  - hub_status
   - illuminance
   - lightning_strike_count
   - lightning_strike_count_1hr
@@ -34,6 +30,7 @@
   - sky_status
   - solar_radiation
   - station_pressure
+  - status
   - temperature_description
   - uv
   - uv_description
