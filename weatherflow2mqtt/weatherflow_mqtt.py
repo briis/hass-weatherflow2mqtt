@@ -300,7 +300,7 @@ class WeatherFlowMqtt:
         payload["device"] = {
             "identifiers": [f"{DOMAIN}_{device.serial_number}"],
             "manufacturer": MANUFACTURER,
-            "name": device.model,
+            "name": f"{device.model} {device.serial_number}",
             "model": device.model,
             "sw_version": device.firmware_revision,
             "suggested_area": "Backyard",
