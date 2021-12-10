@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.1] - 2021-12-10
+
+### Fixed
+
+- Issue #109. Adding better handling of missing data points when parsing messages which may occure when the firmware revision changes, to ensure the program keeps running.
+
+
 ## [3.0.0] - 2021-12-10
 
 This is the first part of a major re-write of this Add-On. Please note **this version has breaking changes** so ensure to read these release notes carefully. Most of the changes are related to the internal workings of this Add-On, and as a user you will not see a change in the data available in Home Assistant. However the Device structure has changed, to make it possible to support multiple devices.
