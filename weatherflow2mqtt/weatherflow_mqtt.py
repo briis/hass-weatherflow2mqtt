@@ -689,8 +689,10 @@ class WeatherFlowMqtt:
             )
             condition_data, fcst_data = await self.forecast.update_forecast()
             if condition_data is not None:
-                self._add_to_queue(fcst_state_topic, json.dumps(condition_data))
-                self._add_to_queue(fcst_attr_topic, json.dumps(fcst_data))
+                self._add_to_queue(
+                    fcst_state_topic, json.dumps(condition_data), retain=True
+                )
+                self._add_to_queue(fcst_attr_topic, json.dumps(fcst_data), retain=True)
                 self.forecast_last_run = now
 
 
