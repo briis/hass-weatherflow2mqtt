@@ -658,7 +658,7 @@ class ConversionFunctions:
 
     def utc_from_timestamp(self, timestamp: int) -> str:
         """Return a UTC time from a timestamp."""
-        if timestamp is None:
+        if not timestamp:
             return None
 
         # Convert to String as MQTT does not like data objects
