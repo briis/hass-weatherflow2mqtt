@@ -306,8 +306,8 @@ class WeatherFlowMqtt:
         if (
             val := getattr(device, "rain_accumulation_previous_minute", None)
         ) is not None:
-            self.storage["rain_today"] += val.m
             if val.m > 0:
+                self.storage["rain_today"] += val.m
                 self.storage["rain_duration_today"] += 1
                 self.sql.writeStorage(self.storage)
 

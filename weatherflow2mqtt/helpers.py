@@ -189,7 +189,8 @@ class ConversionFunctions:
             lp = gravity / (gas_constant * atm_rate)
             cp = gas_constant * atm_rate / gravity
             up = math.pow(
-                1 + math.pow(std_pressure / press, cp) * (atm_rate * elev / std_temp), lp
+                1 + math.pow(std_pressure / press, cp) * (atm_rate * elev / std_temp),
+                lp,
             )
             sea_pressure = press * up
 
@@ -255,12 +256,6 @@ class ConversionFunctions:
             return round(AH * 0.000062, 6)
         """
         return round(AH, 2)
-
-    def rain_rate(self, value):
-        """Return rain rate per hour."""
-        if not value:
-            return 0
-        return self.rain(value * 60)
 
     def rain_intensity(self, rain_rate) -> str:
         """Return a descriptive value of the rain rate.
@@ -676,9 +671,7 @@ class ConversionFunctions:
 
     def utc_last_midnight(self) -> str:
         """Return UTC Time for last midnight."""
-        midnight = dt.datetime.combine(
-            dt.datetime.today(), dt.time.min
-        )
+        midnight = dt.datetime.combine(dt.datetime.today(), dt.time.min)
         midnight_ts = dt.datetime.timestamp(midnight)
         midnight_dt = self.utc_from_timestamp(midnight_ts)
         return midnight_dt
