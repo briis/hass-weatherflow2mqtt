@@ -8,7 +8,6 @@ All notable changes to this project will be documented in this file.
 
 - Issue #109. Adding better handling of missing data points when parsing messages which may occure when the firmware revision changes, to ensure the program keeps running.
 
-
 ## [3.0.0] - 2021-12-10
 
 This is the first part of a major re-write of this Add-On. Please note **this version has breaking changes** so ensure to read these release notes carefully. Most of the changes are related to the internal workings of this Add-On, and as a user you will not see a change in the data available in Home Assistant. However the Device structure has changed, to make it possible to support multiple devices.
@@ -20,17 +19,28 @@ The UDP communication with the WeatherFlow Hub, has, until this version, been bu
 
 ### Breaking Changes
 
-- With the support for multiple devices per Hub, we need to ensure that we know what data comes from what device. All sensors will as minimum get a new name. Previously sensors were named `WF Sensor Name` now they will be named `DEVICE SERIAL_NUMBER Sensor Name`. For existing installations the entity_id will not change, it will still be `sensor.wf_SENSOR_NAME`, but for new installations and new sensors it will be `sensor.devicename_serialnumber_SENSORNAME`
+- With the support for multiple devices per Hub, we need to ensure that we know what data comes from what device. All sensors will as minimum get a new name. Previously sensors were named `WF Sensor Name` now they will be named `DEVICE SERIAL_NUMBER Sensor Name`. The entity_id will be `sensor.devicename_serialnumber_SENSORNAME`.
+  - For existing installations with templates, automations, scripts or more that reference the previous `sensor.wf_` entities, it may be easier to perform the following steps after updating to this release than finding everywhere they have been used:
+    1. Ensure you have advanced mode turned on for your user profile<br/>[![Open your Home Assistant instance and show your Home Assistant user's profile.](https://my.home-assistant.io/badges/profile.svg)](https://my.home-assistant.io/redirect/profile/)
+    2. Navigate to integrations<br/>[![Open your Home Assistant instance and show your integrations.](https://my.home-assistant.io/badges/integrations.svg)](https://my.home-assistant.io/redirect/integrations/)
+    3. Click on "# devices" under your MQTT integration
+    4. Click on the "WeatherFlow2MQTT" device (or whatever you renamed it to) and then delete it
+    5. Go back to the MQTT devices and click on one of your sensor devices (Air, Sky, Tempest)
+    6. Edit the device name and set it to "WF"
+    7. Click on "UPDATE"
+    8. A popup will ask if you also want to rename the entity IDs (requires advanced mode as stated in step 1). Click on "RENAME" and Home Assistant will rename all the entities to `sensor.wf_`.
+       - If any entity IDs clash, you will get an error, but you can handle these individually as you deem necessary
+    9. You can then rename the device back to your sensor name. Just click "NO" on the popup asking to change the entity IDs or you will have to repeat the process
+    10. Repeat steps 5-9 for each sensor (mostly applicable to air & sky setups).
 - Status sensor is now a timestamp (referencing the up_since timestamp of the device) instead of the "humanized" time string since HA takes care of "humanizing" on the front end. This reduces state updates on the sensor since it doesn't have to update every time the uptime seconds change
-- `device`_status (where device is hub, air, sky or tempest) is now just status
-- similarly, battery_`sensor`, battery_level_`sensor` and voltage_`sensor` are now just battery, battery_level and voltage, respectively
-Other Changes:
+- `device`\_status (where device is hub, air, sky or tempest) is now just status
+- similarly, battery\_`sensor`, battery_level\_`sensor` and voltage\_`sensor` are now just battery, battery_level and voltage, respectively
 
 ### Changes
 
 - Multiple devices are now created in mqtt (one for each device)
 - Removes the TEMPEST_DEVICE environment variable/config option since we no longer need a user to tell us the type of device
-
+  - You will get a warning in the supervisor logs about the TEMPEST_DEVICE option being set until it is removed from your add-on configuration yaml.
 
 ## [2.2.5] - 2021-12-04
 
@@ -60,9 +70,10 @@ Other Changes:
 
 ## [2.2.1] - 2021-11-13
 
-@natekspencer further enhanced the Home Assistant Add-On experience and made this more compliant with the way the Add-On is setup. Also he added a new option to filter out sensors *you do not want*, plus a few other great things you can read about below. Thank you @natekspencer.
+@natekspencer further enhanced the Home Assistant Add-On experience and made this more compliant with the way the Add-On is setup. Also he added a new option to filter out sensors _you do not want_, plus a few other great things you can read about below. Thank you @natekspencer.
 
 ### Changed
+
 - **BREAKING CHANGE** Move mapped volume from /usr/local/config to /data to support supervisor. If you are not running the Home Assistant supervised version, then you will need change this `v $(pwd):/usr/local/config` to this `v $(pwd):/data`.
 - Move configuration defaults to code and gracefully handle retrieval
 - Cleanup environment variables in Dockerfile since they are now handled in code
@@ -70,14 +81,17 @@ Other Changes:
 - Remove TZ option from HA supervisor configuration since it should be loaded from HA
 
 ### Added
+
 - Add options for FILTER_SENSORS and INVERT_FILTER to avoid having to load a config.yaml file in HA
 - Add a list of obsolete sensors that can be used to handle cleanup of old sensors when they are deprecated and removed
 
 ## [2.2.0] - 2021-11-10
 
 ### Changed
+
 - **BREAKING CHANGE** The sensor `sensor.wf_uptime` has been renamed to `sensor.wf_hub_status`. This sensor will now have more attributes on the status of the Hub, like Serial Number, FW Version etc.
 
 ### Added
+
 - Thanks to @natekspencer this image can now be installed and managed from the Home Assistant Add-On store. This is not part of the default store yet, but to use it from the Add-On store, just click the button 'ADD REPOSITORY' in the top of the README.md file. **NOTE** Remember to stop/remove the container running outside the Add-On store before attempting to install.
 - Depending on what HW you have, there will be 1 or 2 new sensors created, called either `sensor.wf_tempest_status` (If you have a Tempest device) or `sensor.wf_air_status` and `sensor.wf_sky_status`. The state of the sensors will display the Uptime of each device, and then there will attributes giving more details about each HW device.
