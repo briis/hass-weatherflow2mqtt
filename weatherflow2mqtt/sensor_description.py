@@ -339,7 +339,7 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         event=EVENT_OBSERVATION,
         extra_att=True,
         last_reset=True,
-        attr="rain_amount_previous_minute",
+        attr="rain_accumulation_previous_minute",
         storage_field="rain_duration_today",
     ),
     StorageSensorDescription(
@@ -349,7 +349,7 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         unit_i="min",
         icon="timeline-clock-outline",
         event=EVENT_OBSERVATION,
-        attr="rain_amount_previous_minute",
+        attr="rain_accumulation_previous_minute",
         storage_field="rain_duration_yesterday",
     ),
     SensorDescription(
@@ -357,9 +357,9 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         name="Rain Intensity",
         icon="text-box-outline",
         event=EVENT_OBSERVATION,
-        attr="rain_amount_previous_minute",
+        attr="rain_accumulation_previous_minute",
         custom_fn=lambda cnv, device: cnv.rain_intensity(
-            cnv.rain_rate(device.rain_amount_previous_minute.m)
+            cnv.rain_rate(device.rain_accumulation_previous_minute.m)
         ),
     ),
     SensorDescription(
@@ -371,9 +371,9 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         icon="weather-pouring",
         event=EVENT_OBSERVATION,
         extra_att=True,
-        attr="rain_amount_previous_minute",
+        attr="rain_accumulation_previous_minute",
         custom_fn=lambda cnv, device: cnv.rain_rate(
-            device.rain_amount_previous_minute.m
+            device.rain_accumulation_previous_minute.m
         ),
     ),
     StorageSensorDescription(
@@ -395,7 +395,7 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         icon="weather-pouring",
         event=EVENT_OBSERVATION,
         last_reset=True,
-        attr="rain_amount_previous_minute",
+        attr="rain_accumulation_previous_minute",
         storage_field="rain_today",
         cnv_fn=lambda cnv, val: cnv.rain(val),
     ),
@@ -406,7 +406,7 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         unit_i="in",
         icon="weather-pouring",
         event=EVENT_OBSERVATION,
-        attr="rain_amount_previous_minute",
+        attr="rain_accumulation_previous_minute",
         storage_field="rain_yesterday",
         cnv_fn=lambda cnv, val: cnv.rain(val),
     ),
