@@ -268,7 +268,7 @@ class WeatherFlowMqtt:
         """Construct and return a sensor payload."""
         payload = OrderedDict()
 
-        payload["name"] = f"WF {sensor.name}"
+        payload["name"] = f"{device.model} {device.serial_number} {sensor.name}"
         payload["unique_id"] = f"{device.serial_number}-{sensor.id}"
         if (units := sensor.unit_i if self.is_imperial else sensor.unit_m) is not None:
             payload["unit_of_measurement"] = units
