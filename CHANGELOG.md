@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.0] - 2021-12-10
+
+This is the first part of a major re-write of this Add-On. Please note **this version has breaking changes** so ensure to read these release notes carefully. Most of the changes are related to the internal workings of this Add-On, and as a user you will not see a change in the data available in Home Assistant. However the Device structure has changed, to make it possible to support multiple devices.
+
+I want to extend a big THANK YOU to @natekspencer, who has done all the work on these changes.
+
+The UDP communication with the WeatherFlow Hub, has, until this version, been built in to the Add-On. This has now been split out to a separate module, which makes it a lot easier to maintain new data points going forward.
+@natekspencer has done a tremendous job in modernizing the [`pyweatherflowudp`](https://github.com/briis/pyweatherflowudp) package. This package does all the UDP communication with the WeatherFlow hub and using this module, we can now remove all that code from this Add-On.
+
+### Breaking Changes
+
+- With the support for multiple devices per Hub, we need to ensure that we know what data comes from what device. All sensors will as minimum get a new name. Previously sensors were named `WF Sensor Name` now they will be named `DEVICE SERIAL_NUMBER Sensor Name`. For existing installations the entity_id will not change, it will still be `sensor.wf_SENSOR_NAME`, but for new installations and new sensors it will be `sensor.devicename_serialnumber_SENSORNAME`
+- Status sensor is now a timestamp (referencing the up_since timestamp of the device) instead of the "humanized" time string since HA takes care of "humanizing" on the front end. This reduces state updates on the sensor since it doesn't have to update every time the uptime seconds change
+- `device`_status (where device is hub, air, sky or tempest) is now just status
+- similarly, battery_`sensor`, battery_level_`sensor` and voltage_`sensor` are now just battery, battery_level and voltage, respectively
+Other Changes:
+
+### Changes
+
+- Multiple devices are now created in mqtt (one for each device)
+- Removes the TEMPEST_DEVICE environment variable/config option since we no longer need a user to tell us the type of device
+
+
 ## [2.2.5] - 2021-12-04
 
 ### Fixed
