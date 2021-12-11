@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.2] - 2021-12-11
+
+### Changes
+
+- Uses rain_rate from the pyweatherflowudp package now that it is available. This should solve an issue with Heavy Rain #100 where, when on imperial, rain rate was first converted to in/hr but then passed to rain intensity which is based on a mm/hr rate
+- Sends the forecast data to MQTT with a retain=True value so that it can be restored on a Home Assistant restart instead of waiting for the next forecast update
+- Reduces the loops for setting up the hub sensor by separating device and hub sensors
+- Handles unknown timestamps for last lightning/rain so that it shows up as "Unknown" instead of "52 years ago" when there is no value
+- Changes the number of Decimal places for Air Density to 5.
+
+
 ## [3.0.1] - 2021-12-10
 
 ### Fixed
