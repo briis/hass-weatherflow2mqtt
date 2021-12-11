@@ -72,6 +72,7 @@ _LOGGER = logging.getLogger(__name__)
 ATTRIBUTE_MISSING = object()
 MQTT_TOPIC_FORMAT = "homeassistant/sensor/{}/{}/{}"
 DEVICE_SERIAL_FORMAT = "{}_{}"
+UNKNOWN = "unknown"
 
 
 @dataclass
@@ -379,6 +380,10 @@ class WeatherFlowMqtt:
 
                     if (fn := sensor.cnv_fn) is not None:
                         attr = fn(self.cnv, attr)
+
+                # Handle timestamp None value
+                if sensor.device_class == DEVICE_CLASS_TIMESTAMP and attr is None:
+                    attr = UNKNOWN
 
                 # Set the attribute in the payload
                 data[sensor.id] = attr
