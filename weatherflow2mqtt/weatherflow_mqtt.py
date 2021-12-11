@@ -41,6 +41,7 @@ from .const import (
     ATTR_ATTRIBUTION,
     ATTRIBUTION,
     DATABASE,
+    DEVICE_CLASS_TIMESTAMP,
     DOMAIN,
     EVENT_HIGH_LOW,
     EXTERNAL_DIRECTORY,
@@ -57,6 +58,7 @@ from .helpers import ConversionFunctions, read_config, truebool
 from .sensor_description import (
     DEVICE_SENSORS,
     FORECAST_SENSORS,
+    HUB_SENSORS,
     OBSOLETE_SENSORS,
     BaseSensorDescription,
     SensorDescription,
@@ -515,8 +517,14 @@ class WeatherFlowMqtt:
         serial_number = device.serial_number
         domain_serial = DEVICE_SERIAL_FORMAT.format(DOMAIN, serial_number)
 
+        SENSORS = (
+            DEVICE_SENSORS
+            if isinstance(device, WeatherFlowSensorDevice)
+            else HUB_SENSORS
+        )
+
         # Create the config for the Sensors
-        for sensor in DEVICE_SENSORS:
+        for sensor in SENSORS:
             sensor_id = sensor.id
             sensor_event = sensor.event
 

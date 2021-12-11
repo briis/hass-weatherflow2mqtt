@@ -109,7 +109,17 @@ class StorageSensorDescription(BaseSensorDescription):
         return storage[self.storage_field]
 
 
+STATUS_SENSOR = SensorDescription(
+    id="status",
+    name="Status",
+    icon="clock-outline",
+    event=EVENT_STATUS_UPDATE,
+    attr="uptime",
+    device_class=DEVICE_CLASS_TIMESTAMP,
+)
+
 DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
+    STATUS_SENSOR,
     SensorDescription(
         id="absolute_humidity",
         name="Absolute Humidity",
@@ -457,14 +467,6 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         decimals=(2, 3),
     ),
     SensorDescription(
-        id="status",
-        name="Status",
-        icon="clock-outline",
-        event=EVENT_STATUS_UPDATE,
-        attr="uptime",
-        device_class=DEVICE_CLASS_TIMESTAMP,
-    ),
-    SensorDescription(
         id="temperature_description",
         name="Temperature Level",
         icon="text-box-outline",
@@ -610,6 +612,8 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         decimals=(1, 2),
     ),
 )
+
+HUB_SENSORS: tuple[BaseSensorDescription, ...] = (STATUS_SENSOR,)
 
 FORECAST_SENSORS: tuple[BaseSensorDescription, ...] = (
     SensorDescription(
