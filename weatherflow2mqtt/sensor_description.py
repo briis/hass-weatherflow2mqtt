@@ -131,7 +131,7 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         unit_i="lb/ft^3",
         state_class=STATE_CLASS_MEASUREMENT,
         icon="air-filter",
-        decimals=(2, 4),
+        decimals=(5, 5),
     ),
     SensorDescription(
         id="air_temperature",
