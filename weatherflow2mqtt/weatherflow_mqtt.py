@@ -41,6 +41,7 @@ from .const import (
     ATTR_ATTRIBUTION,
     ATTRIBUTION,
     DATABASE,
+    DEVICE_CLASS_TIMESTAMP,
     DOMAIN,
     EVENT_HIGH_LOW,
     EXTERNAL_DIRECTORY,
@@ -57,6 +58,7 @@ from .helpers import ConversionFunctions, read_config, truebool
 from .sensor_description import (
     DEVICE_SENSORS,
     FORECAST_SENSORS,
+    HUB_SENSORS,
     OBSOLETE_SENSORS,
     BaseSensorDescription,
     SensorDescription,
@@ -70,6 +72,7 @@ _LOGGER = logging.getLogger(__name__)
 ATTRIBUTE_MISSING = object()
 MQTT_TOPIC_FORMAT = "homeassistant/sensor/{}/{}/{}"
 DEVICE_SERIAL_FORMAT = "{}_{}"
+UNKNOWN = "unknown"
 
 
 @dataclass
@@ -306,8 +309,8 @@ class WeatherFlowMqtt:
         if (
             val := getattr(device, "rain_accumulation_previous_minute", None)
         ) is not None:
-            self.storage["rain_today"] += val.m
             if val.m > 0:
+                self.storage["rain_today"] += val.m
                 self.storage["rain_duration_today"] += 1
                 self.sql.writeStorage(self.storage)
 
@@ -377,6 +380,10 @@ class WeatherFlowMqtt:
 
                     if (fn := sensor.cnv_fn) is not None:
                         attr = fn(self.cnv, attr)
+
+                # Handle timestamp None value
+                if sensor.device_class == DEVICE_CLASS_TIMESTAMP and attr is None:
+                    attr = UNKNOWN
 
                 # Set the attribute in the payload
                 data[sensor.id] = attr
@@ -515,8 +522,14 @@ class WeatherFlowMqtt:
         serial_number = device.serial_number
         domain_serial = DEVICE_SERIAL_FORMAT.format(DOMAIN, serial_number)
 
+        SENSORS = (
+            DEVICE_SENSORS
+            if isinstance(device, WeatherFlowSensorDevice)
+            else HUB_SENSORS
+        )
+
         # Create the config for the Sensors
-        for sensor in DEVICE_SENSORS:
+        for sensor in SENSORS:
             sensor_id = sensor.id
             sensor_event = sensor.event
 
@@ -689,8 +702,10 @@ class WeatherFlowMqtt:
             )
             condition_data, fcst_data = await self.forecast.update_forecast()
             if condition_data is not None:
-                self._add_to_queue(fcst_state_topic, json.dumps(condition_data))
-                self._add_to_queue(fcst_attr_topic, json.dumps(fcst_data))
+                self._add_to_queue(
+                    fcst_state_topic, json.dumps(condition_data), retain=True
+                )
+                self._add_to_queue(fcst_attr_topic, json.dumps(fcst_data), retain=True)
                 self.forecast_last_run = now
 
 
