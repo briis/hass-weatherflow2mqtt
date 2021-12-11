@@ -109,7 +109,17 @@ class StorageSensorDescription(BaseSensorDescription):
         return storage[self.storage_field]
 
 
+STATUS_SENSOR = SensorDescription(
+    id="status",
+    name="Status",
+    icon="clock-outline",
+    event=EVENT_STATUS_UPDATE,
+    attr="uptime",
+    device_class=DEVICE_CLASS_TIMESTAMP,
+)
+
 DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
+    STATUS_SENSOR,
     SensorDescription(
         id="absolute_humidity",
         name="Absolute Humidity",
@@ -358,23 +368,20 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         icon="text-box-outline",
         event=EVENT_OBSERVATION,
         attr="rain_accumulation_previous_minute",
-        custom_fn=lambda cnv, device: cnv.rain_intensity(
-            cnv.rain_rate(device.rain_accumulation_previous_minute.m)
-        ),
+        custom_fn=lambda cnv, device: cnv.rain_intensity(device.rain_rate.m),
     ),
     SensorDescription(
         id="rain_rate",
         name="Rain Rate",
         unit_m="mm/h",
+        unit_m_cnv="mm/hr",
         unit_i="in/h",
+        unit_i_cnv="in/hr",
         state_class=STATE_CLASS_MEASUREMENT,
         icon="weather-pouring",
         event=EVENT_OBSERVATION,
         extra_att=True,
-        attr="rain_accumulation_previous_minute",
-        custom_fn=lambda cnv, device: cnv.rain_rate(
-            device.rain_accumulation_previous_minute.m
-        ),
+        decimals=(2, 2),
     ),
     StorageSensorDescription(
         id="rain_start_time",
@@ -458,14 +465,6 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         state_class=STATE_CLASS_MEASUREMENT,
         event=EVENT_OBSERVATION,
         decimals=(2, 3),
-    ),
-    SensorDescription(
-        id="status",
-        name="Status",
-        icon="clock-outline",
-        event=EVENT_STATUS_UPDATE,
-        attr="uptime",
-        device_class=DEVICE_CLASS_TIMESTAMP,
     ),
     SensorDescription(
         id="temperature_description",
@@ -613,6 +612,8 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         decimals=(1, 2),
     ),
 )
+
+HUB_SENSORS: tuple[BaseSensorDescription, ...] = (STATUS_SENSOR,)
 
 FORECAST_SENSORS: tuple[BaseSensorDescription, ...] = (
     SensorDescription(
