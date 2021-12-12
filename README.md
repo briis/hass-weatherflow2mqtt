@@ -1,6 +1,6 @@
 # WeatherFlow-2-MQTT for Home Assistant
 
-![](https://img.shields.io/docker/v/briis/weatherflow2mqtt/latest?style=flat-square) ![](https://img.shields.io/docker/pulls/briis/weatherflow2mqtt?style=flat-square) [![](https://img.shields.io/badge/COMMUNITY-FORUM-success?style=flat-square)](https://community.weatherflow.com/t/weatherflow2mqtt-for-home-assistant/13718)
+![](https://img.shields.io/docker/v/briis/weatherflow2mqtt/latest?style=flat-square) ![](https://img.shields.io/docker/pulls/briis/weatherflow2mqtt?style=flat-square) [![](https://img.shields.io/badge/COMMUNITY-FORUM-success?style=flat-square)](https://community.weatherflow.com/t/weatherflow2mqtt-for-home-assistant/13718) [![](https://img.shields.io/discord/918948431714738257)](https://discord.gg/n5nw8QXM8b)
 
 [![Open your Home Assistant instance and show the add add-on repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fbriis%2Fhass-weatherflow2mqtt)
 
