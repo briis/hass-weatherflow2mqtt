@@ -209,18 +209,6 @@ class WeatherFlowMqtt:
             self.sql.dailyHousekeeping()
             self.current_day = datetime.today().weekday()
 
-        # Update High and Low values if it is time
-        now = datetime.now().timestamp()
-        if (now - self.high_low_last_run) >= HIGH_LOW_TIMER:
-            highlow_topic = MQTT_TOPIC_FORMAT.format(
-                DOMAIN, EVENT_HIGH_LOW, "attributes"
-            )
-            high_low_data = self.sql.readHighLow()
-            self._add_to_queue(
-                highlow_topic, json.dumps(high_low_data), qos=1, retain=True
-            )
-            self.high_low_last_run = datetime.now().timestamp()
-
         await self._update_forecast()
 
     def _add_to_queue(
@@ -406,6 +394,8 @@ class WeatherFlowMqtt:
         self.sql.updateHighLow(data)
         # self.sql.updateDayData(data)
 
+        self._send_high_low_update(device=device)
+
     def _handle_rain_start_event(
         self, device: SkySensorType, event: RainStartEvent
     ) -> None:
@@ -494,6 +484,21 @@ class WeatherFlowMqtt:
         self.sql.upgradeDatabase()
 
         self.storage = self.sql.readStorage()
+
+    def _send_high_low_update(self, device: WeatherFlowSensorDevice) -> None:
+        # Update High and Low values if it is time
+        now = datetime.now().timestamp()
+        if (now - self.high_low_last_run) >= HIGH_LOW_TIMER:
+            highlow_topic = MQTT_TOPIC_FORMAT.format(
+                DEVICE_SERIAL_FORMAT.format(DOMAIN, device.serial_number),
+                EVENT_HIGH_LOW,
+                "attributes",
+            )
+            high_low_data = self.sql.readHighLow()
+            self._add_to_queue(
+                highlow_topic, json.dumps(high_low_data), qos=1, retain=True
+            )
+            self.high_low_last_run = datetime.now().timestamp()
 
     def _setup_mqtt_client(self) -> MqttClient:
         """Initialize MQTT client."""
