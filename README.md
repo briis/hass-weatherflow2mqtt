@@ -10,6 +10,9 @@ Everything runs in a pre-built Docker Container, so installation is very simple.
 
 There is support for both the AIR & SKY devices and the TEMPEST device.
 
+Please review Breaking Changes prior to updating your instance.  Breaking changes will be listed in https://github.com/briis/hass-weatherflow2mqtt/blob/main/CHANGELOG.md
+See Breaking Changes section under [3.0.0] 2021-12-10 for steps to updating naming conventions.
+
 ## Table of Contents
 
 1. [Installation](#installation)
