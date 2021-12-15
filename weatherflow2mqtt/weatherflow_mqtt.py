@@ -193,7 +193,7 @@ class WeatherFlowMqtt:
         self._queue_task = asyncio.ensure_future(self._mqtt_queue_processor())
 
     async def run_time_based_updates(self) -> None:
-        """Data update loop."""
+        """Run some time based updates."""
         # Run New day function if Midnight
         if self.current_day != datetime.today().weekday():
             self.storage["rain_yesterday"] = self.storage["rain_today"]
@@ -709,18 +709,15 @@ class WeatherFlowMqtt:
             )
             >= self.forecast.interval * 60
         ):
-            fcst_state_topic = MQTT_TOPIC_FORMAT.format(
-                DOMAIN, FORECAST_ENTITY, "state"
-            )
-            fcst_attr_topic = MQTT_TOPIC_FORMAT.format(
-                DOMAIN, FORECAST_ENTITY, "attributes"
-            )
-            condition_data, fcst_data = await self.forecast.update_forecast()
-            if condition_data is not None:
-                self._add_to_queue(
-                    fcst_state_topic, json.dumps(condition_data), retain=True
-                )
-                self._add_to_queue(fcst_attr_topic, json.dumps(fcst_data), retain=True)
+            if any(forecast := await self.forecast.update_forecast()):
+                _LOGGER.debug("Sending forecast data to MQTT")
+                for topic, data in zip(("state", "attributes"), forecast):
+                    self._add_to_queue(
+                        MQTT_TOPIC_FORMAT.format(DOMAIN, FORECAST_ENTITY, topic),
+                        json.dumps(data),
+                        qos=1,
+                        retain=True,
+                    )
                 self.forecast_last_run = now
 
 
