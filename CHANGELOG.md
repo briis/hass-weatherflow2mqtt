@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.3] - 2021-12-15
+
+### Changes
+
+- Add discord link to README
+- Remove obsolete references to obs[] data points
+
+### Fixed
+
+- Handle timestamps in their own event so they are only updated when a value exists. Fixing #117
+- Fix high/low update
+
 ## [3.0.2] - 2021-12-11
 
 ### Changes
