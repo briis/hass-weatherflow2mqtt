@@ -71,8 +71,7 @@ _LOGGER = logging.getLogger(__name__)
 
 ATTRIBUTE_MISSING = object()
 MQTT_TOPIC_FORMAT = "homeassistant/sensor/{}/{}/{}"
-DEVICE_SERIAL_FORMAT = "{}_{}"
-UNKNOWN = "unknown"
+DEVICE_SERIAL_FORMAT = f"{DOMAIN}_{{}}"
 
 
 @dataclass
@@ -209,18 +208,6 @@ class WeatherFlowMqtt:
             self.sql.dailyHousekeeping()
             self.current_day = datetime.today().weekday()
 
-        # Update High and Low values if it is time
-        now = datetime.now().timestamp()
-        if (now - self.high_low_last_run) >= HIGH_LOW_TIMER:
-            highlow_topic = MQTT_TOPIC_FORMAT.format(
-                DOMAIN, EVENT_HIGH_LOW, "attributes"
-            )
-            high_low_data = self.sql.readHighLow()
-            self._add_to_queue(
-                highlow_topic, json.dumps(high_low_data), qos=1, retain=True
-            )
-            self.high_low_last_run = datetime.now().timestamp()
-
         await self._update_forecast()
 
     def _add_to_queue(
@@ -314,21 +301,24 @@ class WeatherFlowMqtt:
                 self.storage["rain_duration_today"] += 1
                 self.sql.writeStorage(self.storage)
 
-        state_topic = MQTT_TOPIC_FORMAT.format(
-            DEVICE_SERIAL_FORMAT.format(DOMAIN, device.serial_number),
-            EVENT_OBSERVATION,
-            "state",
-        )
-        data = OrderedDict()
+        event_data: dict[str, OrderedDict] = {}
 
         for sensor in DEVICE_SENSORS:
             # Skip if this device is missing the attribute
             if (
-                attr := getattr(device, sensor.device_attr, ATTRIBUTE_MISSING)
-            ) is ATTRIBUTE_MISSING or (
-                sensor.id == "battery_mode" and not isinstance(device, TempestDevice)
+                sensor.event in (EVENT_RAPID_WIND, EVENT_STATUS_UPDATE)
+                or (attr := getattr(device, sensor.device_attr, ATTRIBUTE_MISSING))
+                is ATTRIBUTE_MISSING
+                or (
+                    sensor.id == "battery_mode"
+                    and not isinstance(device, TempestDevice)
+                )
             ):
                 continue
+
+            if sensor.event not in event_data:
+                event_data[sensor.event] = OrderedDict()
+
             try:
                 if isinstance(sensor, SensorDescription):
                     # TODO: Handle unique data points more elegantly...
@@ -349,7 +339,10 @@ class WeatherFlowMqtt:
 
                         # Check if a description is included
                         if sensor.has_description and isinstance(attr, tuple):
-                            attr, data[f"{sensor.id}_description"] = attr
+                            (
+                                attr,
+                                event_data[sensor.event][f"{sensor.id}_description"],
+                            ) = attr
 
                     # Check if the attr is a Quantity object
                     elif isinstance(attr, Quantity):
@@ -383,12 +376,14 @@ class WeatherFlowMqtt:
 
                 # Handle timestamp None value
                 if sensor.device_class == DEVICE_CLASS_TIMESTAMP and attr is None:
-                    attr = UNKNOWN
+                    continue
 
                 # Set the attribute in the payload
-                data[sensor.id] = attr
+                event_data[sensor.event][sensor.id] = attr
             except Exception as ex:
                 _LOGGER.error("Error setting sensor data for %s: %s", sensor.id, ex)
+
+        data = event_data[EVENT_OBSERVATION]
 
         # TODO: Handle unique data points more elegantly...
         if data["sealevel_pressure"]:
@@ -402,9 +397,17 @@ class WeatherFlowMqtt:
 
         data["last_reset_midnight"] = self.last_midnight
 
-        self._add_to_queue(state_topic, json.dumps(data))
-        self.sql.updateHighLow(data)
-        # self.sql.updateDayData(data)
+        for (evt, data) in event_data.items():
+            if data:
+                state_topic = MQTT_TOPIC_FORMAT.format(
+                    DEVICE_SERIAL_FORMAT.format(device.serial_number), evt, "state"
+                )
+                self._add_to_queue(state_topic, json.dumps(data))
+
+        self.sql.updateHighLow(event_data[EVENT_OBSERVATION])
+        # self.sql.updateDayData(event_data[EVENT_OBSERVATION])
+
+        self._send_high_low_update(device=device)
 
     def _handle_rain_start_event(
         self, device: SkySensorType, event: RainStartEvent
@@ -417,7 +420,7 @@ class WeatherFlowMqtt:
         self, device: HubDevice | WeatherFlowSensorDevice, event: CustomEvent
     ) -> None:
         """Handle a hub status event."""
-        device_serial = DEVICE_SERIAL_FORMAT.format(DOMAIN, device.serial_number)
+        device_serial = DEVICE_SERIAL_FORMAT.format(device.serial_number)
 
         state_topic = MQTT_TOPIC_FORMAT.format(
             device_serial, EVENT_STATUS_UPDATE, "state"
@@ -470,9 +473,7 @@ class WeatherFlowMqtt:
         """Handle a wind event."""
         data = OrderedDict()
         state_topic = MQTT_TOPIC_FORMAT.format(
-            DEVICE_SERIAL_FORMAT.format(DOMAIN, device.serial_number),
-            EVENT_RAPID_WIND,
-            "state",
+            DEVICE_SERIAL_FORMAT.format(device.serial_number), EVENT_RAPID_WIND, "state"
         )
         now = datetime.now().timestamp()
         if (now - self.rapid_last_run) >= self.rapid_wind_interval:
@@ -494,6 +495,21 @@ class WeatherFlowMqtt:
         self.sql.upgradeDatabase()
 
         self.storage = self.sql.readStorage()
+
+    def _send_high_low_update(self, device: WeatherFlowSensorDevice) -> None:
+        # Update High and Low values if it is time
+        now = datetime.now().timestamp()
+        if (now - self.high_low_last_run) >= HIGH_LOW_TIMER:
+            highlow_topic = MQTT_TOPIC_FORMAT.format(
+                DEVICE_SERIAL_FORMAT.format(device.serial_number),
+                EVENT_HIGH_LOW,
+                "attributes",
+            )
+            high_low_data = self.sql.readHighLow()
+            self._add_to_queue(
+                highlow_topic, json.dumps(high_low_data), qos=1, retain=True
+            )
+            self.high_low_last_run = datetime.now().timestamp()
 
     def _setup_mqtt_client(self) -> MqttClient:
         """Initialize MQTT client."""
@@ -520,7 +536,7 @@ class WeatherFlowMqtt:
     def _setup_sensors(self, device: WeatherFlowDevice) -> None:
         """Create Sensors in Home Assistant."""
         serial_number = device.serial_number
-        domain_serial = DEVICE_SERIAL_FORMAT.format(DOMAIN, serial_number)
+        domain_serial = DEVICE_SERIAL_FORMAT.format(serial_number)
 
         SENSORS = (
             DEVICE_SENSORS
@@ -546,9 +562,6 @@ class WeatherFlowMqtt:
             )
             discovery_topic = MQTT_TOPIC_FORMAT.format(
                 domain_serial, sensor_id, "config"
-            )
-            highlow_topic = MQTT_TOPIC_FORMAT.format(
-                domain_serial, EVENT_HIGH_LOW, "attributes"
             )
 
             attribution = OrderedDict()
@@ -590,7 +603,9 @@ class WeatherFlowMqtt:
 
                 # Add extra attributes if needed
                 if sensor.extra_att:
-                    payload["json_attributes_topic"] = highlow_topic
+                    payload["json_attributes_topic"] = MQTT_TOPIC_FORMAT.format(
+                        domain_serial, EVENT_HIGH_LOW, "attributes"
+                    )
                     template = OrderedDict()
                     template = attribution
                     template["max_day"] = f"{{{{ value_json.{sensor_id}['max_day'] }}}}"
