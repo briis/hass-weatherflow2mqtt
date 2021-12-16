@@ -11,6 +11,7 @@ import os
 import sys
 from dataclasses import dataclass
 from datetime import datetime
+from math import ceil
 from typing import Any, OrderedDict
 
 from paho.mqtt.client import Client as MqttClient
@@ -143,8 +144,8 @@ class WeatherFlowMqtt:
         self._invert_filter = invert_filter
 
         # Set timer variables
+        self._forecast_next_run: float = 0
         self.rapid_last_run = 1621229580.583215  # A time in the past
-        self.forecast_last_run: float | None = None
         self.high_low_last_run = 1621229580.583215  # A time in the past
         self.current_day = datetime.today().weekday()
         self.last_midnight = self.cnv.utc_last_midnight()
@@ -193,7 +194,7 @@ class WeatherFlowMqtt:
         self._queue_task = asyncio.ensure_future(self._mqtt_queue_processor())
 
     async def run_time_based_updates(self) -> None:
-        """Data update loop."""
+        """Run some time based updates."""
         # Run New day function if Midnight
         if self.current_day != datetime.today().weekday():
             self.storage["rain_yesterday"] = self.storage["rain_today"]
@@ -208,7 +209,8 @@ class WeatherFlowMqtt:
             self.sql.dailyHousekeeping()
             self.current_day = datetime.today().weekday()
 
-        await self._update_forecast()
+        if self.forecast is not None:
+            await self._update_forecast()
 
     def _add_to_queue(
         self, topic: str, payload: str | None = None, qos: int = 0, retain: bool = False
@@ -701,27 +703,23 @@ class WeatherFlowMqtt:
     async def _update_forecast(self) -> None:
         """Attempt to update the forecast."""
         # Update the Forecast if it is time and enabled
-        if (
-            self.forecast is not None
-            and (
-                (now := datetime.now().timestamp())
-                - (0 if self.forecast_last_run is None else self.forecast_last_run)
+        assert self.forecast
+        if (now := datetime.now().timestamp()) >= self._forecast_next_run:
+            if any(forecast := await self.forecast.update_forecast()):
+                _LOGGER.debug("Sending updated forecast data to MQTT")
+                for topic, data in zip(("state", "attributes"), forecast):
+                    self._add_to_queue(
+                        MQTT_TOPIC_FORMAT.format(DOMAIN, FORECAST_ENTITY, topic),
+                        json.dumps(data),
+                        qos=1,
+                        retain=True,
+                    )
+                self._forecast_next_run = now + self.forecast.interval * 60
+        else:
+            _LOGGER.debug(
+                "Forecast update will run in ~%s minutes",
+                ceil((self._forecast_next_run - now) / 60),
             )
-            >= self.forecast.interval * 60
-        ):
-            fcst_state_topic = MQTT_TOPIC_FORMAT.format(
-                DOMAIN, FORECAST_ENTITY, "state"
-            )
-            fcst_attr_topic = MQTT_TOPIC_FORMAT.format(
-                DOMAIN, FORECAST_ENTITY, "attributes"
-            )
-            condition_data, fcst_data = await self.forecast.update_forecast()
-            if condition_data is not None:
-                self._add_to_queue(
-                    fcst_state_topic, json.dumps(condition_data), retain=True
-                )
-                self._add_to_queue(fcst_attr_topic, json.dumps(fcst_data), retain=True)
-                self.forecast_last_run = now
 
 
 async def main():
