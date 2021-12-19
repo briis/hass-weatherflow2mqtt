@@ -1,7 +1,7 @@
 version: "2"
 services:
   weatherflow2mqtt:
-    image: ghcr.io/briis/hass-weatherflow2mqtt:latest
+    image: briis/weatherflow2mqtt:latest
     restart: unless-stopped
     environment:
       - TZ=America/Los_Angeles
