@@ -222,7 +222,7 @@ class WeatherFlowMqtt:
         """Handle a discovered device."""
 
         def _load_complete():
-            print(device, "was loaded")
+            _LOGGER.debug("Found device: %s", device)
             self._setup_sensors(device)
             device.on(
                 EVENT_STATUS_UPDATE,
@@ -292,7 +292,9 @@ class WeatherFlowMqtt:
         self, device: WeatherFlowSensorDevice, event: CustomEvent
     ) -> None:
         """Handle an observation event."""
-        # Set some class level variables to help with sensors that may not have all data points available:
+        _LOGGER.debug("Observation event from: %s", device)
+
+        # Set some class level variables to help with sensors that may not have all data points available
         if (val := getattr(device, "solar_radiation", None)) is not None:
             self.solar_radiation = val.m
         if (
@@ -382,13 +384,14 @@ class WeatherFlowMqtt:
 
                 # Set the attribute in the payload
                 event_data[sensor.event][sensor.id] = attr
+                _LOGGER.debug("Setting payload: %s = %s", sensor.id, attr)
             except Exception as ex:
                 _LOGGER.error("Error setting sensor data for %s: %s", sensor.id, ex)
 
         data = event_data[EVENT_OBSERVATION]
 
         # TODO: Handle unique data points more elegantly...
-        if data["sealevel_pressure"]:
+        if data.get("sealevel_pressure") is not None:
             (
                 data["pressure_trend"],
                 data["pressure_trend_value"],
@@ -415,6 +418,7 @@ class WeatherFlowMqtt:
         self, device: SkySensorType, event: RainStartEvent
     ) -> None:
         """Handle a rain start event."""
+        _LOGGER.debug("Rain start event from: %s", device)
         self.storage["rain_start"] = event.epoch
         self.sql.writeStorage(self.storage)
 
@@ -422,6 +426,7 @@ class WeatherFlowMqtt:
         self, device: HubDevice | WeatherFlowSensorDevice, event: CustomEvent
     ) -> None:
         """Handle a hub status event."""
+        _LOGGER.debug("Status update event from: %s", device)
         device_serial = DEVICE_SERIAL_FORMAT.format(device.serial_number)
 
         state_topic = MQTT_TOPIC_FORMAT.format(
@@ -464,6 +469,7 @@ class WeatherFlowMqtt:
         self, device: AirSensorType, event: LightningStrikeEvent
     ) -> None:
         """Handle a strike event."""
+        _LOGGER.debug("Lightning strike event from: %s", device)
         self.sql.writeLightning()
         self.storage["lightning_count_today"] += 1
         self.storage["last_lightning_distance"] = self.cnv.distance(event.distance.m)
@@ -473,6 +479,7 @@ class WeatherFlowMqtt:
 
     def _handle_wind_event(self, device: SkySensorType, event: WindEvent) -> None:
         """Handle a wind event."""
+        _LOGGER.debug("Wind event from: %s", device)
         data = OrderedDict()
         state_topic = MQTT_TOPIC_FORMAT.format(
             DEVICE_SERIAL_FORMAT.format(device.serial_number), EVENT_RAPID_WIND, "state"
