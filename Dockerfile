@@ -1,10 +1,13 @@
-FROM python:3.9-buster
+FROM python:3.9-slim-buster
 LABEL org.opencontainers.image.source="https://github.com/briis/hass-weatherflow2mqtt"
 
 RUN mkdir -p /data
 RUN mkdir -p /src/weatherflow2mqtt
 WORKDIR /src/weatherflow2mqtt
 ADD requirements.txt test_requirements.txt /src/weatherflow2mqtt/
+RUN apt-get update && \
+    apt-get -y install build-essential
+RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 ADD setup.py /src/weatherflow2mqtt/
