@@ -2,14 +2,6 @@
 
 All notable changes to this project will be documented in this file.
 
-## [3.0.4] - Unreleased
-
-### Changes
-
-- Add a debug log when updating forecast data and set qos=1 to ensure delivery
-- Add another debug log to indicate next forecast update
-
-
 ## [3.0.3] - 2021-12-15
 
 ### Changes

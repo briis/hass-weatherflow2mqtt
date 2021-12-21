@@ -142,4 +142,3 @@ config_bck.yaml
 max_min_day.sql
 upload_docker.sh
 .DS_Store
-LATEST_CHANGES.md
