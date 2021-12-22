@@ -1,5 +1,5 @@
 name: Bug Report
-description: File a bug report for WeatherFlow2MQTT
+description: File a bug report for Weatherflow2MQTT
 labels: ["bug"]
 body:
   - type: markdown
@@ -18,7 +18,7 @@ body:
     id: addon-selfhosted
     attributes:
       label: Add-On or Self Hosted?
-      description: Are you using HA Supervised Add-On or Self managed container?
+      description: Is Weatherflow2MQTT running as a HA Supervised Add-On or a Self managed container?
       options:
         - HA Supervised (Add-On)
         - Self managed Container
