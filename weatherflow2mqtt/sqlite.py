@@ -327,7 +327,7 @@ class SQLFunctions:
             cursor.execute("SELECT * FROM high_low;")
             table_data = cursor.fetchall()
 
-            data = json.loads(json.dumps(sensor_data))
+            data = dict(sensor_data)
 
             for row in table_data:
                 max_sql = None
