@@ -5,8 +5,6 @@ import datetime as dt
 import json
 import logging
 import math
-from cmath import phase, rect
-from math import degrees, radians
 from typing import Any
 
 import yaml
@@ -170,35 +168,6 @@ class ConversionFunctions:
         ]
         direction_str = direction_array[int((value + 11.25) / 22.5)]
         return self.translations["wind_dir"][direction_str]
-
-    def sea_level_pressure(self, station_press, elevation):
-        """Return Sea Level pressure.
-
-        Converted from a JS formula made by Gary W Funk
-        """
-        if station_press is not None:
-            elev = float(elevation)
-            press = float(station_press)
-            # Constants
-            gravity = 9.80665
-            gas_constant = 287.05
-            atm_rate = 0.0065
-            std_pressure = 1013.25
-            std_temp = 288.15
-            # Sub Calculation
-            lp = gravity / (gas_constant * atm_rate)
-            cp = gas_constant * atm_rate / gravity
-            up = math.pow(
-                1 + math.pow(std_pressure / press, cp) * (atm_rate * elev / std_temp),
-                lp,
-            )
-            sea_pressure = press * up
-
-            return self.pressure(sea_pressure)
-
-        _LOGGER.error(
-            "FUNC: sea_level_pressure ERROR: Temperature or Pressure value was reported as NoneType. Check the sensor"
-        )
 
     def dewpoint(self, temperature, humidity, no_conversion=False):
         """Return Dewpoint."""

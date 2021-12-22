@@ -1,7 +1,7 @@
 """Sensor descriptions."""
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Callable
 
 from pyweatherflowudp.device import (
@@ -31,6 +31,8 @@ from .const import (
 )
 from .helpers import NO_CONVERSION, no_conversion_to_none
 
+ALTITUDE_FEET = "ft"
+ALTITUDE_METERS = "m"
 UV_INDEX = "UV index"
 
 
@@ -87,6 +89,7 @@ class SensorDescription(BaseSensorDescription):
         [ConversionFunctions, WeatherFlowDevice, Any | None], Any
     ] | None = None
     decimals: tuple[int | None, int | None] = (None, None)
+    inputs: tuple[str, ...] = field(default_factory=tuple[str, ...])
 
 
 @dataclass
@@ -204,6 +207,17 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         has_description=True,
     ),
     SensorDescription(
+        id="cloud_base",
+        name="Cloud Base Altitude",
+        unit_m=ALTITUDE_METERS,
+        unit_i=ALTITUDE_FEET,
+        state_class=STATE_CLASS_MEASUREMENT,
+        event=EVENT_OBSERVATION,
+        attr="calculate_cloud_base",
+        decimals=(0, 0),
+        inputs=("altitude",),
+    ),
+    SensorDescription(
         id="delta_t",
         name="Delta T",
         unit_m=TEMP_CELSIUS,
@@ -255,6 +269,17 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         else cnv.feels_like(
             device.air_temperature.m, device.relative_humidity.m, wind_speed
         ),
+    ),
+    SensorDescription(
+        id="freezing_level",
+        name="Freezing Level Altitude",
+        unit_m=ALTITUDE_METERS,
+        unit_i=ALTITUDE_FEET,
+        state_class=STATE_CLASS_MEASUREMENT,
+        event=EVENT_OBSERVATION,
+        attr="calculate_freezing_level",
+        decimals=(0, 0),
+        inputs=("altitude",),
     ),
     SensorDescription(
         id="illuminance",
@@ -449,11 +474,9 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         event=EVENT_OBSERVATION,
         extra_att=True,
         show_min_att=True,
-        attr="station_pressure",
+        attr="calculate_sea_level_pressure",
         decimals=(2, 3),
-        custom_fn=lambda cnv, device, elevation: None
-        if device.station_pressure is None
-        else cnv.sea_level_pressure(device.station_pressure.m, elevation),
+        inputs=("altitude",),
     ),
     SensorDescription(
         id="solar_radiation",
