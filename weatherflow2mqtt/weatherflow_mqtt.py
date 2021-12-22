@@ -70,7 +70,6 @@ from .sqlite import SQLFunctions
 
 _LOGGER = logging.getLogger(__name__)
 
-ATTRIBUTE_MISSING = object()
 MQTT_TOPIC_FORMAT = "homeassistant/sensor/{}/{}/{}"
 DEVICE_SERIAL_FORMAT = f"{DOMAIN}_{{}}"
 
@@ -259,9 +258,11 @@ class WeatherFlowMqtt:
     ) -> OrderedDict:
         """Construct and return a sensor payload."""
         payload = OrderedDict()
+        model = device.model
+        serial_number = device.serial_number
 
-        payload["name"] = f"{device.model} {device.serial_number} {sensor.name}"
-        payload["unique_id"] = f"{device.serial_number}-{sensor.id}"
+        payload["name"] = f"{model} {serial_number} {sensor.name}"
+        payload["unique_id"] = f"{serial_number}-{sensor.id}"
         if (units := sensor.unit_i if self.is_imperial else sensor.unit_m) is not None:
             payload["unit_of_measurement"] = units
         if (device_class := sensor.device_class) is not None:
@@ -274,10 +275,10 @@ class WeatherFlowMqtt:
         payload["value_template"] = f"{{{{ value_json.{sensor.id} }}}}"
         payload["json_attributes_topic"] = attr_topic
         payload["device"] = {
-            "identifiers": [f"{DOMAIN}_{device.serial_number}"],
+            "identifiers": [f"{DOMAIN}_{serial_number}"],
             "manufacturer": MANUFACTURER,
-            "name": f"{device.model} {device.serial_number}",
-            "model": device.model,
+            "name": f"{model} {serial_number}",
+            "model": model,
             "sw_version": device.firmware_revision,
             **(
                 {"via_device": f"{DOMAIN}_{device.hub_sn}"}
@@ -311,14 +312,15 @@ class WeatherFlowMqtt:
             # Skip if this device is missing the attribute
             if (
                 sensor.event in (EVENT_RAPID_WIND, EVENT_STATUS_UPDATE)
-                or (attr := getattr(device, sensor.device_attr, ATTRIBUTE_MISSING))
-                is ATTRIBUTE_MISSING
+                or not hasattr(device, sensor.device_attr)
                 or (
                     sensor.id == "battery_mode"
                     and not isinstance(device, TempestDevice)
                 )
             ):
                 continue
+
+            attr = getattr(device, sensor.device_attr)
 
             if sensor.event not in event_data:
                 event_data[sensor.event] = OrderedDict()
@@ -558,10 +560,7 @@ class WeatherFlowMqtt:
             sensor_id = sensor.id
             sensor_event = sensor.event
 
-            if (
-                getattr(device, sensor.device_attr, ATTRIBUTE_MISSING)
-                is ATTRIBUTE_MISSING
-            ):
+            if not hasattr(device, sensor.device_attr):
                 # Don't add sensors for devices that don't report on that attribute
                 continue
 

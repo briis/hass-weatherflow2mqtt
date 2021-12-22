@@ -129,7 +129,9 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         state_class=STATE_CLASS_MEASUREMENT,
         icon="water-opacity",
         attr="relative_humidity",
-        custom_fn=lambda cnv, device: cnv.absolute_humidity(
+        custom_fn=lambda cnv, device: None
+        if None in (device.air_temperature, device.relative_humidity)
+        else cnv.absolute_humidity(
             device.air_temperature.m, device.relative_humidity.m
         ),
     ),
@@ -174,9 +176,9 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         state_class=STATE_CLASS_MEASUREMENT,
         event=EVENT_OBSERVATION,
         attr="battery",
-        custom_fn=lambda cnv, device: cnv.battery_level(
-            device.battery.m, isinstance(device, TempestDevice)
-        ),
+        custom_fn=lambda cnv, device: None
+        if device.battery is None
+        else cnv.battery_level(device.battery.m, isinstance(device, TempestDevice)),
     ),
     SensorDescription(
         id="battery_mode",
@@ -185,9 +187,9 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         event=EVENT_OBSERVATION,
         attr="battery",
         has_description=True,
-        custom_fn=lambda cnv, device: cnv.battery_mode(
-            device.battery.m, device.solar_radiation.m
-        ),
+        custom_fn=lambda cnv, device: (None, None)
+        if None in (device.battery, device.solar_radiation)
+        else cnv.battery_mode(device.battery.m, device.solar_radiation.m),
     ),
     SensorDescription(
         id="beaufort",
@@ -196,7 +198,9 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         icon="tailwind",
         event=EVENT_OBSERVATION,
         attr="wind_speed",
-        custom_fn=lambda cnv, device: cnv.beaufort(device.wind_average.m),
+        custom_fn=lambda cnv, device: (None, None)
+        if device.wind_average is None
+        else cnv.beaufort(device.wind_average.m),
         has_description=True,
     ),
     SensorDescription(
@@ -231,9 +235,9 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         icon="text-box-outline",
         event=EVENT_OBSERVATION,
         attr="dew_point_temperature",
-        custom_fn=lambda cnv, device: cnv.dewpoint_level(
-            device.dew_point_temperature.m, True
-        ),
+        custom_fn=lambda cnv, device: None
+        if device.dew_point_temperature is None
+        else cnv.dewpoint_level(device.dew_point_temperature.m, True),
     ),
     SensorDescription(
         id="feelslike",
@@ -247,6 +251,7 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         decimals=(1, 1),
         custom_fn=lambda cnv, device, wind_speed: None
         if wind_speed is None
+        or None in (device.air_temperature, device.relative_humidity)
         else cnv.feels_like(
             device.air_temperature.m, device.relative_humidity.m, wind_speed
         ),
@@ -330,7 +335,9 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         name="Precipitation Type",
         icon="weather-rainy",
         event=EVENT_OBSERVATION,
-        custom_fn=lambda cnv, device: cnv.rain_type(device.precipitation_type.value),
+        custom_fn=lambda cnv, device: None
+        if device.precipitation_type is None
+        else cnv.rain_type(device.precipitation_type.value),
     ),
     SensorDescription(
         id="pressure_trend",
@@ -368,7 +375,9 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         icon="text-box-outline",
         event=EVENT_OBSERVATION,
         attr="rain_accumulation_previous_minute",
-        custom_fn=lambda cnv, device: cnv.rain_intensity(device.rain_rate.m),
+        custom_fn=lambda cnv, device: None
+        if device.rain_rate is None
+        else cnv.rain_intensity(device.rain_rate.m),
     ),
     SensorDescription(
         id="rain_rate",
@@ -442,9 +451,9 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         show_min_att=True,
         attr="station_pressure",
         decimals=(2, 3),
-        custom_fn=lambda cnv, device, elevation: cnv.sea_level_pressure(
-            device.station_pressure.m, elevation
-        ),
+        custom_fn=lambda cnv, device, elevation: None
+        if device.station_pressure is None
+        else cnv.sea_level_pressure(device.station_pressure.m, elevation),
     ),
     SensorDescription(
         id="solar_radiation",
@@ -472,7 +481,9 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         icon="text-box-outline",
         event=EVENT_OBSERVATION,
         attr="air_temperature",
-        custom_fn=lambda cnv, device: cnv.temperature_level(device.air_temperature.m),
+        custom_fn=lambda cnv, device: None
+        if device.air_temperature is None
+        else cnv.temperature_level(device.air_temperature.m),
     ),
     SensorDescription(
         id="uv",
@@ -501,7 +512,9 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         icon="eye",
         event=EVENT_OBSERVATION,
         attr="air_temperature",
-        custom_fn=lambda cnv, device, elevation: cnv.visibility(
+        custom_fn=lambda cnv, device, elevation: None
+        if None in (device.air_temperature, device.relative_humidity)
+        else cnv.visibility(
             elevation, device.air_temperature.m, device.relative_humidity.m
         ),
     ),
@@ -515,7 +528,10 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         event=EVENT_OBSERVATION,
         attr="wet_bulb_temperature",
         decimals=(1, 1),
-        custom_fn=lambda cnv, device, solar_radiation: cnv.wbgt(
+        custom_fn=lambda cnv, device, solar_radiation: None
+        if None
+        in (device.air_temperature, device.relative_humidity, device.station_pressure)
+        else cnv.wbgt(
             device.air_temperature.m,
             device.relative_humidity.m,
             device.station_pressure.m,
@@ -565,7 +581,9 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         icon="compass-outline",
         event=EVENT_OBSERVATION,
         attr="wind_direction",
-        custom_fn=lambda cnv, device: cnv.direction(device.wind_direction.m),
+        custom_fn=lambda cnv, device: None
+        if device.wind_direction is None
+        else cnv.direction(device.wind_direction.m),
     ),
     SensorDescription(
         id="wind_gust",
