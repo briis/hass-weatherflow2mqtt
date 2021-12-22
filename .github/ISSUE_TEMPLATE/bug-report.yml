@@ -1,0 +1,50 @@
+name: Bug Report
+description: File a bug report for WeatherFlow2MQTT
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: input
+    id: ha-version
+    attributes:
+      label: Home Assistant Version?
+      description: What version of Home Assistant are you running?
+      placeholder: "2021.12.3"
+    validations:
+      required: true
+  - type: dropdown
+    id: addon-selfhosted
+    attributes:
+      label: Add-On or Self Hosted?
+      description: Are you using HA Supervised Add-On or Self managed container?
+    options:
+      - HA Supervised (Add-On)
+      - Self managed Container
+    validations:
+      required: true
+  - type: input
+    id: addon-version
+    attributes:
+      label: Weatherflow2MQTT version?
+      description: What version of Weatherflow2MQTT is causing the error?
+      placeholder: "3.0.4"
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Also tell us, what did you expect to happen?
+      placeholder: Describe the bug
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+    validations:
+      required: false
