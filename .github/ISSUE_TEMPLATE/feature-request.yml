@@ -1,6 +1,6 @@
 name: Feature Reuest
 description: Ask for a new feature for Weatherflow2MQTT
-labels: ["feature-request"]
+labels: ["enhancement"]
 body:
   - type: markdown
     attributes:
