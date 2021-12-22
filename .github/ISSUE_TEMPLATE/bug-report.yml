@@ -19,9 +19,9 @@ body:
     attributes:
       label: Add-On or Self Hosted?
       description: Are you using HA Supervised Add-On or Self managed container?
-    options:
-      - HA Supervised (Add-On)
-      - Self managed Container
+      options:
+        - HA Supervised (Add-On)
+        - Self managed Container
     validations:
       required: true
   - type: input
