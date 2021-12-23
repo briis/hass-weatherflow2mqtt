@@ -134,7 +134,6 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | dewpoint_description         | Dewpoint Comfort Level      | Textual representation of the Dewpoint value                                                                                                                                                       | Yes               |                                                                                              |
 | feelslike                    | Feels Like Temperature      | The apparent temperature, a mix of Heat Index and Wind Chill                                                                                                                                       | Yes               | C°                                                                                           |
 | freezing_level               | Freezing Level Altitude     | The estimated altitude above mean sea level (AMSL) where the temperature is at the freezing point (0°C/32°F)                                                                                       | Yes               | m                                                                                            |
-| hub_status                   | Hub Status                  | How long has the HUB been running and other HW details                                                                                                                                             | No                |                                                                                              |
 | illuminance                  | Illuminance                 | How much the incident light illuminates the surface                                                                                                                                                | No                | Lux                                                                                          |
 | lightning_strike_count       | Lightning Count             | Number of lightning strikes in the last minute                                                                                                                                                     | Yes               | #                                                                                            |
 | lightning_strike_count_1hr   | Lightning Count (Last hour) | Number of lightning strikes during the last hour                                                                                                                                                   | Yes               |                                                                                              |
@@ -144,6 +143,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | lightning_strike_energy      | Lightning Energy            | Energy of the last strike                                                                                                                                                                          | No                |                                                                                              |
 | lightning_strike_time        | Last Lightning Strike       | When the last lightning strike occurred                                                                                                                                                            | Yes               |                                                                                              |
 | precipitation_type           | Precipitation Type          | Can be one of None, Rain or Hail                                                                                                                                                                   | No                | 0 = none, 1 = rain, 2 = hail, 3 = rain + hail (heavy rain)                                   |
+| pressure_trend               | Pressure Trend              | Returns Steady, Falling or Rising determined by the rate of change over the past 3 hours                                                                                                           | Yes               | trend_text                                                                                   |
 | rain_intensity               | Rain Intensity              | A descriptive text of how much is it raining right now                                                                                                                                             | Yes               |                                                                                              |
 | rain_rate                    | Rain Rate                   | How much is it raining right now                                                                                                                                                                   | Yes               | mm/h                                                                                         |
 | rain_start_time              | Last Rain                   | When was the last time it rained                                                                                                                                                                   | No                | seconds                                                                                      |
@@ -154,12 +154,9 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | relative_humidity            | Humidity                    | Relative Humidity                                                                                                                                                                                  | No                | %                                                                                            |
 | sealevel_pressure            | Station Pressure            | Preasure measurement at Sea Level                                                                                                                                                                  | Yes               | MB                                                                                           |
 | status                       | Status                      | How long has the device been running and other HW details                                                                                                                                          | No                |                                                                                              |
-| sky_status                   | SKY Status                  | How long has the SKY device been running and other HW details                                                                                                                                      | No                |                                                                                              |
-| pressure_trend               | Pressure Trend              | Returns Steady, Falling or Rising determined by the rate of change over the past 3 hours                                                                                                           | trend_text        | Yes                                                                                          |
 | solar_radiation              | Solar Radiation             | Electromagnetic radiation emitted by the sun                                                                                                                                                       | No                | W/m^2                                                                                        |
 | station_pressure             | Station Pressure            | Pressure measurement where the station is located                                                                                                                                                  | No                | MB                                                                                           |
 | temperature_description      | Temperature Level           | Textual representation of the Outside Air Temperature value                                                                                                                                        | Yes               | Text                                                                                         |
-| tempest_status               | Tempest Status              | How long has the Tempest device been running and other HW details                                                                                                                                  | No                |                                                                                              |
 | uv                           | UV Index                    | The UV index                                                                                                                                                                                       | No                | Index                                                                                        |
 | uv_description               | UV Level                    | Textual representation of the UV Index value                                                                                                                                                       | Yes               |                                                                                              |
 | visibility                   | Visibility                  | Distance to the horizon                                                                                                                                                                            | Yes               | km                                                                                           |
@@ -178,20 +175,22 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 
 ### Sensor Structure
 
+See [Available Sensors](#available-sensors) above for a description of each sensor.
+
 ```yaml
 sensors:
   - absolute_humidity
   - air_density
   - air_temperature
-  - battery # Voltage
-  - battery_level
-  - battery_mode # Only for Tempest Devices
+  - battery # voltage
+  - battery_mode # support for Tempest devices only
   - beaufort
+  - cloud_base
+  - delta_t
   - dewpoint
   - dewpoint_description
-  - delta_t
   - feelslike
-  - hub_status
+  - freezing_level
   - illuminance
   - lightning_strike_count
   - lightning_strike_count_1hr
@@ -211,17 +210,17 @@ sensors:
   - rain_duration_yesterday
   - relative_humidity
   - sealevel_pressure
-  - sky_status # Only for SKY Devices
+  - status
   - solar_radiation
   - station_pressure
-  - status # Only for AIR Device
+  - status
   - temperature_description
-  - tempest_status # Only for Tempest devices
   - uv
   - uv_description
   - visibility
-  - wetbulb
+  - voltage
   - wbgt #Wet Bulb Globe Temperature
+  - wetbulb
   - wind_bearing
   - wind_bearing_avg
   - wind_direction
@@ -313,25 +312,25 @@ wind_speed_avg
 
 ## Creating a Home Assistant Weather Entity
 
-If you have enabled the _Forecast_ option, then there is a possibility to create a Weather Entity, that can be used in all the different Lovelace Cards there is for _Weather_. We will do this by using the [Weather Template](https://www.home-assistant.io/integrations/weather.template/). The naming of the sensors might vary based on your configuration, so check that if it does not work.
+If you have enabled the _Forecast_ option, then there is a possibility to create a Weather Entity that can be used in all the different Lovelace Cards available for _Weather_. You can do this by using the [Weather Template](https://www.home-assistant.io/integrations/weather.template/).
 
-Edit `configuration.yaml` and insert the following:
+Edit `configuration.yaml` and insert the following (replacing `hub_hb_00000001` and `tempest_st_00000001` with the appropriate ids of your sensors):
 
 ```yaml
 weather:
   - platform: template
     name: My Local Weather
-    condition_template: "{{ states('sensor.wf_weather') }}"
-    temperature_template: "{{ states('sensor.wf_temperature') | float}}"
-    humidity_template: "{{ states('sensor.wf_humidity')| int }}"
-    pressure_template: "{{ states('sensor.wf_sea_level_pressure')| float }}"
-    wind_speed_template: "{{ ( states('sensor.wf_wind_speed_avg') | float * 18 / 5 ) | round(2) }}"
-    wind_bearing_template: "{{ states('sensor.wf_wind_bearing_avg')| int }}"
-    visibility_template: "{{ states('sensor.wf_visibility')| float }}"
-    forecast_template: "{{ state_attr('sensor.wf_weather', 'hourly_forecast') }}"
+    condition_template: "{{ states('sensor.hub_hb_00000001_weather') }}"
+    temperature_template: "{{ states('sensor.tempest_st_00000001_temperature') | float}}"
+    humidity_template: "{{ states('sensor.tempest_st_00000001_humidity')| int }}"
+    pressure_template: "{{ states('sensor.tempest_st_00000001_sea_level_pressure')| float }}"
+    wind_speed_template: "{{ ( states('sensor.tempest_st_00000001_wind_speed_avg') | float * 18 / 5 ) | round(2) }}"
+    wind_bearing_template: "{{ states('sensor.tempest_st_00000001_wind_bearing_avg')| int }}"
+    visibility_template: "{{ states('sensor.tempest_st_00000001_visibility')| float }}"
+    forecast_template: "{{ state_attr('sensor.hub_hb_00000001_weather', 'hourly_forecast') }}"
 ```
 
-- The weather entity expects km/h when having metric units, so the above example converts m/s to km/h. If you are using _imperial_ units, the line should just be `{{ states('sensor.wf_wind_speed_avg') }}`
+- The weather entity expects km/h when using metric units, so the above example converts m/s to km/h. If you are using _imperial_ units, the line should just be `{{ states('sensor.tempest_st_00000001_wind_speed_avg') }}`, again replacing `tempest_st_00000001` with the appropriate id of your sensor
 - For the _forecast_template_ you can either use `hourly_forecast` or `daily_forecast` to get Hourly or Day based forecast.
 
 ## Setup Dev environment
