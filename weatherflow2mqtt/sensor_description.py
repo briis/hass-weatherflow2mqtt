@@ -209,6 +209,7 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
     SensorDescription(
         id="cloud_base",
         name="Cloud Base Altitude",
+        icon="weather-cloudy",
         unit_m=ALTITUDE_METERS,
         unit_i=ALTITUDE_FEET,
         state_class=STATE_CLASS_MEASUREMENT,
@@ -273,6 +274,7 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
     SensorDescription(
         id="freezing_level",
         name="Freezing Level Altitude",
+        icon="altimeter",
         unit_m=ALTITUDE_METERS,
         unit_i=ALTITUDE_FEET,
         state_class=STATE_CLASS_MEASUREMENT,
