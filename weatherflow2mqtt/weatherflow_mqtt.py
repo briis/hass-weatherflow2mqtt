@@ -12,11 +12,12 @@ import sys
 from dataclasses import dataclass
 from datetime import datetime
 from math import ceil
-from typing import Any, OrderedDict
+from typing import Any, Callable, OrderedDict
 
 from paho.mqtt.client import Client as MqttClient
 from pint.quantity import Quantity
 from pyweatherflowudp.client import EVENT_DEVICE_DISCOVERED, WeatherFlowListener
+from pyweatherflowudp.const import UNIT_METERS
 from pyweatherflowudp.device import (
     EVENT_LOAD_COMPLETE,
     EVENT_OBSERVATION,
@@ -331,12 +332,18 @@ class WeatherFlowMqtt:
                     if sensor.id == "pressure_trend":
                         continue
 
+                    if isinstance(attr, Callable):
+                        inputs = {}
+                        if "altitude" in sensor.inputs:
+                            inputs["altitude"] = self.elevation * UNIT_METERS
+                        attr = attr(**inputs)
+
                     # Check for a custom function
                     if (fn := sensor.custom_fn) is not None:
                         # TODO: Handle unique data points more elegantly
                         if sensor.id == "feelslike":
                             attr = fn(self.cnv, device, self.wind_speed)
-                        elif sensor.id in ("sealevel_pressure", "visibility"):
+                        elif sensor.id in ("visibility"):
                             attr = fn(self.cnv, device, self.elevation)
                         elif sensor.id == "wbgt":
                             attr = fn(self.cnv, device, self.solar_radiation)
