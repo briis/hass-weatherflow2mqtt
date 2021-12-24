@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.5] - 2021-12-24
+
+### Changes
+
+- Add cloud base altitude and freezing level altitude sensors
+- Migrate sea level pressure sensor to use the pyweatherflowudp calculation
+- Bump pyweatherflowudp to 1.3.0
+
 ## [3.0.4] - 2021-12-22
 
 ### Changes
