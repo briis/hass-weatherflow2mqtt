@@ -6,6 +6,5 @@ All notable changes to this project will be documented in this file.
 
 ### Changes
 
-- Add cloud base altitude and freezing level altitude sensors
-- Migrate sea level pressure sensor to use the pyweatherflowudp calculation
-- Bump pyweatherflowudp to 1.3.0
+- BUGFIX: Handle MQTT qos>0 messages appropriately by calling loop_start() on the MQTT client
+  - See https://github.com/eclipse/paho.mqtt.python#client

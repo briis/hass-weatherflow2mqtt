@@ -168,6 +168,7 @@ class WeatherFlowMqtt:
             self.mqtt_client.connect(
                 self.mqtt_config.host, port=self.mqtt_config.port, keepalive=300
             )
+            self.mqtt_client.loop_start()
             _LOGGER.info(
                 "Connected to the MQTT server at %s:%s",
                 self.mqtt_config.host,
@@ -537,7 +538,6 @@ class WeatherFlowMqtt:
             _LOGGER.debug("MQTT Credentials not needed")
 
         self.mqtt_client = client = MqttClient()
-        client.max_inflight_messages_set(240)
 
         if not anonymous:
             client.username_pw_set(
