@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.6] - 2021-12-30
+
+### Fixed
+
+- BUGFIX: Handle MQTT qos>0 messages appropriately by calling loop_start() on the MQTT client
+  - See https://github.com/eclipse/paho.mqtt.python#client
+  - Fixing Issue #46.
+
 ## [3.0.5] - 2021-12-24
 
 ### Changes
