@@ -202,8 +202,8 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         event=EVENT_OBSERVATION,
         attr="wind_speed",
         custom_fn=lambda cnv, device: (None, None)
-        if device.wind_average is None
-        else cnv.beaufort(device.wind_average.m),
+        if device.wind_speed is None
+        else cnv.beaufort(device.wind_speed.m),
         has_description=True,
     ),
     SensorDescription(
