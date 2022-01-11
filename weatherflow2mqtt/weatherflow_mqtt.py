@@ -567,7 +567,9 @@ class WeatherFlowMqtt:
             sensor_id = sensor.id
             sensor_event = sensor.event
 
-            if not hasattr(device, sensor.device_attr):
+            if not hasattr(device, sensor.device_attr) or (
+                sensor.id == "battery_mode" and not isinstance(device, TempestDevice)
+            ):
                 # Don't add sensors for devices that don't report on that attribute
                 continue
 
