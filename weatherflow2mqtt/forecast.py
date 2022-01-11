@@ -144,7 +144,7 @@ class Forecast:
                         row["day_start_local"]
                     ),
                     "conditions": row["conditions"],
-                    ATTR_FORECAST_CONDITION: self.ha_condition_value(row["icon"]),
+                    ATTR_FORECAST_CONDITION: "cloudy" if row.get("icon") is None else self.ha_condition_value(row["icon"]),
                     ATTR_FORECAST_TEMP: self.conversions.temperature(
                         row["air_temp_high"]
                     ),
