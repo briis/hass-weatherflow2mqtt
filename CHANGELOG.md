@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.7] - 2022-01-12
+
+### Fixed
+
+- BUGFIX: Don't add battery mode sensor for Air/Sky devices. If the sensor was already created, you will have to delete it manually in MQTT.
+- BUGFIX: In rare occasions the forecast icon is not present in data supplied from WeatherFlow. Will now be set to *Cloudy* as default.
+
 ## [3.0.6] - 2021-12-30
 
 ### Fixed
