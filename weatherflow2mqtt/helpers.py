@@ -715,8 +715,12 @@ class ConversionFunctions:
         ah_a = 0.14
         ah_h = elevation / 1000
         ah = ah_a * ah_h
-        am = 1/(cos(radians(sz)) + 0.50572*pow((96.07995 - sz),(-1.6364)))
-        si = (1353 * ((1-ah)*pow(.7, pow(am, 0.678))+ah))*(sin(radians(se)))
+        if se >= 0:
+            am = 1/(cos(radians(sz)) + 0.50572*pow((96.07995 - sz),(-1.6364)))
+            si = (1353 * ((1-ah)*pow(.7, pow(am, 0.678))+ah))*(sin(radians(se)))
+        else
+            am = 1
+            si = 0
         si = round(si)
 
         return si
