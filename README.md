@@ -11,7 +11,6 @@ Everything runs in a pre-built Docker Container, so installation is very simple.
 There is support for both the AIR & SKY devices and the TEMPEST device.
 
 Please review Breaking Changes prior to updating your instance. Breaking changes will be listed in https://github.com/briis/hass-weatherflow2mqtt/blob/main/CHANGELOG.md
-See Breaking Changes section under [3.0.0] 2021-12-10 for steps to updating naming conventions.
 
 ## Table of Contents
 
@@ -26,6 +25,10 @@ See Breaking Changes section under [3.0.0] 2021-12-10 for steps to updating nami
 4. [Creating a Home Assistant Weather Entity](#creating-a-home-assistant-weather-entity)
 
 ## Installation
+
+### Prerequisites
+
+A MQTT Server must be setup and configured on your local network, before installing this component. If you run a *Supervised* Home Assistant installation, we recommend using the MQTT Add-On available for this, else you must set it up yourself. See more [here](https://www.eclipse.org/paho/) for installing MQTT.
 
 ### Home Assistant Supervised
 
