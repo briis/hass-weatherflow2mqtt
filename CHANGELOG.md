@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.8] - 2022-06-06
+
+### Fixed
+
+- BUGFIX: Changed spelling error in `en.json` file. Tnanks to @jazzyisj
+- BUGFIX: Bump `pyweatherflowudp` to V1.3.1 to handle `up_since` oscillation on devices
+
+### Added
+
+- NEW: Added Latitude and Longitude environment variables. These will be used in later additions for new calculated sensors. If you run the Supervised Add-On, then these will be provided automatically by Home Assistent. If you run a standalone docker container, you must add: `-e LATITUDE=your_latiude e- LONGITUDE=your_longitude` to the Docker startup command.
+
+
 ## [3.0.7] - 2022-01-12
 
 ### Fixed

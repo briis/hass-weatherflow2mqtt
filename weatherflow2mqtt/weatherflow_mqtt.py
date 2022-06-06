@@ -108,6 +108,8 @@ class WeatherFlowMqtt:
     def __init__(
         self,
         elevation: float = 0,
+        latitude: float = 0,
+        longitude: float = 0,
         unit_system: str = UNITS_METRIC,
         rapid_wind_interval: int = 0,
         language: str = LANGUAGE_ENGLISH,
@@ -120,6 +122,8 @@ class WeatherFlowMqtt:
     ) -> None:
         """Initialize a WeatherFlow MQTT."""
         self.elevation = elevation
+        self.latitude = latitude
+        self.longitude = longitude
         self.unit_system = unit_system
         self.rapid_wind_interval = rapid_wind_interval
 
@@ -750,6 +754,8 @@ async def main():
 
     # Read the config Settings
     elevation = float(config.get("ELEVATION", 0))
+    latitude = float(config.get("LATITUDE", 0))
+    longitude = float(config.get("LONGITUDE", 0))
     unit_system = config.get("UNIT_SYSTEM", UNITS_METRIC)
     rw_interval = int(config.get("RAPID_WIND_INTERVAL", 0))
     language = config.get("LANGUAGE", LANGUAGE_ENGLISH).lower()
@@ -792,6 +798,8 @@ async def main():
 
     weatherflowmqtt = WeatherFlowMqtt(
         elevation=elevation,
+        latitude=latitude,
+        longitude=longitude,
         unit_system=unit_system,
         rapid_wind_interval=rw_interval,
         language=language,
@@ -831,6 +839,8 @@ async def get_supervisor_configuration() -> dict[str, Any]:
                     config.update(
                         {
                             "ELEVATION": data.get("elevation"),
+                            "LATITUDE": data.get("latitude"),
+                            "LONGITUDE": data.get("longitude"),
                             "UNIT_SYSTEM": UNITS_METRIC
                             if data.get("unit_system", {}).get("temperature")
                             == TEMP_CELSIUS

@@ -4,7 +4,7 @@
     "slug": "weatherflow2mqtt",
     "url": "https://github.com/briis/hass-weatherflow2mqtt",
     "image": "briis/weatherflow2mqtt",
-    "version": "3.0.7",
+    "version": "3.0.8",
     "arch": [
         "armv7",
         "aarch64",
@@ -28,6 +28,8 @@
     "options": {},
     "schema": {
         "ELEVATION": "float?",
+        "LATITUDE": "float?",
+        "LONGITUDE": "float?",
         "RAPID_WIND_INTERVAL": "int?",
         "STATION_ID": "str?",
         "STATION_TOKEN": "str?",
