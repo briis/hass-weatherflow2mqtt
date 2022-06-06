@@ -5,6 +5,7 @@ RUN mkdir -p /data
 RUN mkdir -p /src/weatherflow2mqtt
 WORKDIR /src/weatherflow2mqtt
 ADD requirements.txt test_requirements.txt /src/weatherflow2mqtt/
+RUN apt-get clean
 RUN apt-get update && \
     apt-get -y install build-essential
 RUN pip install --upgrade pip

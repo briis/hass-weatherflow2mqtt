@@ -14,6 +14,14 @@ To install the add-on, first follow the installation steps from the [README on G
 
 Set the height above sea level for where the station is placed. This is used when calculating some of the sensor values. Station elevation plus Device height above ground. The value has to be in meters (`meters = feet * 0.3048`). Default is _Home Assistant Elevation_
 
+### Option: `LATITUDE`: (default: Home Assistant Latitude)
+
+Set the latitude for where the station is placed. This is used when calculating some of the sensor values. Default is _Home Assistant Latitude_
+
+### Option: `LONGITUDE`: (default: Home Assistant Longitude)
+
+Set the longitude for where the station is placed. This is used when calculating some of the sensor values. Default is _Home Assistant Longitude_
+
 ### Option: `RAPID_WIND_INTERVAL`: (default: 0)
 
 The weather stations delivers wind speed and bearing every 2 seconds. If you don't want to update the HA sensors so often, you can set a number here (in seconds), for how often they are updated. Default is _0_, which means data are updated when received from the station.

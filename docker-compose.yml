@@ -10,6 +10,8 @@ services:
       - RAPID_WIND_INTERVAL=0
       - DEBUG=False
       - ELEVATION=0
+      - LATITUDE=
+      - LONGITUDE=
       - WF_HOST=0.0.0.0
       - WF_PORT=50222
       - MQTT_HOST=
