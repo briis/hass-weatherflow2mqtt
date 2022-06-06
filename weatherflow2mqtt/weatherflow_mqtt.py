@@ -126,7 +126,6 @@ class WeatherFlowMqtt:
         self.longitude = longitude
         self.unit_system = unit_system
         self.rapid_wind_interval = rapid_wind_interval
-        _LOGGER.debug("LAT: %s  LON: %s", self.latitude, self.longitude)
 
         self.cnv = ConversionFunctions(unit_system, language)
 
