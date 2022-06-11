@@ -28,6 +28,8 @@ sensors:
   - rain_duration_yesterday
   - relative_humidity
   - sealevel_pressure
+  - solar_elevation
+  - solar_insolation
   - solar_radiation
   - station_pressure
   - temperature_description
