@@ -160,6 +160,8 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | rain_duration_yesterday      | Rain Duration (Yesterday)   | Total rain minutes yesterday                                                                                                                                                                       | Yes               | minutes                                                                                      |
 | relative_humidity            | Humidity                    | Relative Humidity                                                                                                                                                                                  | No                | %                                                                                            |
 | sealevel_pressure            | Station Pressure            | Preasure measurement at Sea Level                                                                                                                                                                  | Yes               | MB                                                                                           |
+| solar_elvation               | Solar Elevation             | Sun Angle above Horizon                                                                                                                                                                            | Yes               | °                                                                                           |
+| solar_insolation             | Solar Insolation            | Estimated Solar Radiation with full Sun                                                                                                                                                            | Yes               | W/m^2                                                                                       |
 | status                       | Status                      | How long has the device been running and other HW details                                                                                                                                          | No                |                                                                                              |
 | solar_radiation              | Solar Radiation             | Electromagnetic radiation emitted by the sun                                                                                                                                                       | No                | W/m^2                                                                                        |
 | station_pressure             | Station Pressure            | Pressure measurement where the station is located                                                                                                                                                  | No                | MB                                                                                           |
@@ -217,6 +219,8 @@ sensors:
   - rain_duration_yesterday
   - relative_humidity
   - sealevel_pressure
+  - solar_elevation
+  - solar_insolation
   - status
   - solar_radiation
   - station_pressure
