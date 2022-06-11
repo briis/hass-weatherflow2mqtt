@@ -220,6 +220,8 @@ sensors:
   - relative_humidity
   - sealevel_pressure
   - status
+  - solar_elevation
+  - solar_insolation
   - solar_radiation
   - station_pressure
   - status
@@ -303,6 +305,8 @@ rain_duration_today
 rain_rate
 rain_today
 sealevel_pressure
+solar_elevation
+solar_insolation
 solar_radiation
 station_pressure
 air_temperature
