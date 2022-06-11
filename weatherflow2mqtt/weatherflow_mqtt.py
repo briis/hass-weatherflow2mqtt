@@ -157,6 +157,7 @@ class WeatherFlowMqtt:
         # Read stored Values and set variable values
         self.wind_speed = None
         self.solar_radiation = None
+        self.solar_elevation = None
 
     @property
     def is_imperial(self) -> bool:
@@ -352,6 +353,11 @@ class WeatherFlowMqtt:
                             attr = fn(self.cnv, device, self.elevation)
                         elif sensor.id == "wbgt":
                             attr = fn(self.cnv, device, self.solar_radiation)
+                        elif sensor.id == "solar_elevation":
+                            self.solar_elevation = fn(self.cnv, self.latitude, self.longitude)
+                            attr = self.solar_elevation
+                        elif sensor.id == "solar_insolation":
+                            attr = fn(self.cnv, self.elevation, self.solar_elevation)
                         else:
                             attr = fn(self.cnv, device)
 

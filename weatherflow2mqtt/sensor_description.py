@@ -410,9 +410,9 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         id="rain_rate",
         name="Rain Rate",
         unit_m="mm/h",
-        unit_m_cnv="mm/hr",
+        unit_m_cnv="mm/h",
         unit_i="in/h",
-        unit_i_cnv="in/hr",
+        unit_i_cnv="in/h",
         state_class=STATE_CLASS_MEASUREMENT,
         icon="weather-pouring",
         event=EVENT_OBSERVATION,
@@ -663,9 +663,9 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         icon="angle-acute",
         event=EVENT_OBSERVATION,
         attr="solar_radiation",
-        custom_fn=lambda cnv, device, latitude, logitude: None
-        if None in (self.latitude, self.longitude)
-        else cnv.solar_elevation(self.latitude, self.longitude)
+        custom_fn=lambda cnv, latitude, longitude: None
+        if None in (latitude, longitude)
+        else cnv.solar_elevation(latitude, longitude)
     ),
     SensorDescription(
         id="solar_insolation",
@@ -676,9 +676,9 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         icon="solar-power",
         event=EVENT_OBSERVATION,
         attr="solar_radiation",
-        custom_fn=lambda cnv, device, elevation, solar_elevation: None
-        if None in (self.elevation, self.solar_elevation)
-        else cnv.solar_insolation(self.elevation, self.solar_elevation)
+        custom_fn=lambda cnv, elevation, solar_elevation: None
+        if None in (elevation, solar_elevation)
+        else cnv.solar_insolation(elevation, solar_elevation)
     ),
 )
 
