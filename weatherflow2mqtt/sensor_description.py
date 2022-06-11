@@ -654,6 +654,32 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         attr="wind_average",
         decimals=(1, 2),
     ),
+    SensorDescription(
+        id="solar_elevation",
+        name="Solar Elevation",
+        unit_m="°",
+        unit_i="°",
+        state_class=STATE_CLASS_MEASUREMENT,
+        icon="angle-acute",
+        event=EVENT_OBSERVATION,
+        attr="solar_radiation",
+        custom_fn=lambda cnv, device, latitude, logitude: None
+        if None in (self.latitude, self.longitude)
+        else cnv.solar_elevation(self.latitude, self.longitude)
+    ),
+    SensorDescription(
+        id="solar_insolation",
+        name="Solar Insolation",
+        unit_m="W/m^2",
+        unit_i="W/m^2",
+        state_class=STATE_CLASS_MEASUREMENT,
+        icon="solar-power",
+        event=EVENT_OBSERVATION,
+        attr="solar_radiation",
+        custom_fn=lambda cnv, device, elevation, solar_elevation: None
+        if None in (self.elevation, self.solar_elevation)
+        else cnv.solar_insolation(self.elevation, self.solar_elevation)
+    ),
 )
 
 HUB_SENSORS: tuple[BaseSensorDescription, ...] = (STATUS_SENSOR,)

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import time
 import json
 import logging
 import math
@@ -638,3 +639,88 @@ class ConversionFunctions:
         midnight_ts = dt.datetime.timestamp(midnight)
         midnight_dt = self.utc_from_timestamp(midnight_ts)
         return midnight_dt
+
+    def solar_elevation(self, latitude, longitude):
+        """ Return Sun Elevation in Degrees with respect to the Horizon.
+
+        Input:
+            Latitude in Degrees and fractional degrees (no docker variable yet)
+            Longitude in Degrees and fractional degrees (no docker variable yet)
+            Local Time
+            UTC Time
+        Where:
+            jd is Julian Date (Day of Year only), then Julian Date + Fractional True
+            lt is Local Time (####) 24 hour time, no colon
+            tz is Time Zone Offset (ie -7 from UTC)
+            beta is Beta for EOT
+            lstm is Local Standard Time Meridian
+            eot is Equation of Time
+            tc is Time Correction Factor
+            lst is Local Solar Time
+            h is Hour Angle
+            dec is Declination
+            se is Solar Elevation
+            ** All Trigonometry Fuctions need Degrees converted to Radians **
+            ** The assumption is made that correct local time is established **
+        """
+        if latitude is None or longitude is None:
+            return None
+
+        cos = math.cos
+        sin = math.sin
+        asin = math.asin
+        radians = math.radians
+        degrees = math.degrees
+        jd = time.localtime(time.time()).tm_yday
+        hr = time.localtime(time.time()).tm_hour
+        min = time.localtime(time.time()).tm_min
+        lt = hr + min/60
+        tz = time.localtime(time.time()).tm_gmtoff/3600
+        jd = jd + lt/24
+        beta = (360/365) * (jd - 81)
+        lstm = 15 * tz
+        eot = (9.87*(sin(radians(beta*2)))) - (7.53*(cos(radians(beta)))) - (1.5*(sin(radians(beta))))
+        tc = (4 * (longitude - lstm)) + eot
+        lst = lt + tc/60
+        h = 15 * (lst - 12)
+        dec = cos(radians(((jd) + 10) * (360/365))) * (-23.44)
+        se = degrees(asin(sin(radians(latitude)) * sin(radians(dec)) + cos(radians(latitude)) * cos(radians(dec)) * cos(radians(h))))
+        se = round(se)
+
+        return se
+
+    def solar_insolation(self, elevation, solar_elevation):
+        """ Return Estimation of Solar Radiation at current sun elevation angle.
+
+        Input:
+            Solar Elevation in Degrees
+            Elevation in Meters
+        Where:
+            sz is Solar Zenith in Degrees
+            ah is (Station Elevation Compensation) Constant ah_a = 0.14, ah_h = Station elevation in km
+            am is Air Mass of atmoshere between Station and Sun
+            1353 W/M^2 is considered Solar Radiation at edge of atmoshere
+            ** All Trigonometry Fuctions need Degrees converted to Radians **
+        """
+        if solar_elevation is None or elevation is None:
+            return None
+
+        cos = math.cos
+        sin = math.sin
+        asin = math.asin
+        radians = math.radians
+        degrees = math.degrees
+        se = solar_elevation
+        sz = 90 - se
+        ah_a = 0.14
+        ah_h = elevation / 1000
+        ah = ah_a * ah_h
+        if se >= 0:
+            am = 1/(cos(radians(sz)) + 0.50572*pow((96.07995 - sz),(-1.6364)))
+            si = (1353 * ((1-ah)*pow(.7, pow(am, 0.678))+ah))*(sin(radians(se)))
+        else:
+            am = 1
+            si = 0
+        si = round(si)
+
+        return si
