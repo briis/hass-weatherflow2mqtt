@@ -320,6 +320,15 @@ wind_speed
 wind_speed_avg
 ```
 
+### Sensors in Developement
+
+Solar Elevation (in Dev Branch)
+Solar Insolation (in Dev Branch)
+Zambretti Local Forecast (in Dev Branch)
+Local Current Conditions
+Probability of Snow
+Probability of Fog
+
 ## Creating a Home Assistant Weather Entity
 
 If you have enabled the _Forecast_ option, then there is a possibility to create a Weather Entity that can be used in all the different Lovelace Cards available for _Weather_. You can do this by using the [Weather Template](https://www.home-assistant.io/integrations/weather.template/).
