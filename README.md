@@ -322,12 +322,14 @@ wind_speed_avg
 
 ### Sensors in Developement
 
+```
 Solar Elevation (in Dev Branch)
 Solar Insolation (in Dev Branch)
 Zambretti Local Forecast (in Dev Branch)
 Local Current Conditions
 Probability of Snow
 Probability of Fog
+```
 
 ## Creating a Home Assistant Weather Entity
 
