@@ -24,6 +24,7 @@ Please review Breaking Changes prior to updating your instance. Breaking changes
    3. [Long Term Statistics](#Home-Assistant-Long-Term-Statistics)
    4. [Sensors in Developement](#Sensors-in-Developement)
 4. [Creating a Home Assistant Weather Entity](#creating-a-home-assistant-weather-entity)
+5. [Creating a Developement Environment](#Setup-Dev-environment)
 
 ## Installation
 
