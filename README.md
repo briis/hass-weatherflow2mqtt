@@ -22,6 +22,7 @@ Please review Breaking Changes prior to updating your instance. Breaking changes
    1. [Sensor Structure](#sensor-structure)
    2. [High and Low Values](#high-and-low-values)
    3. [Long Term Statistics](#Home-Assistant-Long-Term-Statistics)
+   4. [Sensors in Developement](#Sensors-in-Developement)
 4. [Creating a Home Assistant Weather Entity](#creating-a-home-assistant-weather-entity)
 
 ## Installation
