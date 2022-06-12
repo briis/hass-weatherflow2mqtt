@@ -34,6 +34,8 @@ A MQTT Server must be setup and configured on your local network, before install
 
 This is the easiest installation method. Just click on the blue **ADD REPOSITORY** button at the top of this README and you will be taken to your Home Assistant instance to add this repository to the _Add-On Store_. From there, scroll down to find "WeatherFlow to MQTT" and then install, configure (optional) and start the add-on.
 
+**NOTE**: Make sure that you already have setup a Working MQTT broker, and easiest way to do that is by using the MQTT broker from the Official Add-On store.
+
 ### Outside Home Assistant using Docker
 
 - Ensure Docker is setup and running
