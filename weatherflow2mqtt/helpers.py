@@ -724,7 +724,8 @@ class ConversionFunctions:
         si = round(si)
 
         return si
-    def zambretti_num(self, latitude, wind_dir, wind_speed, p_hi, p_lo, trend, press):
+
+    def zambretti_number(self, latitude, wind_dir, wind_speed, p_hi, p_lo, trend, press):
         """ Return local forecast number based on Zambretti Forecaster.
         Input:
             Wind Speed in m/s
@@ -736,6 +737,17 @@ class ConversionFunctions:
             Wind Direction in Cardinal
         Where:
         """
+        if (
+            latitude is None
+            or wind_dir is None
+            or wind_speed is None
+            or p_hi is None
+            or p_lo is None
+            or trend is None
+            or press is None
+        ):
+            return None
+
         # Based off Beteljuice's Zambretti work; http://www.beteljuice.co.uk/zambretti/forecast.html
         # Northern = 1 or Southern = 2 hemisphere
         if latitude >= 0:
@@ -808,7 +820,6 @@ class ConversionFunctions:
                 z_hpa += 1.5 / 100 * z_range
             elif z_wind == "NNW":
                 z_hpa += 3 / 100 * z_range
-
             if z_season == 1:
                 # if Summer
                 if z_trend == 1:
@@ -817,7 +828,6 @@ class ConversionFunctions:
                 elif z_trend == 2:
                     # falling
                     z_hpa -= 7 / 100 * z_range
-
         else:
             # South hemisphere
             if z_wind == "S":
@@ -852,7 +862,6 @@ class ConversionFunctions:
                 z_hpa += 1.5 / 100 * z_range
             elif z_wind == "SSE":
                 z_hpa += 3 / 100 * z_range
-
             if z_season == 0:
                 # Winter
                 if z_trend == 1:
@@ -882,20 +891,21 @@ class ConversionFunctions:
         else:
             # must be 'steady'
             z_number = steady_options[z_option]
-        z_number = z_number
 
         return z_number
 
-    def zambretti_txt(self, z_num):
+    def zambretti_text(self, z_num):
         """ Return local forecast text based on Zambretti Number from the zambretti_num function.
         Input:
             Zambretti Number from Zambretti function
         Where:
         """
-        z_number = z_num
+        if z_num is None:
+            return None
+
         # Zambretti Text Equivalents of Zambretti 'dial window' letters A - Z
         z_forecast = ["Settled fine", "Fine weather", "Becoming fine", "Fine, becoming less settled", "Fine, possible showers", "Fairly fine, improving", "Fairly fine, possible showers early", "Fairly fine, showery later", "Showery early, improving", "Changeable, mending", "Fairly fine, showers likely", "Rather unsettled clearing later", "Unsettled, probably improving", "Showery, bright intervals", "Showery, becoming less settled", "Changeable, some rain", "Unsettled, short fine intervals", "Unsettled, rain later", "Unsettled, some rain", "Mostly very unsettled", "Occasional rain, worsening", "Rain at times, very unsettled", "Rain at frequent intervals", "Rain, very unsettled", "Stormy, may improve", "Stormy, much rain"]
         z_text = ""
-        z_text += z_forecast[z_number]
+        z_text += z_forecast[z_num]
 
         return z_text
