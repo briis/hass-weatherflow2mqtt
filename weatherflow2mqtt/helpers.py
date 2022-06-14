@@ -725,10 +725,9 @@ class ConversionFunctions:
 
         return si
 
-    def zambretti_number(self, latitude, wind_dir, wind_speed, p_hi, p_lo, trend, press):
+    def zambretti_number(self, latitude, wind_dir, p_hi, p_lo, trend, press):
         """ Return local forecast number based on Zambretti Forecaster.
         Input:
-            Wind Speed in m/s
             Sea Level Pressure in mB
             Pressure Trend (Steady, Rising, Lowering)
             Latitude in Degrees
@@ -740,7 +739,6 @@ class ConversionFunctions:
         if (
             latitude is None
             or wind_dir is None
-            or wind_speed is None
             or p_hi is None
             or p_lo is None
             or trend is None
