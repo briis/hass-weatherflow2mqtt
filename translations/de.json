@@ -85,5 +85,33 @@
         "HEAVY": "Schwer",
         "VERYHEAVY": "Seht Schwer",
         "EXTREME": "Extrem"
+    },
+    "zambretti": {
+        "A": "Beständiges Schönwetter",
+        "B": "Schönes Wetter",
+        "C": "Wetter wird gut",
+        "D": "Schön, wird wechselhaft",
+        "E": "Schön, Regenschauer möglich",
+        "F": "Ziemlich gut, verbessert sich",
+        "G": "Ziemlich gut, frühe Regenschauer möglich",
+        "H": "Ziemlich gut, spätere Regenschauer",
+        "I": "Früh schauerhaft, verbessert sich",
+        "J": "Wechselhaft, verbessert sich",
+        "K": "Ziemlich gut, Regenschauer möglich",
+        "L": "Eher veränderlich, klart später auf",
+        "M": "Veränderlich, verbessert sich wahrscheinlich",
+        "N": "Regnerisch mit Aufhellungen",
+        "O": "Regnerisch, wird veränderlich",
+        "P": "Veränderlich mit wenig Regen",
+        "Q": "Veränderlich, mit kurzen schönen Intervallen",
+        "R": "Veränderlich, später Regen",
+        "S": "Veränderlich, zeitweise Regen",
+        "T": "Stark wechselnd, zeitweise schöner",
+        "U": "Zeitweise Regen, verschlechtert sich",
+        "V": "Zeitweise Regen, wird sehr unruhig",
+        "W": "Regen in regelmässigen Abständen",
+        "X": "Sehr veränderlich, Regen",
+        "Y": "Stürmisch, verbessert sich wahrscheinlich",
+        "Z": "Stürmisch, viel Regen"
     }
 }
