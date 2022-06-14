@@ -689,9 +689,9 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         icon="vector-bezier",
         event=EVENT_OBSERVATION,
         attr="calculate_sea_level_pressure",
-        custom_fn=lambda cnv, latitude, wind_direction_avg, wind_speed_avg, p_hi, p_lo, pressure_trend, sealevel_pressure: None
-        if None in (latitude, wind_direction_avg, wind_speed_avg, p_hi, p_lo, pressure_trend, sealevel_pressure)
-        else cnv.zambretti_number(latitude, wind_direction_avg, wind_speed_avg, p_hi, p_lo, pressure_trend, sealevel_pressure)
+        custom_fn=lambda cnv, latitude, wind_direction_avg, p_hi, p_lo, pressure_trend, sealevel_pressure: None
+        if None in (latitude, wind_direction_avg, p_hi, p_lo, pressure_trend, sealevel_pressure)
+        else cnv.zambretti_number(latitude, wind_direction_avg, p_hi, p_lo, pressure_trend, sealevel_pressure)
     ),
     SensorDescription(
         id="zambretti_text",
