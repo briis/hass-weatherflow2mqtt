@@ -85,5 +85,33 @@
         "HEAVY": "Lourde",
         "VERYHEAVY": "Très Lourd",
         "EXTREME": "Extrême"
+    },
+    "zambretti": {
+        "A": "Beau temps installé",
+        "B": "Beau temps",
+        "C": "Amélioration de la météo",
+        "D": "Beau temps, deviens changeant",
+        "E": "Beau temps, Possibilité d'averses",
+        "F": "Assez bon, en amélioration",
+        "G": "Assez bon, des averses précoces sont possibles",
+        "H": "Assez bon, des averses plus tard",
+        "I": "Pluie précoce, amélioration",
+        "J": "Changeant s'améliore",
+        "K": "Assez bon, averses probables",
+        "L": "Plutôt variable, s'éclaircira plus tard",
+        "M": "Instable, probablement en amélioration",
+        "N": "Pluie avec éclaircissement",
+        "O": "Pluvieux, devient instable",
+        "P": "Variable avec peu d'averses",
+        "Q": "Instable, avec quelques intervalles de beau",
+        "R": "Instable, averses plus tard",
+        "S": "Instable, averses occasionnelles",
+        "T": "Très Instable, parfois plus beau",
+        "U": "Averses par moments, plus mauvais plus tard",
+        "V": "Averses par moments, devient très instable",
+        "W": "Averses à intervalles fréquents",
+        "X": "Très instable, Pluie",
+        "Y": "Orageux, possible amélioration",
+        "Z": "Orageux, beaucoup de pluie"
     }
 }
