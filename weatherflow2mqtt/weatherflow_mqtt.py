@@ -159,6 +159,13 @@ class WeatherFlowMqtt:
         self.solar_radiation = None
         self.solar_elevation = None
 
+        self.wind_bearing_avg = None
+        self.sealevel_pressure_all_high = 1050
+        self.sealevel_pressure_all_low = 960
+        self.sealevel_pressure = None
+        self.pressure_trend = None
+        self.zambretti_number = None
+
     @property
     def is_imperial(self) -> bool:
         """Return `True` if the unit system is imperial, else `False`."""
@@ -359,10 +366,11 @@ class WeatherFlowMqtt:
                         elif sensor.id == "solar_insolation":
                             attr = fn(self.cnv, self.elevation, self.solar_elevation)
                         elif sensor.id == "zambretti_number":
-                            attr = fn(self, self.latitude, self.wind_direction_avg, p_hi, p_lo, self.pressure_trend, self.sealevel_pressure)
-                            # briis I don't know how to get the 'All Time Sea Level Pressure" High and Low inside the program
+                            _data = event_data[EVENT_OBSERVATION]
+                            self.zambretti_number = fn(self.cnv, self.latitude, _data.get("wind_bearing_avg"), self.sealevel_pressure_all_high, self.sealevel_pressure_all_low, self.pressure_trend, self.sealevel_pressure)
+                            attr = self.zambretti_number
                         elif sensor.id == "zambretti_text":
-                            attr = fn(self, self.z_number)
+                            attr = fn(self.cnv, self.zambretti_number)
                         else:
                             attr = fn(self.cnv, device)
 
@@ -423,6 +431,8 @@ class WeatherFlowMqtt:
             ) = self.sql.readPressureTrend(
                 data["sealevel_pressure"], self.cnv.translations
             )
+            self.pressure_trend = data["pressure_trend_value"]
+            self.sealevel_pressure = data["sealevel_pressure"]
             self.sql.writePressure(data["sealevel_pressure"])
 
         data["last_reset_midnight"] = self.last_midnight

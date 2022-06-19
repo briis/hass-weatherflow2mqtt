@@ -683,28 +683,23 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
     SensorDescription(
         id="zambretti_number",
         name="Zambretti Number",
-        unit_m="",
-        unit_i="",
         state_class=STATE_CLASS_MEASUREMENT,
         icon="vector-bezier",
         event=EVENT_OBSERVATION,
-        attr="calculate_sea_level_pressure",
+        attr="station_pressure",
         custom_fn=lambda cnv, latitude, wind_direction_avg, p_hi, p_lo, pressure_trend, sealevel_pressure: None
         if None in (latitude, wind_direction_avg, p_hi, p_lo, pressure_trend, sealevel_pressure)
-        else cnv.zambretti_number(latitude, wind_direction_avg, p_hi, p_lo, pressure_trend, sealevel_pressure)
+        else cnv.zambretti_value(latitude, wind_direction_avg, p_hi, p_lo, pressure_trend, sealevel_pressure)
     ),
     SensorDescription(
         id="zambretti_text",
         name="Zambretti Text",
-        unit_m="",
-        unit_i="",
-        state_class=STATE_CLASS_MEASUREMENT,
         icon="vector-bezier",
         event=EVENT_OBSERVATION,
-        attr="calculate_sea_level_pressure",
-        custom_fn=lambda cnv, zambretti_number: None
-        if None in (zambretti_number)
-        else cnv.zambretti_text(zambretti_number)
+        attr="station_pressure",
+        custom_fn=lambda cnv, zambretti_value: None
+        if zambretti_value is None
+        else cnv.zambretti_forecast(zambretti_value),
     ),
 )
 

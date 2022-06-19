@@ -725,7 +725,7 @@ class ConversionFunctions:
 
         return si
 
-    def zambretti_number(self, latitude, wind_dir, p_hi, p_lo, trend, press):
+    def zambretti_value(self, latitude, wind_dir, p_hi, p_lo, trend, press):
         """ Return local forecast number based on Zambretti Forecaster.
         Input:
             Sea Level Pressure in mB
@@ -733,7 +733,7 @@ class ConversionFunctions:
             Latitude in Degrees
             All Time Sea Level Pressure High in mB
             All Time Sea Level Pressure Low in mB
-            Wind Direction in Cardinal
+            Wind Direction in Degrees - Converted to Cardinal further down)
         Where:
         """
         if (
@@ -769,11 +769,11 @@ class ConversionFunctions:
         z_season = (z_month >= 4 and  z_month <= 9)
         # z_wind is English windrose cardinal eg. N, NNW, NW etc.
         # NB. if calm a 'nonsense' value should be sent as z_wind (direction) eg. 1 or calm !
-        z_wind = wind_dir
+        z_wind = self.direction(wind_dir)
         # z_trend is barometer trend: 0 = no change, 1 = rise, 2 = fall
-        if trend == "Falling":
+        if float(trend) < 0:
             z_trend = 2
-        elif trend == "Rising":
+        elif float(trend) > 0:
             z_trend = 1
         else:
             z_trend = 0
@@ -892,7 +892,7 @@ class ConversionFunctions:
 
         return z_number
 
-    def zambretti_text(self, z_num):
+    def zambretti_forecast(self, z_num: int):
         """ Return local forecast text based on Zambretti Number from the zambretti_num function.
         Input:
             Zambretti Number from Zambretti function
@@ -905,6 +905,6 @@ class ConversionFunctions:
         # Simplified array for Language Translations
         z_forecast = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
         z_text = ""
-        z_text += z_forecast[z_num]
+        z_text += z_forecast[int(z_num)]
 
-        return self.translations["precip_type"][z_text]
+        return self.translations["zambretti"][z_text]
