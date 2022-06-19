@@ -724,3 +724,187 @@ class ConversionFunctions:
         si = round(si)
 
         return si
+
+    def zambretti_number(self, latitude, wind_dir, p_hi, p_lo, trend, press):
+        """ Return local forecast number based on Zambretti Forecaster.
+        Input:
+            Sea Level Pressure in mB
+            Pressure Trend (Steady, Rising, Lowering)
+            Latitude in Degrees
+            All Time Sea Level Pressure High in mB
+            All Time Sea Level Pressure Low in mB
+            Wind Direction in Cardinal
+        Where:
+        """
+        if (
+            latitude is None
+            or wind_dir is None
+            or p_hi is None
+            or p_lo is None
+            or trend is None
+            or press is None
+        ):
+            return None
+
+        # Based off Beteljuice's Zambretti work; http://www.beteljuice.co.uk/zambretti/forecast.html
+        # Northern = 1 or Southern = 2 hemisphere
+        if latitude >= 0:
+            z_where = 1
+        else:
+            z_where = 2
+        # upper limits of your local 'weather window' Pulled from All Time Max
+        # var z_baro_top = 1050; # upper limits of your local 'weather window' (1050.0 hPa for UK)
+        z_baro_top = p_hi
+        # lower limits of your local 'weather window' Pulled from All Time Min
+        # var z_baro_bottom = 950;	// lower limits of your local 'weather window' (950.0 hPa for UK)
+        z_baro_bottom = p_lo
+        # range of pressure
+        z_range = z_baro_top - z_baro_bottom
+        # z_hpa is Sea Level Adjusted (Relative) barometer in hPa or mB
+        z_hpa = press
+        # z_month is current month as a number between 1 to 12
+        z_month = dt.datetime.now()
+        z_month = int(z_month.strftime("%m"))
+        # True (1) for summer, False (0) for Winter (Northern Hemishere)
+        z_season = (z_month >= 4 and  z_month <= 9)
+        # z_wind is English windrose cardinal eg. N, NNW, NW etc.
+        # NB. if calm a 'nonsense' value should be sent as z_wind (direction) eg. 1 or calm !
+        z_wind = wind_dir
+        # z_trend is barometer trend: 0 = no change, 1 = rise, 2 = fall
+        if trend == "Falling":
+            z_trend = 2
+        elif trend == "Rising":
+            z_trend = 1
+        else:
+            z_trend = 0
+        # A constant for the current location, will vary since range will adjust as the min and max pressure will update overtime
+        z_constant = (z_range / 22)
+        # Equivalents of Zambretti 'dial window' letters A - Z: 0=A
+        rise_options  = [25,25,25,24,24,19,16,12,11,9,8,6,5,2,1,1,0,0,0,0,0,0]
+        steady_options  = [25,25,25,25,25,25,23,23,22,18,15,13,10,4,1,1,0,0,0,0,0,0]
+        fall_options =  [25,25,25,25,25,25,25,25,23,23,21,20,17,14,7,3,1,1,1,0,0,0]
+
+        if z_where == 1:
+            # North hemisphere
+            if z_wind == "N":
+                z_hpa += 6 / 100 * z_range
+            elif z_wind == "NNE":
+                z_hpa += 5 / 100 * z_range
+            elif z_wind == "NE":
+                z_hpa += 5 / 100 * z_range
+            elif z_wind == "ENE":
+                z_hpa += 2 / 100 * z_range
+            elif z_wind == "E":
+                z_hpa -= 0.5 / 100 * z_range
+            elif z_wind == "ESE":
+                z_hpa -= 2 / 100 * z_range
+            elif z_wind == "SE":
+                z_hpa -= 5 / 100 * z_range
+            elif z_wind == "SSE":
+                z_hpa -= 8.5 / 100 * z_range
+            elif z_wind == "S":
+                z_hpa -= 12 / 100 * z_range
+            elif z_wind == "SSW":
+                z_hpa -= 10 / 100 * z_range
+            elif z_wind == "SW":
+                z_hpa -= 6 / 100 * z_range
+            elif z_wind == "WSW":
+                z_hpa -= 4.5 / 100 * z_range
+            elif z_wind == "W":
+                z_hpa -= 3 / 100 * z_range
+            elif z_wind == "WNW":
+                z_hpa -= 0.5 / 100 * z_range
+            elif z_wind == "NW":
+                z_hpa += 1.5 / 100 * z_range
+            elif z_wind == "NNW":
+                z_hpa += 3 / 100 * z_range
+            if z_season == 1:
+                # if Summer
+                if z_trend == 1:
+                    # rising
+                    z_hpa += 7 / 100 * z_range
+                elif z_trend == 2:
+                    # falling
+                    z_hpa -= 7 / 100 * z_range
+        else:
+            # South hemisphere
+            if z_wind == "S":
+                z_hpa += 6 / 100 * z_range
+            elif z_wind == "SSW":
+                z_hpa += 5 / 100 * z_range
+            elif z_wind == "SW":
+                z_hpa += 5 / 100 * z_range
+            elif z_wind == "WSW":
+                z_hpa += 2 / 100 * z_range
+            elif z_wind == "W":
+                z_hpa -= 0.5 / 100 * z_range
+            elif z_wind == "WNW":
+                z_hpa -= 2 / 100 * z_range
+            elif z_wind == "NW":
+                z_hpa -= 5 / 100 * z_range
+            elif z_wind == "NNW":
+                z_hpa -= 8.5 / 100 * z_range
+            elif z_wind == "N":
+                z_hpa -= 12 / 100 * z_range
+            elif z_wind == "NNE":
+                z_hpa -= 10 / 100 * z_range
+            elif z_wind == "NE":
+                z_hpa -= 6 / 100 * z_range
+            elif z_wind == "ENE":
+                z_hpa -= 4.5 / 100 * z_range
+            elif z_wind == "E":
+                z_hpa -= 3 / 100 * z_range
+            elif z_wind == "ESE":
+                z_hpa -= 0.5 / 100 * z_range
+            elif z_wind == "SE":
+                z_hpa += 1.5 / 100 * z_range
+            elif z_wind == "SSE":
+                z_hpa += 3 / 100 * z_range
+            if z_season == 0:
+                # Winter
+                if z_trend == 1:
+                    # rising
+                    z_hpa += 7 / 100 * z_range
+                elif z_trend == 2:
+                    # falling
+                    z_hpa -= 7 / 100 * z_range
+            # END North / South
+
+        if z_hpa == z_baro_top:
+            z_hpa = z_baro_top - 1
+        z_option = math.floor((z_hpa - z_baro_bottom) / z_constant)
+
+        if z_option < 0:
+            z_option = 0
+
+        if z_option > 21:
+            z_option = 21
+
+        if z_trend == 1:
+            # rising
+            z_number = rise_options[z_option]
+        elif z_trend == 2:
+            # falling
+            z_number = fall_options[z_option]
+        else:
+            # must be 'steady'
+            z_number = steady_options[z_option]
+
+        return z_number
+
+    def zambretti_text(self, z_num):
+        """ Return local forecast text based on Zambretti Number from the zambretti_num function.
+        Input:
+            Zambretti Number from Zambretti function
+        Where:
+        """
+        if z_num is None:
+            return None
+
+        # Zambretti Text Equivalents of Zambretti 'dial window' letters A - Z
+        # Simplified array for Language Translations
+        z_forecast = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
+        z_text = ""
+        z_text += z_forecast[z_num]
+
+        return self.translations["precip_type"][z_text]

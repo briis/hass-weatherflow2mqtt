@@ -358,6 +358,11 @@ class WeatherFlowMqtt:
                             attr = self.solar_elevation
                         elif sensor.id == "solar_insolation":
                             attr = fn(self.cnv, self.elevation, self.solar_elevation)
+                        elif sensor.id == "zambretti_number":
+                            attr = fn(self, self.latitude, self.wind_direction_avg, p_hi, p_lo, self.pressure_trend, self.sealevel_pressure)
+                            # briis I don't know how to get the 'All Time Sea Level Pressure" High and Low inside the program
+                        elif sensor.id == "zambretti_text":
+                            attr = fn(self, self.z_number)
                         else:
                             attr = fn(self.cnv, device)
 

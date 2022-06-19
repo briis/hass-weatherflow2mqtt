@@ -22,7 +22,9 @@ Please review Breaking Changes prior to updating your instance. Breaking changes
    1. [Sensor Structure](#sensor-structure)
    2. [High and Low Values](#high-and-low-values)
    3. [Long Term Statistics](#Home-Assistant-Long-Term-Statistics)
+   4. [Sensors in Developement](#Sensors-in-Developement)
 4. [Creating a Home Assistant Weather Entity](#creating-a-home-assistant-weather-entity)
+5. [Creating a Developement Environment](#Setup-Dev-environment)
 
 ## Installation
 
@@ -167,6 +169,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | solar_insolation              | Solar Insolation           | Estimation of Solar Radiation at current sun elevation angle                                                                                                                                                       | Yes                | W/m^2                                                                                       |
 | solar_radiation              | Solar Radiation             | Electromagnetic radiation emitted by the sun                                                                                                                                                       | No                | W/m^2                                                                                        |
 | station_pressure             | Station Pressure            | Pressure measurement where the station is located                                                                                                                                                  | No                | MB                                                                                           |
+| status                       | Status                      | How long has the device been running and other HW details                                                                                                                                          | No                |                                                                                              |
 | temperature_description      | Temperature Level           | Textual representation of the Outside Air Temperature value                                                                                                                                        | Yes               | Text                                                                                         |
 | uv                           | UV Index                    | The UV index                                                                                                                                                                                       | No                | Index                                                                                        |
 | uv_description               | UV Level                    | Textual representation of the UV Index value                                                                                                                                                       | Yes               |                                                                                              |
@@ -221,7 +224,6 @@ sensors:
   - rain_duration_yesterday
   - relative_humidity
   - sealevel_pressure
-  - status
   - solar_elevation
   - solar_insolation
   - solar_radiation
@@ -323,6 +325,17 @@ wind_gust
 wind_lull
 wind_speed
 wind_speed_avg
+```
+
+### Sensors in Developement
+
+```
+Solar Elevation (in Dev Branch)
+Solar Insolation (in Dev Branch)
+Zambretti Local Forecast (in Dev Branch)
+Local Current Conditions
+Probability of Snow
+Probability of Fog
 ```
 
 ## Creating a Home Assistant Weather Entity
