@@ -160,7 +160,7 @@ class WeatherFlowMqtt:
         self.solar_elevation = None
 
         self.wind_bearing_avg = None
-        self.sealevel_pressure_all_high = 1050
+        self.sealevel_pressure_all_high = 1060
         self.sealevel_pressure_all_low = 960
         self.sealevel_pressure = None
         self.pressure_trend = None
@@ -367,6 +367,7 @@ class WeatherFlowMqtt:
                             attr = fn(self.cnv, self.elevation, self.solar_elevation)
                         elif sensor.id == "zambretti_number":
                             _data = event_data[EVENT_OBSERVATION]
+                            # _LOGGER.info("LAT: %s, BEAR: %s, TREND: %s PRES: %s, HI: %s, LO: %s", self.latitude, _data.get("wind_bearing_avg"), self.pressure_trend, self.sealevel_pressure, self.sealevel_pressure_all_high, self.sealevel_pressure_all_low)
                             self.zambretti_number = fn(self.cnv, self.latitude, _data.get("wind_bearing_avg"), self.sealevel_pressure_all_high, self.sealevel_pressure_all_low, self.pressure_trend, self.sealevel_pressure)
                             attr = self.zambretti_number
                         elif sensor.id == "zambretti_text":
