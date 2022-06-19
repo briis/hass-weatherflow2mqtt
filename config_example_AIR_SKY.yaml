@@ -28,6 +28,8 @@ sensors:
   - relative_humidity
   - sealevel_pressure
   - sky_status
+  - solar_elevation
+  - solar_insolation
   - solar_radiation
   - station_pressure
   - status

@@ -36,6 +36,8 @@ A MQTT Server must be setup and configured on your local network, before install
 
 This is the easiest installation method. Just click on the blue **ADD REPOSITORY** button at the top of this README and you will be taken to your Home Assistant instance to add this repository to the _Add-On Store_. From there, scroll down to find "WeatherFlow to MQTT" and then install, configure (optional) and start the add-on.
 
+**NOTE**: Make sure that you already have setup a Working MQTT broker, and easiest way to do that is by using the MQTT broker from the Official Add-On store.
+
 ### Outside Home Assistant using Docker
 
 - Ensure Docker is setup and running
@@ -94,8 +96,8 @@ A description of the Environment Variables available for this container. All of 
 - `LANGUAGE`: Use this to set the language for Wind Direction cardinals and other sensors with text strings as state value. These strings will then be displayed in HA in the selected language. See section [Supported Languages](#supported-languages)
 - `RAPID_WIND_INTERVAL`: The weather stations delivers wind speed and bearing every 2 seconds. If you don't want to update the HA sensors so often, you can set a number here (in seconds), for how often they are updated. Default is _0_, which means data are updated when received from the station.
 - `ELEVATION`: Set the hight above sea level for where the station is placed. This is used when calculating some of the sensor values. Station elevation plus Device height above ground. The value has to be in meters (`meters = feet * 0.3048`). Default is _0_
-- `LATITUDE`: Set the Latitude where the Station is located. Default is _0_. Currently not used, but will be used in the future for new calculated sensors.
-- `LONGITUDE`: Set the Longitude where the Station is located. Default is _0_. Currently not used, but will be used in the future for new calculated sensors.
+- `LATITUDE`: Set the Latitude where the Station is located. Default is _0_.
+- `LONGITUDE`: Set the Longitude where the Station is located. Default is _0_.
 - `WF_HOST`: Unless you have a very special IP setup or the Weatherflow hub is on a different network, you should not change this. Default is _0.0.0.0_
 - `WF_PORT`: Weatherflow always broadcasts on port 50222/udp, so don't change this. Default is _50222_
 - `MQTT_HOST`: The IP address of your mqtt server. Even though you have the MQTT Server on the same machine as this Container, don't use `127.0.0.1` as this will resolve to an IP Address inside your container. Use the external IP Address. Default value is _127.0.0.1_ (**Required**)
@@ -162,8 +164,9 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | rain_duration_yesterday      | Rain Duration (Yesterday)   | Total rain minutes yesterday                                                                                                                                                                       | Yes               | minutes                                                                                      |
 | relative_humidity            | Humidity                    | Relative Humidity                                                                                                                                                                                  | No                | %                                                                                            |
 | sealevel_pressure            | Station Pressure            | Preasure measurement at Sea Level                                                                                                                                                                  | Yes               | MB                                                                                           |
-| solar_elvation               | Solar Elevation             | Sun Angle above Horizon                                                                                                                                                                            | Yes               | °                                                                                           |
-| solar_insolation             | Solar Insolation            | Estimated Solar Radiation with full Sun                                                                                                                                                            | Yes               | W/m^2                                                                                       |
+| status                       | Status                      | How long has the device been running and other HW details                                                                                                                                          | No                |                                                                                              |
+| solar_elevation              | Solar Elevation             | Sun Elevation in Degrees with respect to the Horizon                                                                                                                                                       | Yes                | ° (degree)                                                                                       |
+| solar_insolation              | Solar Insolation           | Estimation of Solar Radiation at current sun elevation angle                                                                                                                                                       | Yes                | W/m^2                                                                                       |
 | solar_radiation              | Solar Radiation             | Electromagnetic radiation emitted by the sun                                                                                                                                                       | No                | W/m^2                                                                                        |
 | station_pressure             | Station Pressure            | Pressure measurement where the station is located                                                                                                                                                  | No                | MB                                                                                           |
 | status                       | Status                      | How long has the device been running and other HW details                                                                                                                                          | No                |                                                                                              |
@@ -306,6 +309,8 @@ rain_duration_today
 rain_rate
 rain_today
 sealevel_pressure
+solar_elevation
+solar_insolation
 solar_radiation
 station_pressure
 air_temperature
