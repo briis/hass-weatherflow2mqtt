@@ -164,6 +164,8 @@ UNITS_METRIC = "metric"
 
 UTC = datetime.timezone.utc
 
+ZAMBRETTI_MIN_PRESSURE = 960
+ZAMBRETTI_MAX_PRESSURE = 1060
 
 CONDITION_CLASSES = {
     "clear-night": ["clear-night"],

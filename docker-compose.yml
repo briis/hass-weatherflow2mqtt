@@ -12,6 +12,8 @@ services:
       - ELEVATION=0
       - LATITUDE=
       - LONGITUDE=
+      - ZAMBRETTI_MIN_PRESSURE=
+      - ZAMBRETTI_MAX_PRESSURE=
       - WF_HOST=0.0.0.0
       - WF_PORT=50222
       - MQTT_HOST=

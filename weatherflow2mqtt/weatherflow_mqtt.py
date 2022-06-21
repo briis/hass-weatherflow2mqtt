@@ -54,6 +54,8 @@ from .const import (
     TEMP_CELSIUS,
     UNITS_IMPERIAL,
     UNITS_METRIC,
+    ZAMBRETTI_MAX_PRESSURE,
+    ZAMBRETTI_MIN_PRESSURE,
 )
 from .forecast import Forecast, ForecastConfig
 from .helpers import ConversionFunctions, read_config, truebool
@@ -119,6 +121,8 @@ class WeatherFlowMqtt:
         database_file: str = None,
         filter_sensors: list[str] | None = None,
         invert_filter: bool = False,
+        zambretti_min_pressure = ZAMBRETTI_MIN_PRESSURE,
+        zambretti_max_pressure = ZAMBRETTI_MAX_PRESSURE
     ) -> None:
         """Initialize a WeatherFlow MQTT."""
         self.elevation = elevation
@@ -126,6 +130,8 @@ class WeatherFlowMqtt:
         self.longitude = longitude
         self.unit_system = unit_system
         self.rapid_wind_interval = rapid_wind_interval
+        self.sealevel_pressure_all_high = zambretti_max_pressure
+        self.sealevel_pressure_all_low = zambretti_min_pressure
 
         self.cnv = ConversionFunctions(unit_system, language)
 
@@ -159,9 +165,8 @@ class WeatherFlowMqtt:
         self.solar_radiation = None
         self.solar_elevation = None
 
+        # Zambretti Forecast Vars
         self.wind_bearing_avg = None
-        self.sealevel_pressure_all_high = 1060
-        self.sealevel_pressure_all_low = 960
         self.sealevel_pressure = None
         self.pressure_trend = None
         self.zambretti_number = None
@@ -781,6 +786,8 @@ async def main():
     unit_system = config.get("UNIT_SYSTEM", UNITS_METRIC)
     rw_interval = int(config.get("RAPID_WIND_INTERVAL", 0))
     language = config.get("LANGUAGE", LANGUAGE_ENGLISH).lower()
+    zambretti_min_pressure = float(config.get("ZAMBRETTI_MIN_PRESSURE", ZAMBRETTI_MIN_PRESSURE))
+    zambretti_max_pressure = float(config.get("ZAMBRETTI_MAX_PRESSURE", ZAMBRETTI_MAX_PRESSURE))
 
     mqtt_config = MqttConfig(
         host=config.get("MQTT_HOST", "127.0.0.1"),
@@ -831,6 +838,8 @@ async def main():
         database_file=DATABASE,
         filter_sensors=filter_sensors,
         invert_filter=invert_filter,
+        zambretti_min_pressure=zambretti_min_pressure,
+        zambretti_max_pressure=zambretti_max_pressure,
     )
     await weatherflowmqtt.connect()
 

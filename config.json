@@ -44,6 +44,8 @@
         "MQTT_DEBUG": "bool?",
         "WF_HOST": "str?",
         "WF_PORT": "port?",
-        "DEBUG": "bool?"
+        "DEBUG": "bool?",
+        "ZAMBRETTI_MIN_PRESSURE": "float?",
+        "ZAMBRETTI_MAX_PRESSURE": "float?"
     }
 }
