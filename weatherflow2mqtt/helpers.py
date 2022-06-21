@@ -729,7 +729,7 @@ class ConversionFunctions:
         """ Return local forecast number based on Zambretti Forecaster.
         Input:
             Sea Level Pressure in mB
-            Pressure Trend (Steady, Rising, Lowering)
+            Pressure Trend 0 for Steady, >0 for Rising and <0 for Falling
             Latitude in Degrees
             All Time Sea Level Pressure High in mB
             All Time Sea Level Pressure Low in mB
