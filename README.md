@@ -188,6 +188,8 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | wind_speed                   | Wind Speed                  | Current measured Wind Speed                                                                                                                                                                        | No                | m/s                                                                                          |
 | wind_speed_avg               | Wind Speed Avg              | Average wind speed for the last minute                                                                                                                                                             | No                | m/s                                                                                          |
 | weather                      | Weather                     | Only available if STATION_ID and STATION_TOKEN have valid data (See above). State will be current condition, and forecast data will be in the attributes.                                          | No                |                                                                                              |
+| zambretti_number             | Zambretti Number            | Local Weather Forecast for the near future utilizing the Beteljuice Zambretti Algorhithm.                                                                                                           | Yes               | (0-25) number corispondes to Zambretti letters A-Z                                            |
+| zambretti_text               | Zambretti Text                     | Local Weather Forecast for the near future utilizing the Beteljuice Zambretti Algorhithm.                                                                                                   | Yes               | Weather Forecast Text                                                                        |
 
 ### Sensor Structure
 
@@ -247,6 +249,8 @@ sensors:
   - wind_speed
   - wind_speed_avg
   - weather
+  - zambretti_number
+  - zambretti_text
 ```
 
 ### High and Low Values
