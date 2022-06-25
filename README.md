@@ -98,6 +98,8 @@ A description of the Environment Variables available for this container. All of 
 - `ELEVATION`: Set the hight above sea level for where the station is placed. This is used when calculating some of the sensor values. Station elevation plus Device height above ground. The value has to be in meters (`meters = feet * 0.3048`). Default is _0_
 - `LATITUDE`: Set the Latitude where the Station is located. Default is _0_.
 - `LONGITUDE`: Set the Longitude where the Station is located. Default is _0_.
+- `ZAMBRETTI_MIN_PRESSURE`: All Time Low Sea Level Pressure. Default is _960_ (Mb for Metric) or Default is _28.35_ (inHG for Imperial)
+- `ZAMBRETTI_MAX_PRESSURE`: All Time High Sea Level Pressure. Default is _1060_ (Mb for Metric) or Default is _31.30_ (inHG for Imperial)
 - `WF_HOST`: Unless you have a very special IP setup or the Weatherflow hub is on a different network, you should not change this. Default is _0.0.0.0_
 - `WF_PORT`: Weatherflow always broadcasts on port 50222/udp, so don't change this. Default is _50222_
 - `MQTT_HOST`: The IP address of your mqtt server. Even though you have the MQTT Server on the same machine as this Container, don't use `127.0.0.1` as this will resolve to an IP Address inside your container. Use the external IP Address. Default value is _127.0.0.1_ (**Required**)
