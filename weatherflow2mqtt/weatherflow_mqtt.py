@@ -786,8 +786,10 @@ async def main():
     unit_system = config.get("UNIT_SYSTEM", UNITS_METRIC)
     rw_interval = int(config.get("RAPID_WIND_INTERVAL", 0))
     language = config.get("LANGUAGE", LANGUAGE_ENGLISH).lower()
-    zambretti_min_pressure = float(config.get("ZAMBRETTI_MIN_PRESSURE", ZAMBRETTI_MIN_PRESSURE))
-    zambretti_max_pressure = float(config.get("ZAMBRETTI_MAX_PRESSURE", ZAMBRETTI_MAX_PRESSURE))
+    zambretti_min_default = ZAMBRETTI_MIN_PRESSURE if unit_system == UNITS_METRIC else ZAMBRETTI_MIN_PRESSURE * 0.029530
+    zambretti_max_default = ZAMBRETTI_MAX_PRESSURE if unit_system == UNITS_METRIC else ZAMBRETTI_MAX_PRESSURE * 0.029530
+    zambretti_min_pressure = float(config.get("ZAMBRETTI_MIN_PRESSURE", zambretti_min_default))
+    zambretti_max_pressure = float(config.get("ZAMBRETTI_MAX_PRESSURE", zambretti_max_default))
 
     mqtt_config = MqttConfig(
         host=config.get("MQTT_HOST", "127.0.0.1"),
