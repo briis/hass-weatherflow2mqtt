@@ -771,7 +771,7 @@ class ConversionFunctions:
         # NB. if calm a 'nonsense' value should be sent as z_wind (direction) eg. 1 or calm !
         z_wind = self.direction(wind_dir)
         # z_trend is barometer trend: 0 = no change, 1 = rise, 2 = fall
-        z_trend_threshold = 1.6 if self.unit_system == UNITS_IMPERIAL else 5.4
+        z_trend_threshold = 0.047248 if self.unit_system == UNITS_IMPERIAL else 1.6
         if float(trend) < z_trend_threshold:
             z_trend = 2
         elif float(trend) > z_trend_threshold:
