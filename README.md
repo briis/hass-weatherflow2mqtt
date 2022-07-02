@@ -98,6 +98,8 @@ A description of the Environment Variables available for this container. All of 
 - `ELEVATION`: Set the hight above sea level for where the station is placed. This is used when calculating some of the sensor values. Station elevation plus Device height above ground. The value has to be in meters (`meters = feet * 0.3048`). Default is _0_
 - `LATITUDE`: Set the Latitude where the Station is located. Default is _0_.
 - `LONGITUDE`: Set the Longitude where the Station is located. Default is _0_.
+- `ZAMBRETTI_MIN_PRESSURE`: All Time Low Sea Level Pressure. Default is _960_ (Mb for Metric) or Default is _28.35_ (inHG for Imperial)
+- `ZAMBRETTI_MAX_PRESSURE`: All Time High Sea Level Pressure. Default is _1060_ (Mb for Metric) or Default is _31.30_ (inHG for Imperial)
 - `WF_HOST`: Unless you have a very special IP setup or the Weatherflow hub is on a different network, you should not change this. Default is _0.0.0.0_
 - `WF_PORT`: Weatherflow always broadcasts on port 50222/udp, so don't change this. Default is _50222_
 - `MQTT_HOST`: The IP address of your mqtt server. Even though you have the MQTT Server on the same machine as this Container, don't use `127.0.0.1` as this will resolve to an IP Address inside your container. Use the external IP Address. Default value is _127.0.0.1_ (**Required**)
@@ -186,6 +188,8 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | wind_speed                   | Wind Speed                  | Current measured Wind Speed                                                                                                                                                                        | No                | m/s                                                                                          |
 | wind_speed_avg               | Wind Speed Avg              | Average wind speed for the last minute                                                                                                                                                             | No                | m/s                                                                                          |
 | weather                      | Weather                     | Only available if STATION_ID and STATION_TOKEN have valid data (See above). State will be current condition, and forecast data will be in the attributes.                                          | No                |                                                                                              |
+| zambretti_number             | Zambretti Number            | Local Weather Forecast for the near future utilizing the Beteljuice Zambretti Algorhithm.                                                                                                           | Yes               | (0-25) number corispondes to Zambretti letters A-Z                                            |
+| zambretti_text               | Zambretti Text                     | Local Weather Forecast for the near future utilizing the Beteljuice Zambretti Algorhithm.                                                                                                   | Yes               | Weather Forecast Text                                                                        |
 
 ### Sensor Structure
 
@@ -245,6 +249,8 @@ sensors:
   - wind_speed
   - wind_speed_avg
   - weather
+  - zambretti_number
+  - zambretti_text
 ```
 
 ### High and Low Values
