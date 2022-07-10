@@ -676,9 +676,9 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         icon="solar-power",
         event=EVENT_OBSERVATION,
         attr="solar_radiation",
-        custom_fn=lambda cnv, elevation, solar_elevation: None
-        if None in (elevation, solar_elevation)
-        else cnv.solar_insolation(elevation, solar_elevation)
+        custom_fn=lambda cnv, elevation, latitude, longitude: None
+        if None in (elevation, latitude, longitude)
+        else cnv.solar_insolation(elevation, latitude, longitude)
     ),
     SensorDescription(
         id="zambretti_number",

@@ -369,7 +369,7 @@ class WeatherFlowMqtt:
                             self.solar_elevation = fn(self.cnv, self.latitude, self.longitude)
                             attr = self.solar_elevation
                         elif sensor.id == "solar_insolation":
-                            attr = fn(self.cnv, self.elevation, self.solar_elevation)
+                            attr = fn(self.cnv, self.elevation, self.latitude, self.longitude)
                         elif sensor.id == "zambretti_number":
                             _data = event_data[EVENT_OBSERVATION]
                             self.zambretti_number = fn(self.cnv, self.latitude, _data.get("wind_bearing_avg"), self.sealevel_pressure_all_high, self.sealevel_pressure_all_low, self.pressure_trend, self.sealevel_pressure)

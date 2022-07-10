@@ -689,7 +689,7 @@ class ConversionFunctions:
 
         return se
 
-    def solar_insolation(self, elevation, solar_elevation):
+    def solar_insolation(self, elevation, latitude, longitude):
         """ Return Estimation of Solar Radiation at current sun elevation angle.
 
         Input:
@@ -702,9 +702,10 @@ class ConversionFunctions:
             1353 W/M^2 is considered Solar Radiation at edge of atmoshere
             ** All Trigonometry Fuctions need Degrees converted to Radians **
         """
-        if solar_elevation is None or elevation is None:
+        if elevation is None or latitude is None or longitude is None:
             return None
 
+        solar_elevation = self.solar_elevation(latitude, longitude)
         cos = math.cos
         sin = math.sin
         asin = math.asin
