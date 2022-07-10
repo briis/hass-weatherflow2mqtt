@@ -693,8 +693,9 @@ class ConversionFunctions:
         """ Return Estimation of Solar Radiation at current sun elevation angle.
 
         Input:
-            Solar Elevation in Degrees
             Elevation in Meters
+            Latitude
+            Longitude
         Where:
             sz is Solar Zenith in Degrees
             ah is (Station Elevation Compensation) Constant ah_a = 0.14, ah_h = Station elevation in km
@@ -705,7 +706,9 @@ class ConversionFunctions:
         if elevation is None or latitude is None or longitude is None:
             return None
 
+        # Calculate Solar Elevation
         solar_elevation = self.solar_elevation(latitude, longitude)
+
         cos = math.cos
         sin = math.sin
         asin = math.asin
