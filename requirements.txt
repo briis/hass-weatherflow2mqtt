@@ -3,4 +3,4 @@ asyncio==3.4.3
 aiohttp==3.7.4.post0
 PyYAML==5.4.1
 pytz==2021.1
-pyweatherflowudp==1.4.0
+pyweatherflowudp==1.4.1
