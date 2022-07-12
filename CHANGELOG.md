@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.1] - 2022-07-12
+
+### Fixed
+
+- Fixed Issue #163 Bumped `pyweatherflowudp` to V1.4.1. Thank you to @natekspencer.
+  - Adjusted logic for calculate_sea_level_pressure to match WeatherFlow (https://weatherflow.github.io/Tempest/api/derived-metric-formulas.html#sea-level-pressure)
+
 ## [3.1.0] - 2022-07-03
 
 ### Changed
