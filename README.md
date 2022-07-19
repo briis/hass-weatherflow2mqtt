@@ -66,8 +66,8 @@ docker run -d \
 -e RAPID_WIND_INTERVAL=0 \
 -e DEBUG=False \
 -e ELEVATION=0 \
--e LATITUDE=0 \
--e LONGITUDE=0 \
+-e LATITUDE=0.0000 \
+-e LONGITUDE=0.0000 \
 -e ZAMBRETTI_MIN_PRESSURE=960 \
 -e ZAMBRETTI_MAX_PRESSURE=1060 \
 -e WF_HOST=0.0.0.0 \
@@ -98,8 +98,8 @@ A description of the Environment Variables available for this container. All of 
 - `LANGUAGE`: Use this to set the language for Wind Direction cardinals and other sensors with text strings as state value. These strings will then be displayed in HA in the selected language. See section [Supported Languages](#supported-languages)
 - `RAPID_WIND_INTERVAL`: The weather stations delivers wind speed and bearing every 2 seconds. If you don't want to update the HA sensors so often, you can set a number here (in seconds), for how often they are updated. Default is _0_, which means data are updated when received from the station.
 - `ELEVATION`: Set the hight above sea level for where the station is placed. This is used when calculating some of the sensor values. Station elevation plus Device height above ground. The value has to be in meters (`meters = feet * 0.3048`). Default is _0_
-- `LATITUDE`: Set the Latitude where the Station is located. Default is _0_.
-- `LONGITUDE`: Set the Longitude where the Station is located. Default is _0_.
+- `LATITUDE`: Set the Latitude where the Station is located. Default is _0.0000_.
+- `LONGITUDE`: Set the Longitude where the Station is located. Default is _0.0000_.
 - `ZAMBRETTI_MIN_PRESSURE`: All Time Low Sea Level Pressure. Default is _960_ (Mb for Metric) or Default is _28.35_ (inHG for Imperial)
 - `ZAMBRETTI_MAX_PRESSURE`: All Time High Sea Level Pressure. Default is _1060_ (Mb for Metric) or Default is _31.30_ (inHG for Imperial)
 - `WF_HOST`: Unless you have a very special IP setup or the Weatherflow hub is on a different network, you should not change this. Default is _0.0.0.0_
