@@ -934,53 +934,56 @@ class ConversionFunctions:
         fog = 0
         diff = temperature - dew_point
 
-        if (solar_elevation >= 0):
+        if solar_elevation >= 0:
             # daytime
             fog = fog - 15
         else:
             # fog is more common at night
             fog = fog + 10
 
-        if (wind_speed < 5): # mph
+        if wind_speed < 5: # mph
             # fog is more likely when it is calm
             fog = fog + 20
-        else if (wind_speed < 10): # mph
+        elif wind_speed < 10: # mph
             # it's more windy, fog is slightly less likely
             fog = fog + 5
         else:
 	        # it's unlikely fog will form above 10mph
             fog = fog - 20
 
-        if (humidity > 75 && humidity < 91):
+        if humidity > 75 and humidity < 91:
             # high humidity
             fog = fog + 5
-        else if (humidity > 90):
+        elif humidity > 90:
             # higher humidity
             fog = fog + 10
         else:
             # humidity is still quite low
             fog = fog - 20
 
-        if ((diff < 5.1) && (diff > 3.9)):
+        if diff < 5.1 and diff > 3.9:
 	        # Diff between temp and dewpoint is less than 5'C and over 4'C")
 	        fog = fog + 5
-        else if ((diff < 4.1) && (diff > 2.5)):
+        elif diff < 4.1 and diff > 2.5:
             # Diff between temp and dewpoint is less than 4'C and over 2.5'C")
             fog = fog + 10
-        else if ((diff < 2.6) && (diff > 1.9))
+        elif diff < 2.6 and diff > 1.9
             # Diff between temp and dewpoint is less than 3'C and over 2'C")
             fog = fog + 15
-        else if ((diff < 2.1) && (diff > 0.9)):
+        elif diff < 2.1 and diff > 0.9:
             # Diff between temp and dewpoint is less than 2'C and over 1'C")
             fog = fog + 20
-        else if (diff < 1):
+        elif diff < 1:
 	        # Diff between temp and dewpoint is less than 1'C"
 	        fog = fog + 25
         else:
             fog = fog - 20
 
         # 75 is the maximum possible score
-        if (fog > 0) { fog = (fog /75) * 100; } else { fog = 0; }
+        if fog > 0:
+            fog = (fog / 75) * 100
+        else:
+            fog = 0
 
         fog_probability = round(fog)
 
