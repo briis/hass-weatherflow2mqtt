@@ -34,7 +34,7 @@
         "STATION_ID": "str?",
         "STATION_TOKEN": "str?",
         "FORECAST_INTERVAL": "int?",
-        "LANGUAGE": "list(en|da|de|fr)?",
+        "LANGUAGE": "list(en|da|de|fr|nl)?",
         "FILTER_SENSORS": "str?",
         "INVERT_FILTER": "bool?",
         "MQTT_HOST": "str?",
