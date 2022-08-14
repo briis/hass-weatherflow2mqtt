@@ -110,7 +110,7 @@ A description of the Environment Variables available for this container. All of 
 - `MQTT_PASSWORD`: The password used to connect to the mqtt server. Leave blank to use Anonymous connection. Default value is _blank_
 - `MQTT_DEBUG`: Set this to True, to get some more mqtt debugging messages in the Container log file. Default value is _False_
 - `DEBUG`: Set this to True to enable more debug data in the Container Log. Default is _False_
-- `STATION_ID`: Enter your Station ID for your WeatherFlow Station. Default value is _blank_.
+- `STATION_ID`: Enter your Station ID for your WeatherFlow Station. Default value is _blank_. The correct STATION_ID is the number that you see when you access your Station from the Tempest Web APP. For example when you are on https://tempestwx.com/station/XXXXX/
 - `STATION_TOKEN`: Enter your personal access Token to allow retrieval of data. If you don't have the token [login with your account](https://tempestwx.com/settings/tokens) and create the token. **NOTE** You must own a WeatherFlow station to get this token. Default value is _blank_
 - `FORECAST_INTERVAL`: The interval in minutes, between updates of the Forecast data. Default value is _30_ minutes.
 - `briis/weatherflow2mqtt:<tag>`: _latest_ for the latest stable build, _dev_ for the latest build (may not be stable due to development/testing build). Once dev build is verified latest build and dev will be identical. Latest features will be tested in dev build before released to latest.
