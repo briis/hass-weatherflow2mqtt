@@ -7,4 +7,5 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - Added support for the Dutch Language. Big thanks to @vdbrink for adding this.
+- Updated README to clarify how to get Station ID.
   
