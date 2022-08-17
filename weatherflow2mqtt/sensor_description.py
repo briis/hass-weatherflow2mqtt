@@ -704,6 +704,9 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
     SensorDescription(
         id="fog_probability",
         name="Fog Probability",
+        unit_m="%",
+        unit_i="%",
+        state_class=STATE_CLASS_MEASUREMENT,
         icon="weather-fog",
         event=EVENT_OBSERVATION,
         attr="relative_humidity",
