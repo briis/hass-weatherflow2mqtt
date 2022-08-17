@@ -962,8 +962,8 @@ class ConversionFunctions:
             fog = fog - 20
 
         if diff < 5.1 and diff > 3.9:
-	        # Diff between temp and dewpoint is less than 5'C and over 4'C")
-	        fog = fog + 5
+            # Diff between temp and dewpoint is less than 5'C and over 4'C")
+            fog = fog + 5
         elif diff < 4.1 and diff > 2.5:
             # Diff between temp and dewpoint is less than 4'C and over 2.5'C")
             fog = fog + 10
@@ -974,8 +974,8 @@ class ConversionFunctions:
             # Diff between temp and dewpoint is less than 2'C and over 1'C")
             fog = fog + 20
         elif diff < 1:
-	        # Diff between temp and dewpoint is less than 1'C"
-	        fog = fog + 25
+            # Diff between temp and dewpoint is less than 1'C"
+            fog = fog + 25
         else:
             fog = fog - 20
 
