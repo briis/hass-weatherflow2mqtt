@@ -376,6 +376,8 @@ class WeatherFlowMqtt:
                             attr = self.zambretti_number
                         elif sensor.id == "zambretti_text":
                             attr = fn(self.cnv, self.zambretti_number)
+                        elif sensor.id == "fog_probability":
+                            attr = fn(self.cnv, device, self.solar_elevation, self.wind_speed, self.relative_humidity, self.dew_point_temperature)
                         else:
                             attr = fn(self.cnv, device)
 
