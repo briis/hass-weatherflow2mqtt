@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.2] - 2022-08-20
+
+### Added
+
+- Added support for the Dutch Language. Big thanks to @vdbrink for adding this.
+
+### Changed
+
+- Updated README to clarify how to get Station ID.
+
 ## [3.1.1] - 2022-07-12
 
 ### Fixed
