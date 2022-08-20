@@ -701,6 +701,19 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         if zambretti_value is None
         else cnv.zambretti_forecast(zambretti_value),
     ),
+    SensorDescription(
+        id="fog_probability",
+        name="Fog Probability",
+        unit_m="%",
+        unit_i="%",
+        state_class=STATE_CLASS_MEASUREMENT,
+        icon="weather-fog",
+        event=EVENT_OBSERVATION,
+        attr="relative_humidity",
+        custom_fn=lambda cnv, solar_elevation, wind_speed, humidity, dew_point: None
+        if None in (solar_elevation, wind_speed, humidity, dew_point)
+        else cnv.fog_probability(solar_elevation, wind_speed, humidity, dew_point),
+    ),
 )
 
 HUB_SENSORS: tuple[BaseSensorDescription, ...] = (STATUS_SENSOR,)
