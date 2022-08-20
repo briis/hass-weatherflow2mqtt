@@ -783,6 +783,7 @@ async def main():
     latitude = float(config.get("LATITUDE", 0))
     longitude = float(config.get("LONGITUDE", 0))
     unit_system = config.get("UNIT_SYSTEM", UNITS_METRIC)
+    _LOGGER.info("Unit System is %s", unit_system)
     rw_interval = int(config.get("RAPID_WIND_INTERVAL", 0))
     language = config.get("LANGUAGE", LANGUAGE_ENGLISH).lower()
     zambretti_min_default = ZAMBRETTI_MIN_PRESSURE if unit_system == UNITS_METRIC else ZAMBRETTI_MIN_PRESSURE * 0.029530
