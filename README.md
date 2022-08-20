@@ -149,6 +149,7 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | dewpoint                     | Dew Point                   | Dewpoint in degrees                                                                                                                                                                                | Yes               | C°                                                                                           |
 | dewpoint_description         | Dewpoint Comfort Level      | Textual representation of the Dewpoint value                                                                                                                                                       | Yes               |                                                                                              |
 | feelslike                    | Feels Like Temperature      | The apparent temperature, a mix of Heat Index and Wind Chill                                                                                                                                       | Yes               | C°                                                                                           |
+| fog_probability              | Fog Probability             | The probability of fog based on current conditions                                                                                                                                                 | Yes               | %                                                                                           |
 | freezing_level               | Freezing Level Altitude     | The estimated altitude above mean sea level (AMSL) where the temperature is at the freezing point (0°C/32°F)                                                                                       | Yes               | m                                                                                            |
 | illuminance                  | Illuminance                 | How much the incident light illuminates the surface                                                                                                                                                | No                | Lux                                                                                          |
 | lightning_strike_count       | Lightning Count             | Number of lightning strikes in the last minute                                                                                                                                                     | Yes               | #                                                                                            |
@@ -211,6 +212,7 @@ sensors:
   - dewpoint
   - dewpoint_description
   - feelslike
+  - fog_probability
   - freezing_level
   - illuminance
   - lightning_strike_count
