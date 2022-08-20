@@ -164,6 +164,9 @@ class WeatherFlowMqtt:
         self.wind_speed = None
         self.solar_radiation = None
         self.solar_elevation = None
+        self.relative_humidity = None
+        self.dew_point_temperature = None
+        self.air_temperature = None
 
         # Zambretti Forecast Vars
         self.wind_bearing_avg = None
@@ -357,6 +360,7 @@ class WeatherFlowMqtt:
                         attr = attr(**inputs)
 
                     # Check for a custom function
+                    _data = event_data[EVENT_OBSERVATION]
                     if (fn := sensor.custom_fn) is not None:
                         # TODO: Handle unique data points more elegantly
                         if sensor.id == "feelslike":
@@ -371,13 +375,12 @@ class WeatherFlowMqtt:
                         elif sensor.id == "solar_insolation":
                             attr = fn(self.cnv, self.elevation, self.latitude, self.longitude)
                         elif sensor.id == "zambretti_number":
-                            _data = event_data[EVENT_OBSERVATION]
                             self.zambretti_number = fn(self.cnv, self.latitude, _data.get("wind_bearing_avg"), self.sealevel_pressure_all_high, self.sealevel_pressure_all_low, self.pressure_trend, self.sealevel_pressure)
                             attr = self.zambretti_number
                         elif sensor.id == "zambretti_text":
                             attr = fn(self.cnv, self.zambretti_number)
                         elif sensor.id == "fog_probability":
-                            attr = fn(self.cnv, device, self.solar_elevation, self.wind_speed, self.relative_humidity, self.dew_point_temperature)
+                            attr = fn(self.cnv, self.solar_elevation, self.wind_speed, _data.get("relative_humidity"), _data.get("dewpoint"), _data.get("air_temperature"))
                         else:
                             attr = fn(self.cnv, device)
 

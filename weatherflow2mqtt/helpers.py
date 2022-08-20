@@ -914,7 +914,7 @@ class ConversionFunctions:
 
         return self.translations["zambretti"][z_text]
 
-    def fog_probability(self, solar_elevation, wind_speed, humidity, dew_point):
+    def fog_probability(self, solar_elevation, wind_speed, humidity, dew_point, air_temperature):
         """ Return probability of fog in percent.
         Input:
             Solar Elevation - determine daylight
@@ -932,7 +932,7 @@ class ConversionFunctions:
             return None
         
         fog = 0
-        diff = temperature - dew_point
+        diff = air_temperature - dew_point
 
         if solar_elevation >= 0:
             # daytime
@@ -967,7 +967,7 @@ class ConversionFunctions:
         elif diff < 4.1 and diff > 2.5:
             # Diff between temp and dewpoint is less than 4'C and over 2.5'C")
             fog = fog + 10
-        elif diff < 2.6 and diff > 1.9
+        elif diff < 2.6 and diff > 1.9:
             # Diff between temp and dewpoint is less than 3'C and over 2'C")
             fog = fog + 15
         elif diff < 2.1 and diff > 0.9:

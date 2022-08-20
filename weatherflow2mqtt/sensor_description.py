@@ -710,9 +710,9 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         icon="weather-fog",
         event=EVENT_OBSERVATION,
         attr="relative_humidity",
-        custom_fn=lambda cnv, solar_elevation, wind_speed, humidity, dew_point: None
-        if None in (solar_elevation, wind_speed, humidity, dew_point)
-        else cnv.fog_probability(solar_elevation, wind_speed, humidity, dew_point),
+        custom_fn=lambda cnv, solar_elevation, wind_speed, humidity, dew_point, air_temperature: None
+        if None in (solar_elevation, wind_speed, humidity, dew_point, air_temperature)
+        else cnv.fog_probability(solar_elevation, wind_speed, humidity, dew_point, air_temperature),
     ),
 )
 
