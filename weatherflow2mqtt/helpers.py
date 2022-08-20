@@ -988,3 +988,49 @@ class ConversionFunctions:
         fog_probability = round(fog)
 
         return fog_probability
+
+    def snow_probability(self, solar_elevation, wind_speed, humidity, dew_point, air_temperature):
+        """ Return probability of snow in percent.
+        Input:
+            Solar Elevation - determine daylight
+            Wind Speed
+            Humidity
+            Dew Point
+        Where:
+        """
+        if (
+            solar_elevation is None
+            or wind_speed is None
+            or humidity is None
+            or dew_point is None
+        ):
+            return None
+
+        var temperature = msg.temperature
+        var freezing_level = msg.freezing_level
+        var cloud_base = msg.cloud_base
+        var dew_point = msg.dew_point
+        var wet_bulb = msg.wet_bulb
+        var snow_line = freezing_level - 750 // 500 ft, 150 m
+        var station_height = 325 // in feet for now
+
+        var temperature = msg.temperature
+        var dew_point = msg.dew_point
+        var snow_possible = msg.snow
+        var A = dew_point + temperature
+        var snow_prob
+
+        # Convert from F to C
+        # 2.1C = 35.78F, 1C = 33.8F, 4.1C = 39.38F, -40F = -40C
+        temperature = (temperature - 32) / 1.8
+        dew_point = (dew_point - 32) / 1.8
+        wet_bulb = (wet_bulb - 32) / 1.8
+
+        if ((temperature <= 2.1) && (snow_line <= station_height) && (dew_point <= 1) && (wet_bulb <= 2.1) && (freezing_line <= cloud_base) && (temperature >= -40)):
+             snow_prob = 80 - 10 * A
+        else:
+             snow_prob = 0
+
+        snow_probability = Math.round(snow_prob)
+
+        return snow_probability
