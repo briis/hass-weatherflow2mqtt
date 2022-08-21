@@ -923,6 +923,9 @@ class ConversionFunctions:
             Dew Point
             Air Temperature
         Where:
+            diff is the differance between air temperature and dew point temperature
+            fog is the variable for ongoing fog probability calculations
+            fog_probability is the returned percentage
         """
         if (
             solar_elevation is None
@@ -991,51 +994,45 @@ class ConversionFunctions:
 
         return fog_probability
 
-# *** Work in Progress * Commented out to fix Fog Probability ***
-    def snow_probability(self, solar_elevation, wind_speed, humidity, dew_point, air_temperature):
-        """ Return probability of snow in percent.
+# *** Work in Progress ***
+    def snow_probability(self, air_temperature, freezing_level, cloud_base, dew_point, wet_bulb, station_height):
+        """ Return probability of snow in percent (Max of 80% calculated probability).
         Input:
             Air Temperature
-            Freezing Level
-            Cloud Base
-            Dew Point
-            Wet Bulb
-            Station Height
+            Freezing Level (is this always metric or depends on user?)
+            Cloud Base (is this always metric or depends on user?)
+            Dew Point (verify always metric)
+            Wet Bulb (verify always metric)
+            Station Height (verify always metric)
         Where:
+            dptt is Dew Point plus Air Temperature
+            snow_prob is the probability of snow
+            snow_probability is the returned percentage of the probability of snow rounded (Max of 80%)
         """
         if (
             air_temperature is None
-            or freeze is None
+            or freezeing_level is None
             or cloud_base is None
             or dew_point is None
+            or wet_bulb is None
         ):
             return None
 
-        var temperature = msg.temperature
-        var freezing_level = msg.freezing_level
-        var cloud_base = msg.cloud_base
-        var dew_point = msg.dew_point
-        var wet_bulb = msg.wet_bulb
-        var snow_line = freezing_level - 750 // 500 ft, 150 m
-        var station_height = 325 // in feet for now
-
-        var temperature = msg.temperature
-        var dew_point = msg.dew_point
-        var snow_possible = msg.snow
-        var A = dew_point + temperature
-        var snow_prob
+        snow_line = freezing_level - 228.6 # 750 ft / 228.6 m, snow line can vary in distance from freezing line
+        dptt = dew_point + temperature
+        
 
         # Convert from F to C
         # 2.1C = 35.78F, 1C = 33.8F, 4.1C = 39.38F, -40F = -40C
-        temperature = (temperature - 32) / 1.8
-        dew_point = (dew_point - 32) / 1.8
-        wet_bulb = (wet_bulb - 32) / 1.8
+        #temperature = (temperature - 32) / 1.8
+        #dew_point = (dew_point - 32) / 1.8
+        #wet_bulb = (wet_bulb - 32) / 1.8
 
-        if ((temperature <= 2.1) && (snow_line <= station_height) && (dew_point <= 1) && (wet_bulb <= 2.1) && (freezing_line <= cloud_base) && (temperature >= -40)):
-             snow_prob = 80 - 10 * A
+        if ((air_temperature <= 2.1) && (snow_line <= station_height) && (dew_point <= 1) && (wet_bulb <= 2.1) && (freezing_line <= cloud_base) && (air_temperature >= -40)):
+             snow_prob = 80 - 10 * dptt
         else:
              snow_prob = 0
 
-        snow_probability = Math.round(snow_prob)
+        snow_probability = round(snow_prob)
 
         return snow_probability
