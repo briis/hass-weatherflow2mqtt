@@ -1,15 +1,15 @@
 {
     "beaufort": {
         "0": "Calme",
-        "1": "Petit air",
+        "1": "Léger",
         "2": "Brise légère",
-        "3": "Petite Brise",
+        "3": "Brise légère",
         "4": "Brise moyenne",
         "5": "Brise fraîche",
-        "6": "Forte Brise",
-        "7": "Vent moyen",
+        "6": "Brise Forte",
+        "7": "Vent modéré",
         "8": "Vent frais",
-        "9": "Fort vent",
+        "9": "Vent fort",
         "10": "Tempête",
         "11": "Violente tempête",
         "12": "Ouragan"
@@ -38,28 +38,28 @@
         "steady": "Stable"
     },
     "dewpoint": {
-        "severely-high": "Gravement haut",
+        "severely-high": "Sévèrement élevé",
         "miserable": "Misérable",
         "oppressive": "Oppressif",
         "uncomfortable": "Inconfortable",
         "ok-for-most": "Ok pour la plupart",
         "comfortable": "Comfortable",
-        "very-comfortable": "Très agréable",
+        "very-comfortable": "Très confortable",
         "somewhat-dry": "Un peu sec",
         "dry": "Sec",
         "very-dry": "Très sec",
         "undefined": "Non défini"
     },
     "temperature": {
-        "inferno": "Inferno",
-        "very-hot": "Très chaud",
-        "hot": "Chaud",
-        "warm": "Un peu chaud",
+        "inferno": "D’enfer",
+        "very-hot": "Très chaude",
+        "hot": "Chaude",
+        "warm": "Chaleureuse",
         "nice": "Agréable",
-        "cool": "Frais",
-        "chilly": "Froid",
-        "cold": "Cold",
-        "freezing": "Gelée",
+        "cool": "Fraiche",
+        "chilly": "Froide",
+        "cold": "Froide",
+        "freezing": "Gel",
         "fridged": "Réfrigéré",
         "undefined": "Non définie"
     },
@@ -69,10 +69,10 @@
         "high": "Haut",
         "moderate": "Moyen",
         "low": "Bas",
-        "none": "Rien"
+        "none": "Aucun"
     },
     "precip_type": {
-        "none": "Rien",
+        "none": "Aucune",
         "rain": "Pluie",
         "hail": "Grêle",
         "heavy-rain": "Forte pluie"
