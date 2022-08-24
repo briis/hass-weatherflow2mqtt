@@ -78,12 +78,12 @@
         "heavy-rain": "Forte pluie"
     },
     "rain_intensity": {
-        "NONE": "Rien",
-        "VERYLIGHT": "Très Léger",
-        "LIGHT": "Léger",
-        "MODERATE": "Moyen",
-        "HEAVY": "Lourde",
-        "VERYHEAVY": "Très Lourd",
+        "NONE": "Aucune",
+        "VERYLIGHT": "Très faible",
+        "LIGHT": "Faible",
+        "MODERATE": "Modérée",
+        "HEAVY": "Forte",
+        "VERYHEAVY": "Très forte",
         "EXTREME": "Extrême"
     },
     "zambretti": {
