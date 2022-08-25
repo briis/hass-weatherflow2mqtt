@@ -935,7 +935,7 @@ class ConversionFunctions:
             or air_temperature is None
         ):
             return None
-        
+
         fog = 0
         diff = air_temperature - dew_point
 
@@ -995,15 +995,15 @@ class ConversionFunctions:
         return fog_probability
 
 # *** Work in Progress ***
-    def snow_probability(self, air_temperature, freezing_level, cloud_base, dew_point, wet_bulb, station_height):
+    def snow_probability(self, air_temperature, freezing_level, cloud_base, dew_point, wet_bulb, station_height, is_metric):
         """ Return probability of snow in percent (Max of 80% calculated probability).
         Input:
-            Air Temperature
-            Freezing Level (is this always metric or depends on user?)
-            Cloud Base (is this always metric or depends on user?)
-            Dew Point (verify always metric)
-            Wet Bulb (verify always metric)
-            Station Height (verify always metric)
+            Air Temperature (metric)
+            Freezing Level (imperial or metric)
+            Cloud Base (imperial or metric)
+            Dew Point (metric)
+            Wet Bulb (imperial or metric))
+            Station Height (metric)
         Where:
             dptt is Dew Point plus Air Temperature
             snow_prob is the probability of snow
@@ -1017,17 +1017,20 @@ class ConversionFunctions:
             or wet_bulb is None
         ):
             return None
-
+        
+        if is_metric:
+            #Do nothing if metric
+        else:
+            air_temperature = air_temperature
+            freezing_level = freezing_level / 3.28
+            cloud_base = cloud_base / 3.28
+            dew_point = dew_point
+            wet_bulb = (wet_bulb - 32) / 1.8
+            station_height = station_height
+        
         snow_line = freezing_level - 228.6 # 750 ft / 228.6 m, snow line can vary in distance from freezing line
         dptt = dew_point + temperature
         
-
-        # Convert from F to C
-        # 2.1C = 35.78F, 1C = 33.8F, 4.1C = 39.38F, -40F = -40C
-        #temperature = (temperature - 32) / 1.8
-        #dew_point = (dew_point - 32) / 1.8
-        #wet_bulb = (wet_bulb - 32) / 1.8
-
         if ((air_temperature <= 2.1) && (snow_line <= station_height) && (dew_point <= 1) && (wet_bulb <= 2.1) && (freezing_line <= cloud_base) && (air_temperature >= -40)):
              snow_prob = 80 - 10 * dptt
         else:
