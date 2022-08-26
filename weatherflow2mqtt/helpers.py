@@ -995,7 +995,7 @@ class ConversionFunctions:
         return fog_probability
 
 # *** Work in Progress ***
-    def snow_probability(self, air_temperature, freezing_level, cloud_base, dew_point, wet_bulb, station_height, is_metric):
+    def snow_probability(self, air_temperature, freezing_level, cloud_base, dew_point, wet_bulb, station_height, is_metric: bool = None):
         """ Return probability of snow in percent (Max of 80% calculated probability).
         Input:
             Air Temperature (metric)
@@ -1017,7 +1017,10 @@ class ConversionFunctions:
             or wet_bulb is None
         ):
             return None
-        
+
+        if is_metric is None:
+            is_metric = self.unit_system != UNITS_IMPERIAL
+
         if is_metric:
             #Do nothing if metric
         else:
