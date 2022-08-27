@@ -714,6 +714,20 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         if None in (solar_elevation, wind_speed, humidity, dew_point, air_temperature)
         else cnv.fog_probability(solar_elevation, wind_speed, humidity, dew_point, air_temperature),
     ),
+    SensorDescription(
+        id="snow_probability",
+        name="Snow Probability",
+        unit_m="%",
+        unit_i="%",
+        state_class=STATE_CLASS_MEASUREMENT,
+        icon="snowflake",
+        event=EVENT_OBSERVATION,
+        attr="relative_humidity",
+        custom_fn=lambda cnv, air_temperature, freezing_level, cloud_base, dew_point, wetbulb, elevation, is_metric: None
+        if None in (air_temperature, freezing_level, cloud_base, dew_point, wetbulb, elevation, is_metric)
+        else cnv.fog_probability(air_temperature, freezing_level, cloud_base, dew_point, wetbulb, elevation, is_metric),
+    ),
+
 )
 
 HUB_SENSORS: tuple[BaseSensorDescription, ...] = (STATUS_SENSOR,)
