@@ -921,16 +921,21 @@ class ConversionFunctions:
             Wind Speed
             Humidity
             Dew Point
+            Air Temperature
         Where:
+            diff is the differance between air temperature and dew point temperature
+            fog is the variable for ongoing fog probability calculations
+            fog_probability is the returned percentage
         """
         if (
             solar_elevation is None
             or wind_speed is None
             or humidity is None
             or dew_point is None
+            or air_temperature is None
         ):
             return None
-        
+
         fog = 0
         diff = air_temperature - dew_point
 
@@ -941,14 +946,14 @@ class ConversionFunctions:
             # fog is more common at night
             fog = fog + 10
 
-        if wind_speed < 5: # mph
-            # fog is more likely when it is calm
+        if wind_speed < 2.2352:
+            # fog is more likely when it is calm (<5 mph / 2.2352 m/s)
             fog = fog + 20
-        elif wind_speed < 10: # mph
-            # it's more windy, fog is slightly less likely
+        elif wind_speed < 4.4704:
+            # it's more windy, fog is slightly less likely (<10 mph / 4.4704 m/s)
             fog = fog + 5
         else:
-	        # it's unlikely fog will form above 10mph
+            # it's unlikely fog will form above 10 mph / 4.4704 m/s
             fog = fog - 20
 
         if humidity > 75 and humidity < 91:
@@ -988,3 +993,52 @@ class ConversionFunctions:
         fog_probability = round(fog)
 
         return fog_probability
+
+# *** Work in Progress ***
+    def snow_probability(self, air_temperature, freezing_level, cloud_base, dew_point, wet_bulb, station_height, is_metric: bool = None):
+        """ Return probability of snow in percent (Max of 80% calculated probability).
+        Input:
+            Air Temperature (metric)
+            Freezing Level (imperial or metric)
+            Cloud Base (imperial or metric)
+            Dew Point (metric)
+            Wet Bulb (imperial or metric))
+            Station Height (metric)
+        Where:
+            dptt is Dew Point plus Air Temperature
+            snow_prob is the probability of snow
+            snow_probability is the returned percentage of the probability of snow rounded (Max of 80%)
+        """
+        if (
+            air_temperature is None
+            or freezeing_level is None
+            or cloud_base is None
+            or dew_point is None
+            or wet_bulb is None
+        ):
+            return None
+
+        if is_metric is None:
+            is_metric = self.unit_system != UNITS_IMPERIAL
+
+        if is_metric:
+            #Do nothing if metric
+        else:
+            air_temperature = air_temperature
+            freezing_level = freezing_level / 3.28
+            cloud_base = cloud_base / 3.28
+            dew_point = dew_point
+            wet_bulb = (wet_bulb - 32) / 1.8
+            station_height = station_height
+        
+        snow_line = freezing_level - 228.6 # 750 ft / 228.6 m, snow line can vary in distance from freezing line
+        dptt = dew_point + temperature
+        
+        if ((air_temperature <= 2.1) && (snow_line <= station_height) && (dew_point <= 1) && (wet_bulb <= 2.1) && (freezing_line <= cloud_base) && (air_temperature >= -40)):
+             snow_prob = 80 - 10 * dptt
+        else:
+             snow_prob = 0
+
+        snow_probability = round(snow_prob)
+
+        return snow_probability
