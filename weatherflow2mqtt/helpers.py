@@ -1034,7 +1034,7 @@ class ConversionFunctions:
         snow_line = freezing_level - 228.6 # 750 ft / 228.6 m, snow line can vary in distance from freezing line
         dptt = dew_point + temperature
         
-        if ((air_temperature <= 2.1) && (snow_line <= station_height) && (dew_point <= 1) && (wet_bulb <= 2.1) && (freezing_line <= cloud_base) && (air_temperature >= -40)):
+        if ((air_temperature <= 2.1) and (snow_line <= station_height) and (dew_point <= 1) and (wet_bulb <= 2.1) and (freezing_level <= cloud_base) and (air_temperature >= -40)):
              snow_prob = 80 - 10 * dptt
         else:
              snow_prob = 0
