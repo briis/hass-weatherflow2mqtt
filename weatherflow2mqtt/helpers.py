@@ -995,7 +995,7 @@ class ConversionFunctions:
         return fog_probability
 
 # *** Work in Progress ***
-    def snow_probability(self, air_temperature, freezing_level, cloud_base, dew_point, wet_bulb, station_height, is_metric: bool = None):
+    def snow_probability(self, air_temperature, freezing_level, cloud_base, dew_point, wet_bulb, station_height):
         """ Return probability of snow in percent (Max of 80% calculated probability).
         Input:
             Air Temperature (metric)
@@ -1009,21 +1009,20 @@ class ConversionFunctions:
             snow_prob is the probability of snow
             snow_probability is the returned percentage of the probability of snow rounded (Max of 80%)
         """
+
         if (
             air_temperature is None
-            or freezeing_level is None
+            or freezing_level is None
             or cloud_base is None
             or dew_point is None
             or wet_bulb is None
         ):
             return None
 
-        if is_metric is None:
-            is_metric = self.unit_system != UNITS_IMPERIAL
+        is_metric = False if self.unit_system != UNITS_IMPERIAL else True
 
-        if is_metric:
-            #Do nothing if metric
-        else:
+
+        if not is_metric:
             air_temperature = air_temperature
             freezing_level = freezing_level / 3.28
             cloud_base = cloud_base / 3.28
@@ -1032,7 +1031,7 @@ class ConversionFunctions:
             station_height = station_height
         
         snow_line = freezing_level - 228.6 # 750 ft / 228.6 m, snow line can vary in distance from freezing line
-        dptt = dew_point + temperature
+        dptt = dew_point + air_temperature
         
         if ((air_temperature <= 2.1) and (snow_line <= station_height) and (dew_point <= 1) and (wet_bulb <= 2.1) and (freezing_level <= cloud_base) and (air_temperature >= -40)):
              snow_prob = 80 - 10 * dptt

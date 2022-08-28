@@ -723,9 +723,9 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         icon="snowflake",
         event=EVENT_OBSERVATION,
         attr="relative_humidity",
-        custom_fn=lambda cnv, air_temperature, freezing_level, cloud_base, dew_point, wetbulb, elevation, is_metric: None
-        if None in (air_temperature, freezing_level, cloud_base, dew_point, wetbulb, elevation, is_metric)
-        else cnv.fog_probability(air_temperature, freezing_level, cloud_base, dew_point, wetbulb, elevation, is_metric),
+        custom_fn=lambda cnv, device, freezing_level, cloud_base, elevation: None
+        if None in (device.air_temperature, device.dew_point_temperature, device.wet_bulb_temperature, freezing_level, cloud_base)
+        else cnv.snow_probability(device.air_temperature.m, freezing_level, cloud_base, device.dew_point_temperature.m, device.wet_bulb_temperature.m, elevation)
     ),
 
 )
