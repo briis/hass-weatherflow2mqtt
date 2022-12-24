@@ -885,6 +885,7 @@ async def get_supervisor_configuration() -> dict[str, Any]:
                             else UNITS_IMPERIAL,
                         }
                     )
+                    _LOGGER.info("Unit System is: %s", data.get("unit_system", {}))
         except Exception as e:
             _LOGGER.error("Could not read Home Assistant core config: %s", e)
 
