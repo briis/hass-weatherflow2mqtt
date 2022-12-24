@@ -1038,6 +1038,6 @@ class ConversionFunctions:
         else:
              snow_prob = 0
 
-        snow_probability = round(snow_prob)
+        snow_probability = round(snow_prob) if snow_prob <= 100 else 99
 
         return snow_probability
