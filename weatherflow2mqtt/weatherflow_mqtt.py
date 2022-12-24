@@ -39,6 +39,7 @@ from pyweatherflowudp.event import (
     WindEvent,
 )
 
+from .__version__ import VERSION
 from .const import (
     ATTR_ATTRIBUTION,
     ATTRIBUTION,
@@ -486,6 +487,7 @@ class WeatherFlowMqtt:
         attr_data[ATTR_ATTRIBUTION] = ATTRIBUTION
         attr_data["serial_number"] = device.serial_number
         attr_data["rssi"] = device.rssi.m
+        attr_data["version"] = VERSION
 
         if isinstance(device, HubDevice):
             attr_data["reset_flags"] = device.reset_flags
@@ -795,6 +797,7 @@ async def main():
     zambretti_max_default = ZAMBRETTI_MAX_PRESSURE if unit_system == UNITS_METRIC else ZAMBRETTI_MAX_PRESSURE * 0.029530
     zambretti_min_pressure = float(config.get("ZAMBRETTI_MIN_PRESSURE", zambretti_min_default))
     zambretti_max_pressure = float(config.get("ZAMBRETTI_MAX_PRESSURE", zambretti_max_default))
+    _LOGGER.info("Zambretti Values: %s and %s", zambretti_min_pressure, zambretti_max_pressure)
 
     mqtt_config = MqttConfig(
         host=config.get("MQTT_HOST", "127.0.0.1"),
@@ -885,7 +888,7 @@ async def get_supervisor_configuration() -> dict[str, Any]:
                             else UNITS_IMPERIAL,
                         }
                     )
-                    _LOGGER.info("Unit System is: %s", data.get("unit_system", {}))
+                    _LOGGER.info("Add-On value Unit System is: %s", data.get("unit_system", {}))
         except Exception as e:
             _LOGGER.error("Could not read Home Assistant core config: %s", e)
 
