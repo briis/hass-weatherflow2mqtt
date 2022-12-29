@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 - Added new sensor `fog_probability` which returns the probability for fog based on current conditions. Thanks to @GlennGoddard for creating the formula.
 - Added new sensor `snow_probability` which returns the probability of snow based on current conditions. Thanks to @GlennGoddard for creating the formula.
+- Added new version attribute to the `sensor.hub_SERIAL_NUMBER_status`. This attribute will always hold the current version of the Docker Container.
 
 ### Changed
 
