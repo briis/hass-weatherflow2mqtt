@@ -3,8 +3,8 @@ import sys
 from setuptools import setup
 from weatherflow2mqtt.__version__ import VERSION
 
-if sys.version_info < (3,7):
-    sys.exit('Sorry, Python < 3.7 is not supported')
+if sys.version_info < (3,10):
+    sys.exit('Sorry, Python < 3.10 is not supported')
 
 install_requires = list(val.strip() for val in open('requirements.txt'))
 tests_require = list(val.strip() for val in open('test_requirements.txt'))
@@ -38,7 +38,7 @@ setup(name='weatherflow2mqtt',
       install_requires=install_requires,
       tests_require=tests_require,
       classifiers=[
-        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.10',
       ]
 
 )
