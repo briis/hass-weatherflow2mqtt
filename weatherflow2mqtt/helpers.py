@@ -412,6 +412,7 @@ class ConversionFunctions:
             Battery voltage range is 1.8 to 2.85 Vdc
                 > 2.80 is capped at 100%
                 < 1.8 is capped at 0%
+                However, below 2.11V the station is no longer operational, so this is used.
         Air:
             4 AA batteries (2 in series, then parallel for 2 sets)
             Battery voltage range is 1.2(x2) => 2.4 to 1.8(x2) => 3.6 Vdc
@@ -432,13 +433,13 @@ class ConversionFunctions:
             if battery > 2.80:
                 # Cap max at 100%
                 pb = int(100)
-            elif battery < 1.8:
-                # Min voltage is 1.8
+            elif battery < 2.11:
+                # Min voltage is 1.8, but functional voltage is 2.11
                 pb = int(0)
             else:
                 # pb = battery - 1.8
                 # Multiply by 100 to get in percentage
-                pb = int((battery - 1.8) * 100)
+                pb = int((battery - 2.11) * 100)
         else:
             if battery > 3.50:
                 # Cap max at 100%
