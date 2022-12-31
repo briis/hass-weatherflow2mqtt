@@ -1042,3 +1042,37 @@ class ConversionFunctions:
         snow_probability = round(snow_prob) if snow_prob <= 100 else 99
 
         return snow_probability
+
+    def current_conditions(self, lightning_1h, precip_type, rain_rate, wind_speed, solar_el, solar_rad, solar_ins, snow_prob, fog_prob):
+        """ Return local current conditions based on only weather station sesnors.
+        Input:
+            lightning_1h (count)
+            precip_type (text)
+            rain_rate (imperial or metric)
+            wind_speed (metric)
+            solar_el (imperial or metric))
+            solar_rad (metric)
+            snow_prob (%)
+            fog_prob (%)
+        Where:
+            lightning_1h is lightning strike count within last hour
+            precip_type is the type of precipitation: rain / hail
+            rain_rate is the rain fall
+            wind_speed is the speed of wind
+            solar_el is the elevation of the sun with respect to horizon
+            solar_rad is the measured solar radiation
+            solar_ins is the calculated solar radiation
+            snow_prob is the probability of snow
+            fog_prob is the probability of fog
+        """
+        if z_num is None:
+            return None
+
+        # Zambretti Text Equivalents of Zambretti 'dial window' letters A - Z
+        # Simplified array for Language Translations
+        z_forecast = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
+        z_text = ""
+        z_text += z_forecast[int(z_num)]
+
+        # return the standard weather conditions as used by Home Assistant
+        return self.translations["zambretti"][z_text]
