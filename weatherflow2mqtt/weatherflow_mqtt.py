@@ -382,6 +382,8 @@ class WeatherFlowMqtt:
                             attr = fn(self.cnv, self.solar_elevation, self.wind_speed, _data.get("relative_humidity"), _data.get("dewpoint"), _data.get("air_temperature"))
                         elif sensor.id == "snow_probability":
                             attr = fn(self.cnv, device, _data.get("freezing_level"), _data.get("cloud_base"), self.elevation)
+                        elif sensor.id == "current_conditions":
+                            attr = fn(self.cnv, _data.get("lightning_strike_count_1hr"), _data.get("precipitation_type"), _data.get("rain_rate"), self.wind_speed, self.solar_elevation, self.solar_radiation, self.solar_insolation, _data.get("snow_probability"), _data.get("fog_probability")
                         else:
                             attr = fn(self.cnv, device)
 
