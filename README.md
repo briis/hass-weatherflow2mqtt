@@ -145,6 +145,8 @@ Here is the list of sensors that the program generates. Calculated Sensor means,
 | battery_mode                 | Battery Mode                | The battery operating mode on the TEMPEST unit (If present)                                                                                                                                        | Yes               | https://help.weatherflow.com/hc/en-us/articles/360048877194-Solar-Power-Rechargeable-Battery |
 | beaufort                     | Beaufort Scale              | Beaufort scale is an empirical measure that relates wind speed to observed conditions at sea or on land                                                                                            | Yes               | #                                                                                            |
 | cloud_base                   | Cloud Base Altitude         | The estimated altitude above mean sea level (AMSL) to the cloud base                                                                                                                               | Yes               | m                                                                                            |
+| current_conditions           | Local Current Conditions    | The estimated current weather conditions derived from only local sensors in Home Assistant format                                                                                                   | Yes               | https://www.home-assistant.io/integrations/weather/                                          |
+| current_conditions_txt       | Local Current Conditions Text | The estimated current weather conditions derived from only local sensors in human readable text                                                                                                     | Yes               | Clear Night, Cloudy, Fog, Hail, Lightning, Lightning & Rain, Partly Cloudy, Pouring Rain, Rainy, Snowy, Snow & Rain, Sunny, Windy, Wind & Rain, *exceptional (not used)*                                          |
 | delta_t                      | Delta T                     | Difference between Air Temperature and Wet Bulb Temperature                                                                                                                                        | Yes               | C°                                                                                           |
 | dewpoint                     | Dew Point                   | Dewpoint in degrees                                                                                                                                                                                | Yes               | C°                                                                                           |
 | dewpoint_description         | Dewpoint Comfort Level      | Textual representation of the Dewpoint value                                                                                                                                                       | Yes               |                                                                                              |
@@ -209,6 +211,8 @@ sensors:
   - battery_mode # support for Tempest devices only
   - beaufort
   - cloud_base
+  - current_conditions
+  - current_conditions_txt
   - delta_t
   - dewpoint
   - dewpoint_description
@@ -343,7 +347,8 @@ wind_speed_avg
 ### Sensors in Developement
 
 ```
-Local Current Conditions
+Local Current Conditions in Home Assistant format (Dev Branch)
+Local Current Conditions in Human Readable Text (will need translations)
 Probability of Snow (Dev Branch)
 Probability of Fog (Dev Branch)
 ```
@@ -359,6 +364,7 @@ weather:
   - platform: template
     name: My Local Weather
     condition_template: "{{ states('sensor.hub_hb_00000001_weather') }}"
+    # condition_template: "{{ states('tempest_st_00000001_current_conditions') }}" # Local Only Option
     temperature_template: "{{ states('sensor.tempest_st_00000001_temperature') | float}}"
     humidity_template: "{{ states('sensor.tempest_st_00000001_humidity')| int }}"
     pressure_template: "{{ states('sensor.tempest_st_00000001_sea_level_pressure')| float }}"
