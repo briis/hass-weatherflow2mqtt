@@ -1048,23 +1048,27 @@ class ConversionFunctions:
         Input:
             lightning_1h (#)
             **** Need to use the precip type number from Tempest so to get it before translations ****
-            * precip_type (text)
+            precip_type (#)
             rain_rate (imperial or metric)
             wind_speed (metric)
-            solar_el (#)
+            solar_el (degrees)
             solar_rad (metric)
             snow_prob (%)
             fog_prob (%)
         Where:
             lightning_1h is lightning strike count within last hour
             precip_type is the type of precipitation: rain / hail
-            rain_rate is the rain fall
+            rain_rate is the rain fall rate
             wind_speed is the speed of wind
             solar_el is the elevation of the sun with respect to horizon
             solar_rad is the measured solar radiation
             solar_ins is the calculated solar radiation
             snow_prob is the probability of snow
             fog_prob is the probability of fog
+            si_p is the percentage difference in Solar Radiation and Solar Insolation
+            si_d is the numeral difference in Solar Radiation and Solar Insolation
+            cloudy is Boolan for cloud state
+            part_cloud is Boolan for partly cloud state
             current is the Local Current Weather Condition
         """
         if (
@@ -1082,48 +1086,94 @@ class ConversionFunctions:
 
         # Home Assistant weather conditions: clear-night, cloudy, fog, hail, lightning, lightning-rainy, partlycloudy, pouring, rainy, snowy, snowy-rainy, sunny, windy, windy-variant, exceptional
         # Exceptional not used here
-
-        if rain_rate >= 0.31; else if precip_type == "Heavy Rain" # (pouring) Imperial >= 0.31 in/hr, Metric >= 7.8 mm/hr
         
-        if wind_speed >= 25 # (windy) Imperial >= 25 mph, Metric >= 11.17 m/s
+        if (solar_el =< 0): # Can not determine clouds at night
+            cloudy is False
+            part_cloud is False
+        else:
+            si_p = round(((solar_rad) / (solar_ins)) * 100
+            si_d = round((solar_ins) - (solar_rad))
+            if ((si_p <= 50) and (si_d >= 50)):
+                 cloudy is True
+                 part_cloud is False
+            elif ((si_p <= 75) and (abs(si_d) >= 15)):
+                 part_cloud is True
+                 cloudy is False
+            elif ((si_p >= 115) and (abs(si_d) >= 15)):
+                 part_cloud is True
+                 cloudy is False
+            else:
+                 part_cloud is False
+                 cloudy is False
 
-        if sz >= 90: si_p = 100
-        else si_p = Math.round(((sr) / (si)) * 100)
-        if si_p <= 50 && si_d >= 50
-        #(cloudy)
-
-        if ((si_p <= 75) && (Math.abs(si_d) >= 15))
-        else if ((si_p >= 115) && (Math.abs(si_d) >= 15))
-        #(partlycloudy)
-
-        if ((lightning_1h >= 1) && (rain_rate >= 0.01))
+        if ((lightning_1h >= 1) and (rain_rate >= 0.01)): # any rain at all
             current = "lightning-rainy"
-        else if (lightning_1h >= 1)
+        elif (lightning_1h >= 1):
             current = "lightning"
-        else if (preip_type == "Hail")
+        elif (preip_type == 2):
             current = "hail"
-        else if (pouring == 'true')
+        elif (rain_rate >= 7.8): # pouring => Imperial >= 0.31 in/hr, Metric >= 7.8 mm/hr
             current = "pouring"
-        else if ((snow_prob >= 50) && (rain_rate >= 0.01))
+        elif ((snow_prob >= 50) and (rain_rate >= 0.01)): # any rain at all
             current = "snowy-rainy"
-        else if (rain_rate >= 0.01)
+        elif (rain_rate >= 0.01): # any rain at all
             current = "rainy"
-        else if ((windy == 'true') && (cloudy == 'true'))
+        elif ((wind_speed >= 11.17) and (cloudy)): # windy => Imperial >= 25 mph, Metric >= 11.17 m/s
             current = "windy-variant"
-        else if (windy == 'true')
+        elif (wind_speed >= 11.17): # windy => Imperial >= 25 mph, Metric >= 11.17 m/s
             current = "windy"
-        else if (fog_prob >= 50)
+        elif (fog_prob >= 50):
             current = "fog"
-        else if ((snow_prob >= 50) && (cloudy == 'true'))
+        elif ((snow_prob >= 50) and (cloudy)):
             current = "snowy"
-        else if (cloudy == 'true')
+        elif (cloudy == 'true'):
             current = "cloudy"
-        else if (part_cloud == 'true')
+        elif (part_cloud):
             current = "partlycloudy"
-        else if (solar_el => 0 ) # if daytime
+        elif (solar_el => 0 ): # if daytime
             current = "sunny"
-        else
+        else:
             current = "clear-night"
 
         # return the standard weather conditions as used by Home Assistant
         return current
+
+'''    def current_conditions_txt(self, current_conditions):
+        # Clear Night, Cloudy, Fog, Hail, Lightning, Lightning & Rain, Partly Cloudy, Pouring Rain, Rain, Snow, Snow & Rain, Sunny, Windy, Wind & Rain, exceptional (not used)
+        # Need translations
+        # Add input blurb
+
+        if (current_conditions = "lightning-rainy"):
+            current = "Lightning & Rain"
+        elif (current_conditions = "lightning"):
+            current = "Lightning"
+        elif (current_conditions = "hail"):
+            current = "Hail"
+        elif (current_conditions = "pouring"):
+            current = "Pouring Rain"
+        elif (current_conditions = "snowy-rainy"):
+            current = "Snow & Rain"
+        elif (current_conditions = "rainy"):
+            current = "Rain"
+        elif (current_conditions = "windy-variant"):
+            current = "Wind & Rain"
+        elif (current_conditions = "windy"):
+            current = "Windy"
+        elif (current_conditions = "fog"):
+            current = "Fog"
+        elif (current_conditions = "snowy"):
+            current = "Snow"
+        elif (current_conditions = "cloudy"):
+            current = "Cloudy"
+        elif (current_conditions = "partlycloudy"):
+            current = "Partly Cloudy"
+        elif (current_conditions = "sunny"):
+            current = "Sunny"
+        elif (current_conditions = "clear-night"):
+            current = "Clear Night"
+        else
+            current = "Unknown"
+
+        # return the human readable weather conditions
+        return current
+'''
