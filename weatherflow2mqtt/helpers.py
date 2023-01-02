@@ -1046,11 +1046,12 @@ class ConversionFunctions:
     def current_conditions(self, lightning_1h, precip_type, rain_rate, wind_speed, solar_el, solar_rad, solar_ins, snow_prob, fog_prob):
         """ Return local current conditions based on only weather station sesnors.
         Input:
-            lightning_1h (count)
-            precip_type (text)
+            lightning_1h (#)
+            **** Need to use the precip type number from Tempest so to get it before translations ****
+            * precip_type (text)
             rain_rate (imperial or metric)
             wind_speed (metric)
-            solar_el (imperial or metric))
+            solar_el (#)
             solar_rad (metric)
             snow_prob (%)
             fog_prob (%)
@@ -1064,15 +1065,65 @@ class ConversionFunctions:
             solar_ins is the calculated solar radiation
             snow_prob is the probability of snow
             fog_prob is the probability of fog
+            current is the Local Current Weather Condition
         """
-        if z_num is None:
+        if (
+            lightning_1h is None
+            or precip_type is None
+            or rain_rate is None
+            or wind_speed is None
+            or solar_el is None
+            or solar_rad is None
+            or solar_ins is None
+            or snow_prob is None
+            or fog_prob is None
+        ):
             return None
 
-        # Zambretti Text Equivalents of Zambretti 'dial window' letters A - Z
-        # Simplified array for Language Translations
-        z_forecast = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
-        z_text = ""
-        z_text += z_forecast[int(z_num)]
+        # Home Assistant weather conditions: clear-night, cloudy, fog, hail, lightning, lightning-rainy, partlycloudy, pouring, rainy, snowy, snowy-rainy, sunny, windy, windy-variant, exceptional
+        # Exceptional not used here
+
+        if rain_rate >= 0.31; else if precip_type == "Heavy Rain" # (pouring) Imperial >= 0.31 in/hr, Metric >= 7.8 mm/hr
+        
+        if wind_speed >= 25 # (windy) Imperial >= 25 mph, Metric >= 11.17 m/s
+
+        if sz >= 90: si_p = 100
+        else si_p = Math.round(((sr) / (si)) * 100)
+        if si_p <= 50 && si_d >= 50
+        #(cloudy)
+
+        if ((si_p <= 75) && (Math.abs(si_d) >= 15))
+        else if ((si_p >= 115) && (Math.abs(si_d) >= 15))
+        #(partlycloudy)
+
+        if ((lightning_1h >= 1) && (rain_rate >= 0.01))
+            current = "lightning-rainy"
+        else if (lightning_1h >= 1)
+            current = "lightning"
+        else if (preip_type == "Hail")
+            current = "hail"
+        else if (pouring == 'true')
+            current = "pouring"
+        else if ((snow_prob >= 50) && (rain_rate >= 0.01))
+            current = "snowy-rainy"
+        else if (rain_rate >= 0.01)
+            current = "rainy"
+        else if ((windy == 'true') && (cloudy == 'true'))
+            current = "windy-variant"
+        else if (windy == 'true')
+            current = "windy"
+        else if (fog_prob >= 50)
+            current = "fog"
+        else if ((snow_prob >= 50) && (cloudy == 'true'))
+            current = "snowy"
+        else if (cloudy == 'true')
+            current = "cloudy"
+        else if (part_cloud == 'true')
+            current = "partlycloudy"
+        else if (solar_el => 0 ) # if daytime
+            current = "sunny"
+        else
+            current = "clear-night"
 
         # return the standard weather conditions as used by Home Assistant
-        return self.translations["zambretti"][z_text]
+        return current
