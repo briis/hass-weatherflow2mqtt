@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file. Thanks to @ubiquitousgimp for spotting and suggesting the fix.
 
-## [3.1.5] - 2023-01-08
+## [3.1.6] - 2023-01-08
 
 ### Fixed
 
