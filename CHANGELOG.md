@@ -1,6 +1,12 @@
 # Change Log
 
-All notable changes to this project will be documented in this file.
+All notable changes to this project will be documented in this file. Thanks to @ubiquitousgimp for spotting and suggesting the fix.
+
+## [3.1.5] - 2023-01-08
+
+### Fixed
+
+- Fixed the Tempest battery % calculation to show a more accurate calculation.
 
 ## [3.1.4] - 2022-12-29
 
