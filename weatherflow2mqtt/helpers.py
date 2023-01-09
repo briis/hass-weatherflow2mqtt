@@ -135,7 +135,7 @@ class ConversionFunctions:
 
     def rain_type(self, value) -> str:
         """Convert rain type."""
-        type_array = ["none", "rain", "hail", "heavy"]
+        type_array = ["none", "rain", "hail", "heavy-rain"]
         try:
             precip_type = type_array[int(value)]
             return self.translations["precip_type"][precip_type]
