@@ -135,7 +135,7 @@ class ConversionFunctions:
 
     def rain_type(self, value) -> str:
         """Convert rain type."""
-        type_array = ["none", "rain", "hail", "heavy"]
+        type_array = ["none", "rain", "hail", "heavy-rain"]
         try:
             precip_type = type_array[int(value)]
             return self.translations["precip_type"][precip_type]
@@ -439,7 +439,7 @@ class ConversionFunctions:
             else:
                 # pb = battery - 1.8
                 # Multiply by 100 to get in percentage
-                pb = int((battery - 2.11) * 100)
+                pb = int((battery - 2.11) / (2.8 - 2.11) * 100)
         else:
             if battery > 3.50:
                 # Cap max at 100%
