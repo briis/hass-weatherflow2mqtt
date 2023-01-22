@@ -1,4 +1,4 @@
-name: Feature Reuest
+name: Feature Request
 description: Ask for a new feature for Weatherflow2MQTT
 labels: ["enhancement"]
 body:
