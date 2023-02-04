@@ -1,4 +1,4 @@
-"""Several Helper Functions."""
+""" Several Helper Functions."""
 from __future__ import annotations
 
 import datetime as dt
@@ -28,7 +28,7 @@ def no_conversion_to_none(val: Any) -> Any | None:
 
 
 def truebool(val: Any | None) -> bool:
-    """Return `True` if the value passed in matches a "True" value, otherwise `False`.
+    """ Return `True` if the value passed in matches a "True" value, otherwise `False`.
 
     "True" values are: 'true', 't', 'yes', 'y', 'on' or '1'.
     """
@@ -36,7 +36,7 @@ def truebool(val: Any | None) -> bool:
 
 
 def read_config() -> list[str] | None:
-    """Read the config file to look for sensors."""
+    """ Read the config file to look for sensors."""
     try:
         filepath = f"{EXTERNAL_DIRECTORY}/config.yaml"
         with open(filepath, "r") as file:
@@ -53,7 +53,7 @@ def read_config() -> list[str] | None:
 
 
 class ConversionFunctions:
-    """Class to help with converting from different units."""
+    """ Class to help with converting from different units."""
 
     def __init__(self, unit_system: str, language: str) -> None:
         """Initialize Conversion Function."""
@@ -61,7 +61,7 @@ class ConversionFunctions:
         self.translations = self.get_language_file(language)
 
     def get_language_file(self, language: str) -> dict[str, dict[str, str]] | None:
-        """Return the language file json array."""
+        """ Return the language file json array."""
         filename = (
             f"translations/{language if language in SUPPORTED_LANGUAGES else 'en'}.json"
         )
@@ -77,7 +77,7 @@ class ConversionFunctions:
             return None
 
     def temperature(self, value) -> float:
-        """Convert Temperature Value."""
+        """ Convert Temperature Value."""
         if value is not None:
             if self.unit_system == UNITS_IMPERIAL:
                 return round((value * 9 / 5) + 32, 1)
@@ -88,7 +88,7 @@ class ConversionFunctions:
         )
 
     def pressure(self, value) -> float:
-        """Convert Pressure Value."""
+        """ Convert Pressure Value."""
         if value is not None:
             if self.unit_system == UNITS_IMPERIAL:
                 return round(value * 0.02953, 3)
@@ -99,7 +99,7 @@ class ConversionFunctions:
         )
 
     def speed(self, value, kmh=False) -> float:
-        """Convert Wind Speed."""
+        """ Convert Wind Speed."""
         if value is not None:
             if self.unit_system == UNITS_IMPERIAL:
                 return round(value * 2.2369362920544, 2)
@@ -112,7 +112,7 @@ class ConversionFunctions:
         )
 
     def distance(self, value) -> float:
-        """Convert distance."""
+        """ Convert distance."""
         if value is not None:
             if self.unit_system == UNITS_IMPERIAL:
                 return round(value / 1.609344, 2)
@@ -123,7 +123,7 @@ class ConversionFunctions:
         )
 
     def rain(self, value) -> float:
-        """Convert rain."""
+        """ Convert rain."""
         if value is not None:
             if self.unit_system == UNITS_IMPERIAL:
                 return round(value * 0.0393700787, 2)
@@ -134,7 +134,7 @@ class ConversionFunctions:
         )
 
     def rain_type(self, value) -> str:
-        """Convert rain type."""
+        """ Convert rain type."""
         type_array = ["none", "rain", "hail", "heavy-rain"]
         try:
             precip_type = type_array[int(value)]
@@ -144,7 +144,7 @@ class ConversionFunctions:
             return f"Unknown - {value}"
 
     def direction(self, value) -> str:
-        """Return directional Wind Direction string."""
+        """ Return directional Wind Direction string."""
         if value is None:
             return "N"
 
@@ -171,7 +171,7 @@ class ConversionFunctions:
         return self.translations["wind_dir"][direction_str]
 
     def dewpoint(self, temperature, humidity, no_conversion=False):
-        """Return Dewpoint."""
+        """ Return Dewpoint."""
         if temperature is not None and humidity is not None:
             dewpoint_c = round(
                 243.04
@@ -195,8 +195,7 @@ class ConversionFunctions:
         )
 
     def absolute_humidity(self, temp, humidity):
-        """Return Absolute Humidity.
-
+        """ Return Absolute Humidity.
         Grams of water per cubic meter of air (g/m^3)
         Input:
             Temperature in Celcius
@@ -228,14 +227,16 @@ class ConversionFunctions:
         return round(AH, 2)
 
     def rain_intensity(self, rain_rate) -> str:
-        """Return a descriptive value of the rain rate.
-
-        VERY LIGHT: < 0.25 mm/hour
-        LIGHT: ≥ 0.25, < 1.0 mm/hour
-        MODERATE: ≥ 1.0, < 4.0 mm/hour
-        HEAVY: ≥ 4.0, < 16.0 mm/hour
-        VERY HEAVY: ≥ 16.0, < 50 mm/hour
-        EXTREME: > 50.0 mm/hour
+        """ Return a descriptive value of the rain rate.
+        Input:
+            Rain Rate in mm/hour
+        Where:
+            VERY LIGHT: < 0.25 mm/hour
+            LIGHT: ≥ 0.25, < 1.0 mm/hour
+            MODERATE: ≥ 1.0, < 4.0 mm/hour
+            HEAVY: ≥ 4.0, < 16.0 mm/hour
+            VERY HEAVY: ≥ 16.0, < 50 mm/hour
+            EXTREME: > 50.0 mm/hour
         """
         if rain_rate == 0:
             intensity = "NONE"
@@ -255,7 +256,7 @@ class ConversionFunctions:
         return self.translations["rain_intensity"][intensity]
 
     def feels_like(self, temperature, humidity, windspeed):
-        """Calculate feel like temperature."""
+        """ Calculate feel like temperature."""
         if temperature is None or humidity is None or windspeed is None:
             return 0
 
@@ -266,12 +267,17 @@ class ConversionFunctions:
         return self.temperature(feelslike_c)
 
     def visibility(self, elevation, temp, humidity):
-        """Return the visibility.
-
+        """ Return the visibility.
         Input:
             Elevation in Meters
             Temperature in Celcius
             Humidity in percent
+        Where:
+            elv_min is the station elevation with a minimum set height of 2 meters above sea level
+            mv is the maximum distance of visibility to the horizon
+            pr_a sets a minimum and maximum visability distance independent of environmental conditions
+            pr is a precentage reduction of visability based on environmental conditions
+            vis is the visability distance
         """
         if temp is None or elevation is None or humidity is None:
             return None
@@ -308,13 +314,25 @@ class ConversionFunctions:
         return round(vis, 1)
 
     def wetbulb(self, temp, humidity, pressure, no_conversion=False):
-        """Return Wet Bulb Temperature.
-
+        """ Return Wet Bulb Temperature.
         Converted from a JS formula made by Gary W Funk
         Input:
             Temperature in Celcius
             Humdity in Percent
             Station Pressure in MB
+        Where:
+            t is air temperature
+            rh is relative humidity
+            p is staion pressure
+            edifference is 
+            twguess is
+            eguess is
+            eguess is
+            previoussign is 
+            cursign is 
+            incr is 
+            es is
+            e2 is
         """
         if temp is None or humidity is None or pressure is None:
             return None
@@ -360,8 +378,7 @@ class ConversionFunctions:
         return self.temperature(twguess)
 
     def wbgt(self, temp, humidity, pressure, solar_radiation):
-        """Return Wet Bulb Globe Temperature.
-
+        """ Return Wet Bulb Globe Temperature.
         This is a way to show heat stress on the human body.
         Input:
             Temperature in Celcius
@@ -403,8 +420,7 @@ class ConversionFunctions:
         return wbgt
 
     def battery_level(self, battery, is_tempest):
-        """Return battery percentage.
-
+        """ Return battery percentage.
         Input:
             Voltage in Volts DC (depends on the weather station type, see below)
             is_tempest in Boolean
@@ -455,8 +471,7 @@ class ConversionFunctions:
         return pb
 
     def battery_mode(self, voltage, solar_radiation):
-        """Return battery operating mode.
-
+        """ Return battery operating mode.
         Input:
             Voltage in Volts DC (depends on the weather station type, see below)
             is_tempest in Boolean
@@ -505,7 +520,12 @@ class ConversionFunctions:
         return batt_mode, mode_description
 
     def beaufort(self, wind_speed):
-        """Return Beaufort Scale value based on Wind Speed."""
+        """ Return Beaufort Scale value based on Wind Speed.
+        Input:
+            Wind Speed in m/s
+        Where:
+            bft_value is the numerical rating on the Beaufort Scale
+        """
         if wind_speed is None:
             return 0, self.translations["beaufort"][str(0)]
 
@@ -541,7 +561,12 @@ class ConversionFunctions:
         return bft_value, bft_text
 
     def dewpoint_level(self, dewpoint: float, is_metric: bool = None) -> str:
-        """Return text based comfort level, based on dewpoint F value."""
+        """ Return text based comfort level.
+        Input:
+            dewpoint in Celsius or Fahrenheit
+        Where:
+            dewpoint is dewpoint converted to Fahrenheit
+        """
         if dewpoint is None:
             return "no-data"
         if is_metric is None:
@@ -574,7 +599,13 @@ class ConversionFunctions:
         return self.translations["dewpoint"]["undefined"]
 
     def temperature_level(self, temperature_c):
-        """Return text based comfort level, based on Air Temperature value."""
+        """ Return text based comfort level, based on Air Temperature value.
+        Input:
+            Air Temperature in Celsius
+        Where:
+            temperature_c is input temperature in Celsius
+            temperature is temperature converted to Fahrenheit
+        """
         if temperature_c is None:
             return "no-data"
 
@@ -604,7 +635,7 @@ class ConversionFunctions:
         return self.translations["temperature"]["undefined"]
 
     def uv_level(self, uvi):
-        """Return text based UV Description."""
+        """ Return text based UV Description."""
         if uvi is None:
             return "no-data"
 
@@ -622,7 +653,7 @@ class ConversionFunctions:
         return self.translations["uv"]["none"]
 
     def utc_from_timestamp(self, timestamp: int) -> str:
-        """Return a UTC time from a timestamp."""
+        """ Return a UTC time from a timestamp."""
         if not timestamp:
             return None
 
@@ -635,7 +666,7 @@ class ConversionFunctions:
         return f"{dt_str}{utc_string}"
 
     def utc_last_midnight(self) -> str:
-        """Return UTC Time for last midnight."""
+        """ Return UTC Time for last midnight."""
         midnight = dt.datetime.combine(dt.datetime.today(), dt.time.min)
         midnight_ts = dt.datetime.timestamp(midnight)
         midnight_dt = self.utc_from_timestamp(midnight_ts)
@@ -643,10 +674,9 @@ class ConversionFunctions:
 
     def solar_elevation(self, latitude, longitude):
         """ Return Sun Elevation in Degrees with respect to the Horizon.
-
         Input:
-            Latitude in Degrees and fractional degrees (no docker variable yet)
-            Longitude in Degrees and fractional degrees (no docker variable yet)
+            Latitude in Degrees and fractional degrees
+            Longitude in Degrees and fractional degrees
             Local Time
             UTC Time
         Where:
@@ -692,12 +722,12 @@ class ConversionFunctions:
 
     def solar_insolation(self, elevation, latitude, longitude):
         """ Return Estimation of Solar Radiation at current sun elevation angle.
-
         Input:
             Elevation in Meters
             Latitude
             Longitude
         Where:
+            solar_elevation is the Sun Elevation in Degrees with respect to the Horizon
             sz is Solar Zenith in Degrees
             ah is (Station Elevation Compensation) Constant ah_a = 0.14, ah_h = Station elevation in km
             am is Air Mass of atmoshere between Station and Sun
@@ -740,6 +770,19 @@ class ConversionFunctions:
             All Time Sea Level Pressure Low in mB
             Wind Direction in Degrees - Converted to Cardinal further down)
         Where:
+            z_where is a designation of Northern or Southern Hemisphere
+            z_baro_top is the highest barometric pressure for location
+            z_baro_bottom is the lowest barometric pressure for location
+            z_range is the difference between highest and lowest pressures
+            z_hpa is sea level pressure
+            z_month is month of the year
+            z_season is summer or winter
+            z_wind is the cardinal wind direction
+            z_trend is the pressure trend (idealy over a 3 hour period but current trend is used here)
+            z_constant is pressure per zambretti value increment
+            rise_options is array of outputs available for rising pressure conditions
+            steady_options is array of outputs available for steady pressure conditions
+            fall_options is array of outputs available for falling pressure conditions
         """
         if (
             latitude is None
@@ -995,7 +1038,6 @@ class ConversionFunctions:
 
         return fog_probability
 
-# *** Work in Progress ***
     def snow_probability(self, air_temperature, freezing_level, cloud_base, dew_point, wet_bulb, station_height):
         """ Return probability of snow in percent (Max of 80% calculated probability).
         Input:
