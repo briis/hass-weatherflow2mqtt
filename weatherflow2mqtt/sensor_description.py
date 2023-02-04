@@ -727,6 +727,20 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         if None in (device.air_temperature, device.dew_point_temperature, device.wet_bulb_temperature, freezing_level, cloud_base)
         else cnv.snow_probability(device.air_temperature.m, freezing_level, cloud_base, device.dew_point_temperature.m, device.wet_bulb_temperature.m, elevation)
     ),
+    # attr = fn(self.cnv, device, _data.get("freezing_level"), _data.get("cloud_base"), self.elevation)
+
+    SensorDescription(
+        id="current_conditions",
+        name="Current Conditions",
+        icon="snowflake",
+        event=EVENT_OBSERVATION,
+        attr="relative_humidity",
+        custom_fn=lambda cnv, device, lightning_strike_count_1hr, precipitation_type, rain_rate, snow_probability, solar_elevation, solar_radiation, solar_insolation, fog_probability: None
+        if None in (lightning_strike_count_1hr, precipitation_type, rain_rate, device.wind_speed, solar_elevation, solar_radiation, solar_insolation, snow_probability, fog_probability)
+        else cnv.current_conditions(lightning_strike_count_1hr, precipitation_type, rain_rate, device.wind_speed, solar_elevation, solar_radiation, solar_insolation, snow_probability, fog_probability)
+    ),
+    # attr = fn(self.cnv, _data.get("lightning_strike_count_1hr"), _data.get("precipitation_type"), _data.get("rain_rate"), self.wind_speed, self.solar_elevation, self.solar_radiation, self.solar_insolation, _data.get("snow_probability"), _data.get("fog_probability"))
+    # def current_conditions(self, lightning_1h, precip_type, rain_rate, wind_speed, solar_el, solar_rad, solar_ins, snow_prob, fog_prob):
 
 )
 

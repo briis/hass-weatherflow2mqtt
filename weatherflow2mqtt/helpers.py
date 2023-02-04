@@ -1124,6 +1124,7 @@ class ConversionFunctions:
             or snow_prob is None
             or fog_prob is None
         ):
+            _LOGGER.info("Something is missing to calculate current conditions")
             return None
 
         # Home Assistant weather conditions: clear-night, cloudy, fog, hail, lightning, lightning-rainy, partlycloudy, pouring, rainy, snowy, snowy-rainy, sunny, windy, windy-variant, exceptional
@@ -1136,17 +1137,17 @@ class ConversionFunctions:
             si_p = round(((solar_rad) / (solar_ins))) * 100
             si_d = round((solar_ins) - (solar_rad))
             if ((si_p <= 50) and (si_d >= 50)):
-                 cloudy is True
-                 part_cloud is False
+                 cloudy = True
+                 part_cloud = False
             elif ((si_p <= 75) and (abs(si_d) >= 15)):
-                 part_cloud is True
-                 cloudy is False
+                 part_cloud = True
+                 cloudy = False
             elif ((si_p >= 115) and (abs(si_d) >= 15)):
-                 part_cloud is True
-                 cloudy is False
+                 part_cloud = True
+                 cloudy = False
             else:
-                 part_cloud is False
-                 cloudy is False
+                 part_cloud = False
+                 cloudy = False
 
         if ((lightning_1h >= 1) and (rain_rate >= 0.01)): # any rain at all
             current = "lightning-rainy"

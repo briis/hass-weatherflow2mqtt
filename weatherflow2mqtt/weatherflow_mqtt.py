@@ -372,18 +372,20 @@ class WeatherFlowMqtt:
                             self.solar_elevation = fn(self.cnv, self.latitude, self.longitude)
                             attr = self.solar_elevation
                         elif sensor.id == "solar_insolation":
-                            attr = fn(self.cnv, self.elevation, self.latitude, self.longitude)
+                            self.solar_insolation = fn(self.cnv, self.elevation, self.latitude, self.longitude)
+                            attr = self.solar_insolation
                         elif sensor.id == "zambretti_number":
                             self.zambretti_number = fn(self.cnv, self.latitude, _data.get("wind_bearing_avg"), self.sealevel_pressure_all_high, self.sealevel_pressure_all_low, self.pressure_trend, self.sealevel_pressure)
                             attr = self.zambretti_number
                         elif sensor.id == "zambretti_text":
                             attr = fn(self.cnv, self.zambretti_number)
                         elif sensor.id == "fog_probability":
-                            attr = fn(self.cnv, self.solar_elevation, self.wind_speed, _data.get("relative_humidity"), _data.get("dewpoint"), _data.get("air_temperature"))
+                            self.fog_probability = fn(self.cnv, self.solar_elevation, self.wind_speed, _data.get("relative_humidity"), _data.get("dewpoint"), _data.get("air_temperature"))
+                            attr = self.fog_probability
                         elif sensor.id == "snow_probability":
                             attr = fn(self.cnv, device, _data.get("freezing_level"), _data.get("cloud_base"), self.elevation)
                         elif sensor.id == "current_conditions":
-                            attr = fn(self.cnv, _data.get("lightning_strike_count_1hr"), _data.get("precipitation_type"), _data.get("rain_rate"), self.wind_speed, self.solar_elevation, self.solar_radiation, self.solar_insolation, _data.get("snow_probability"), _data.get("fog_probability")
+                            attr = fn(self.cnv, device, _data.get("lightning_strike_count_1hr"), _data.get("precipitation_type"), _data.get("rain_rate"),  _data.get("snow_probability"), self.solar_elevation, self.solar_radiation, self.solar_insolation, self.fog_probability)
                         else:
                             attr = fn(self.cnv, device)
 
