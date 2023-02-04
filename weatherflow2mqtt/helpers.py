@@ -1129,11 +1129,11 @@ class ConversionFunctions:
         # Home Assistant weather conditions: clear-night, cloudy, fog, hail, lightning, lightning-rainy, partlycloudy, pouring, rainy, snowy, snowy-rainy, sunny, windy, windy-variant, exceptional
         # Exceptional not used here
         
-        if (solar_el =< 0): # Can not determine clouds at night
-            cloudy is False
-            part_cloud is False
+        if solar_el <= 0: # Can not determine clouds at night
+            cloudy = False
+            part_cloud = False
         else:
-            si_p = round(((solar_rad) / (solar_ins)) * 100
+            si_p = round(((solar_rad) / (solar_ins))) * 100
             si_d = round((solar_ins) - (solar_rad))
             if ((si_p <= 50) and (si_d >= 50)):
                  cloudy is True
@@ -1152,7 +1152,7 @@ class ConversionFunctions:
             current = "lightning-rainy"
         elif (lightning_1h >= 1):
             current = "lightning"
-        elif (preip_type == 2):
+        elif (precip_type == 2):
             current = "hail"
         elif (rain_rate >= 7.8): # pouring => Imperial >= 0.31 in/hr, Metric >= 7.8 mm/hr
             current = "pouring"
@@ -1172,7 +1172,7 @@ class ConversionFunctions:
             current = "cloudy"
         elif (part_cloud):
             current = "partlycloudy"
-        elif (solar_el => 0 ): # if daytime
+        elif (solar_el >= 0 ): # if daytime
             current = "sunny"
         else:
             current = "clear-night"
