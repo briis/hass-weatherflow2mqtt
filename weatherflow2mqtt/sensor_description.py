@@ -732,10 +732,10 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
     SensorDescription(
         id="current_conditions",
         name="Current Conditions",
-        icon="snowflake",
+        icon="weather-partly-snowy-rainy",
         event=EVENT_OBSERVATION,
         attr="relative_humidity",
-        custom_fn=lambda cnv, device, lightning_strike_count_1hr, precipitation_type, rain_rate, snow_probability, solar_elevation, solar_radiation, solar_insolation, fog_probability: None
+        custom_fn=lambda cnv, device, lightning_strike_count_1hr, precipitation_type, rain_rate, wind_speed, solar_elevation, solar_radiation, solar_insolation, snow_probability, fog_probability: None
         if None in (lightning_strike_count_1hr, precipitation_type, rain_rate, device.wind_speed, solar_elevation, solar_radiation, solar_insolation, snow_probability, fog_probability)
         else cnv.current_conditions(lightning_strike_count_1hr, precipitation_type, rain_rate, device.wind_speed, solar_elevation, solar_radiation, solar_insolation, snow_probability, fog_probability)
     ),
