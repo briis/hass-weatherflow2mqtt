@@ -710,7 +710,7 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         icon="weather-fog",
         event=EVENT_OBSERVATION,
         attr="relative_humidity",
-        custom_fn=lambda cnv, solar_elevation, wind_speed, humidity, dew_point, air_temperature: None
+        custom_fn=lambda cnv, solar_elevation, wind_speed, humidity, dew_point, air_temperature: 0
         if None in (solar_elevation, wind_speed, humidity, dew_point, air_temperature)
         else cnv.fog_probability(solar_elevation, wind_speed, humidity, dew_point, air_temperature),
     ),
@@ -734,7 +734,7 @@ DEVICE_SENSORS: tuple[BaseSensorDescription, ...] = (
         icon="weather-partly-snowy-rainy",
         event=EVENT_OBSERVATION,
         attr="rain_rate",
-        custom_fn=lambda cnv, lightning_strike_count_1hr, precipitation_type, rain_rate, wind_speed, solar_elevation, solar_radiation, solar_insolation, snow_probability, fog_probability: None
+        custom_fn=lambda cnv, lightning_strike_count_1hr, precipitation_type, rain_rate, wind_speed, solar_elevation, solar_radiation, solar_insolation, snow_probability, fog_probability: "clear-night"
         if None in (lightning_strike_count_1hr, precipitation_type, rain_rate, wind_speed, solar_elevation, solar_radiation, solar_insolation, snow_probability, fog_probability)
         else cnv.current_conditions(lightning_strike_count_1hr, precipitation_type, rain_rate, wind_speed, solar_elevation, solar_radiation, solar_insolation, snow_probability, fog_probability)
     ),
