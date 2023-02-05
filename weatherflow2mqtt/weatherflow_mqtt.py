@@ -162,9 +162,13 @@ class WeatherFlowMqtt:
         self.last_midnight = self.cnv.utc_last_midnight()
 
         # Read stored Values and set variable values
+        self.fog_probability = None
         self.wind_speed = None
+        self.snow_probability = None
         self.solar_radiation = None
         self.solar_elevation = None
+        self.solar_insolation = None
+
 
         # Zambretti Forecast Vars
         self.wind_bearing_avg = None
@@ -383,9 +387,10 @@ class WeatherFlowMqtt:
                             self.fog_probability = fn(self.cnv, self.solar_elevation, self.wind_speed, _data.get("relative_humidity"), _data.get("dewpoint"), _data.get("air_temperature"))
                             attr = self.fog_probability
                         elif sensor.id == "snow_probability":
-                            attr = fn(self.cnv, device, _data.get("freezing_level"), _data.get("cloud_base"), self.elevation)
+                            self.snow_probability = fn(self.cnv, device, _data.get("freezing_level"), _data.get("cloud_base"), self.elevation)
+                            attr = self.snow_probability
                         elif sensor.id == "current_conditions":
-                            attr = fn(self.cnv, device, _data.get("lightning_strike_count_1hr"), _data.get("precipitation_type"), _data.get("rain_rate"),  _data.get("wind_speed"), self.solar_elevation, self.solar_radiation, self.solar_insolation, self.snow_probability, self.fog_probability)
+                            attr = fn(self.cnv, _data.get("lightning_strike_count_1hr"), _data.get("precipitation_type"), _data.get("rain_rate"),  self.wind_speed, self.solar_elevation, self.solar_radiation, self.solar_insolation, self.snow_probability, self.fog_probability)
                         else:
                             attr = fn(self.cnv, device)
 

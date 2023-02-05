@@ -1124,8 +1124,8 @@ class ConversionFunctions:
             or snow_prob is None
             or fog_prob is None
         ):
-            _LOGGER.info("Something is missing to calculate current conditions")
-            return None
+            _LOGGER.info("Something is missing to calculate current conditions %s - %s - %s - %s - %s - %s - %s - %s - %s", lightning_1h, precip_type, rain_rate, wind_speed,solar_el, solar_rad, solar_ins, snow_prob, fog_prob)
+            return "Missing Data"
 
         # Home Assistant weather conditions: clear-night, cloudy, fog, hail, lightning, lightning-rainy, partlycloudy, pouring, rainy, snowy, snowy-rainy, sunny, windy, windy-variant, exceptional
         # Exceptional not used here
