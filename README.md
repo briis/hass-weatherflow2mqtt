@@ -32,6 +32,8 @@ Please review Breaking Changes prior to updating your instance. Breaking changes
 
 A MQTT Server must be setup and configured on your local network, before installing this component. If you run a *Supervised* Home Assistant installation, we recommend using the MQTT Add-On available for this, else you must set it up yourself. See more [here](https://www.eclipse.org/paho/) for installing MQTT.
 
+**NOTE**: WeatherFlow2MQTT will not discover your base station if it is on a separate VLAN/subnet from your Home Assistant (or Docker) instance.
+
 ### Home Assistant Supervised
 
 This is the easiest installation method. Just click on the blue **ADD REPOSITORY** button at the top of this README and you will be taken to your Home Assistant instance to add this repository to the _Add-On Store_. From there, scroll down to find "WeatherFlow to MQTT" and then install, configure (optional) and start the add-on.

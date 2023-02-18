@@ -82,6 +82,14 @@ Weatherflow always broadcasts on port 50222/udp, so don't change this. Default i
 
 Set this to True to enable more debug data in the Container Log.
 
+## Troubleshooting
+
+### VLANs and Subnets
+WeatherFlow2MQTT will not discover your base station if it is on a separate VLAN/subnet from your Home Assistant/Docker instance. Common indications that you are on a different VLAN are error messages such as:
+```weatherflow2mqtt.weatherflow_mqtt:Could not start listening to the UDP Socket. Error is: Could not open a local UDP endpoint```
+
+Although WeatherFlow2MQTT allows you to manually specify the Weatherflow host, there will still be issues getting the UDP broadcast to travel across the VLAN.
+
 ## Authors & contributors
 
 The original setup of this repository is by [Bjarne Riis](https://github.com/briis).
