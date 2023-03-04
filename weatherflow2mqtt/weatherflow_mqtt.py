@@ -787,9 +787,12 @@ async def main():
     """Entry point for program."""
     logging.basicConfig(level=logging.INFO)
 
-    if is_supervisor := truebool(os.getenv("HA_SUPERVISOR")):
-        config = await get_supervisor_configuration()
-    else:
+    try:
+        if is_supervisor := truebool(os.getenv("HA_SUPERVISOR")):
+            config = await get_supervisor_configuration()
+        else:
+            config = os.environ
+    except:
         config = os.environ
 
     _LOGGER.info("Timezone is %s", os.environ.get("TZ"))
