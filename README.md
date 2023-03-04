@@ -126,6 +126,7 @@ Currently these languages are supported for Wind Cardinals and other Text state 
 - `de`: German
 - `fr`: French
 - `nl`: Dutch
+- `se`: Swedish
 
 If you would like to assist in translating to a new language, do the following:
 
