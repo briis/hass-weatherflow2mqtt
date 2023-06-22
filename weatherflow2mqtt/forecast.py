@@ -238,8 +238,8 @@ class Forecast:
                 )
             if "Not Found" in str(err):
                 _LOGGER.error("The Station ID does not exist")
-        except Exception as e:
-            _LOGGER.debug("Error requesting data from %s Error: ", endpoint, e)
+        except Exception as exc:
+            _LOGGER.debug("Error requesting data from %s Error: ", endpoint, exc)
 
         finally:
             if not use_running_session:
@@ -252,8 +252,8 @@ class Forecast:
                 (k for k, v in CONDITION_CLASSES.items() if value in v),
                 None,
             )
-        except Exception as e:
+        except Exception as exc:
             _LOGGER.debug(
-                "Could not find icon with value: %s. Error message: %s", value, e
+                "Could not find icon with value: %s. Error message: %s", value, exc
             )
             return None
