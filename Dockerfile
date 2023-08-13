@@ -12,7 +12,6 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 ADD setup.py /src/weatherflow2mqtt/
-ADD translations /src/weatherflow2mqtt/translations/
 
 ADD weatherflow2mqtt /src/weatherflow2mqtt/weatherflow2mqtt/
 RUN python setup.py install

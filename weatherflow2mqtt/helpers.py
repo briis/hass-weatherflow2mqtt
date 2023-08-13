@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import importlib.resources
 import time
 import json
 import logging
@@ -67,7 +68,7 @@ class ConversionFunctions:
         )
 
         try:
-            with open(filename, "r") as json_file:
+            with (importlib.resources.files(__package__) / filename).open('r') as json_file:
                 return json.load(json_file)
         except FileNotFoundError as e:
             _LOGGER.error("Could not read language file. Error message: %s", e)
