@@ -285,7 +285,7 @@ class WeatherFlowMqtt:
         model = device.model
         serial_number = device.serial_number
 
-        payload["name"] = f"{model} {serial_number} {sensor.name}"
+        payload["name"] = f"{sensor.name}"
         payload["unique_id"] = f"{serial_number}-{sensor.id}"
         if (units := sensor.unit_i if self.is_imperial else sensor.unit_m) is not None:
             payload["unit_of_measurement"] = units
