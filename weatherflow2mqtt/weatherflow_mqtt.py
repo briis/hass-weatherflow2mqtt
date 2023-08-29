@@ -15,7 +15,7 @@ from math import ceil
 from typing import Any, Callable, OrderedDict
 
 from paho.mqtt.client import Client as MqttClient
-from pint.quantity import Quantity
+from pint import Quantity
 from pyweatherflowudp.client import EVENT_DEVICE_DISCOVERED, WeatherFlowListener
 from pyweatherflowudp.const import UNIT_METERS
 from pyweatherflowudp.device import (

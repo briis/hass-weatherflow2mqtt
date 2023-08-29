@@ -1,5 +1,4 @@
 paho-mqtt==1.6.1
-asyncio==3.4.3
 aiohttp==3.8.4
 PyYAML==6.0
 pytz==2023.3

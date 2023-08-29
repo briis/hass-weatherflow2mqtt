@@ -15,7 +15,10 @@ setup(name='weatherflow2mqtt',
       author='Bjarne Riis',
       author_email='bjarne@briis.com',
       url='https://github.com/briis/hass-weatherflow2mqtt',
-      package_data={'': ['LICENSE.txt']},
+      package_data={
+          '': ['LICENSE.txt'],
+          'weatherflow2mqtt': ['translations/*.json'],
+      },
       include_package_data=True,
       packages=['weatherflow2mqtt'],
       entry_points={
@@ -23,17 +26,6 @@ setup(name='weatherflow2mqtt',
               'weatherflow2mqtt = weatherflow2mqtt.__main__:main'
           ]
       },
-      data_files=[
-        (
-            "translations",
-            [
-                "translations/da.json",
-                "translations/en.json",
-                "translations/fr.json",
-                "translations/de.json",
-            ],
-        )
-      ],
       license='MIT',
       install_requires=install_requires,
       tests_require=tests_require,
