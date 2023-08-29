@@ -4,7 +4,7 @@
     "slug": "weatherflow2mqtt",
     "url": "https://github.com/briis/hass-weatherflow2mqtt",
     "image": "briis/weatherflow2mqtt",
-    "version": "3.1.6",
+    "version": "3.2.0",
     "arch": [
         "armv7",
         "aarch64",
