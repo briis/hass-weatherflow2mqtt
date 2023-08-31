@@ -184,7 +184,7 @@ class Forecast:
                         row["air_temperature"]
                     ),
                     ATTR_FORECAST_PRESSURE: self.conversions.pressure(
-                        row["sea_level_pressure"]
+                        row.get("sea_level_pressure", 0)
                     ),
                     ATTR_FORECAST_HUMIDITY: row["relative_humidity"],
                     ATTR_FORECAST_PRECIPITATION: self.conversions.rain(row["precip"]),
