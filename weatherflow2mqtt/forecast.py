@@ -239,7 +239,7 @@ class Forecast:
             if "Not Found" in str(err):
                 _LOGGER.error("The Station ID does not exist")
         except Exception as exc:
-            _LOGGER.debug("Error requesting data from %s Error: ", endpoint, exc)
+            _LOGGER.debug("Error requesting data from %s Error: %s", endpoint, exc)
 
         finally:
             if not use_running_session:
