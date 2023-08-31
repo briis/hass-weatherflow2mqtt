@@ -199,7 +199,7 @@ class Forecast:
                     "wind_direction_cardinal": self.conversions.translations[
                         "wind_dir"
                     ][row["wind_direction_cardinal"]],
-                    "uv": row["uv"],
+                    "uv": row.get("uv", 0),
                     "feels_like": self.conversions.temperature(row["feels_like"]),
                 }
                 items.append(item)
