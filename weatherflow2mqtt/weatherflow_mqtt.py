@@ -714,10 +714,10 @@ class WeatherFlowMqtt:
         if isinstance(device, HubDevice):
             run_forecast = False
             fcst_state_topic = MQTT_TOPIC_FORMAT.format(
-                DOMAIN, FORECAST_ENTITY, "state"
+                FORECAST_ENTITY, "state"
             )
             fcst_attr_topic = MQTT_TOPIC_FORMAT.format(
-                DOMAIN, FORECAST_ENTITY, "attributes"
+                FORECAST_ENTITY, "attributes"
             )
             for sensor in FORECAST_SENSORS:
                 discovery_topic = MQTT_TOPIC_FORMAT.format(DOMAIN, sensor.id, "config")
@@ -770,7 +770,7 @@ class WeatherFlowMqtt:
                 _LOGGER.debug("Sending updated forecast data to MQTT")
                 for topic, data in zip(("state", "attributes"), forecast):
                     self._add_to_queue(
-                        MQTT_TOPIC_FORMAT.format(DOMAIN, FORECAST_ENTITY, topic),
+                        MQTT_TOPIC_FORMAT.format(FORECAST_ENTITY, topic),
                         json.dumps(data),
                         qos=1,
                         retain=True,
