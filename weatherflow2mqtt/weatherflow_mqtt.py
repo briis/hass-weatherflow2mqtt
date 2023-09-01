@@ -14,6 +14,7 @@ from datetime import datetime
 from math import ceil
 from typing import Any, Callable, OrderedDict
 
+from aiohttp import ClientSession
 from paho.mqtt.client import Client as MqttClient
 from pint import Quantity
 from pyweatherflowudp.client import EVENT_DEVICE_DISCOVERED, WeatherFlowListener
@@ -873,7 +874,6 @@ async def main():
 
 async def get_supervisor_configuration() -> dict[str, Any]:
     """Get the configuration from Home Assistant Supervisor."""
-    from aiohttp import ClientSession
 
     _LOGGER.info("🏠 Home Assistant Supervisor Mode 🏠")
 
