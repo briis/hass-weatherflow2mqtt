@@ -156,9 +156,6 @@ class Forecast:
                         sum_wind_avg, True
                     ),
                     ATTR_FORECAST_WIND_BEARING: int(sum_wind_bearing),
-                    "wind_direction_cardinal": self.conversions.direction(
-                        int(sum_wind_bearing)
-                    ),
                 }
                 items.append(item)
             fcst_data["daily_forecast"] = items
@@ -188,13 +185,7 @@ class Forecast:
                     ATTR_FORECAST_WIND_SPEED: self.conversions.speed(
                         row["wind_avg"], True
                     ),
-                    "wind_gust": self.conversions.speed(row["wind_gust"], True),
                     ATTR_FORECAST_WIND_BEARING: row["wind_direction"],
-                    "wind_direction_cardinal": self.conversions.translations[
-                        "wind_dir"
-                    ][row["wind_direction_cardinal"]],
-                    "uv": row.get("uv", 0),
-                    "feels_like": self.conversions.temperature(row["feels_like"]),
                 }
                 items.append(item)
                 # Limit number of Hours
