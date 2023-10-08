@@ -143,7 +143,6 @@ class Forecast:
                     ATTR_FORECAST_TIME: self.conversions.utc_from_timestamp(
                         row["day_start_local"]
                     ),
-                    "conditions": row["conditions"],
                     ATTR_FORECAST_CONDITION: "cloudy" if row.get("icon") is None else self.ha_condition_value(row["icon"]),
                     ATTR_FORECAST_TEMP: self.conversions.temperature(
                         row["air_temp_high"]
@@ -153,15 +152,10 @@ class Forecast:
                     ),
                     ATTR_FORECAST_PRECIPITATION: self.conversions.rain(precip),
                     ATTR_FORECAST_PRECIPITATION_PROBABILITY: row["precip_probability"],
-                    "precip_icon": row.get("precip_icon", ""),
-                    "precip_type": row.get("precip_type", ""),
                     ATTR_FORECAST_WIND_SPEED: self.conversions.speed(
                         sum_wind_avg, True
                     ),
                     ATTR_FORECAST_WIND_BEARING: int(sum_wind_bearing),
-                    "wind_direction_cardinal": self.conversions.direction(
-                        int(sum_wind_bearing)
-                    ),
                 }
                 items.append(item)
             fcst_data["daily_forecast"] = items
@@ -178,7 +172,6 @@ class Forecast:
                     ATTR_FORECAST_TIME: self.conversions.utc_from_timestamp(
                         row["time"]
                     ),
-                    "conditions": row["conditions"],
                     ATTR_FORECAST_CONDITION: self.ha_condition_value(row.get("icon")),
                     ATTR_FORECAST_TEMP: self.conversions.temperature(
                         row["air_temperature"]
@@ -189,18 +182,10 @@ class Forecast:
                     ATTR_FORECAST_HUMIDITY: row["relative_humidity"],
                     ATTR_FORECAST_PRECIPITATION: self.conversions.rain(row["precip"]),
                     ATTR_FORECAST_PRECIPITATION_PROBABILITY: row["precip_probability"],
-                    "precip_icon": row.get("precip_icon", ""),
-                    "precip_type": row.get("precip_type", ""),
                     ATTR_FORECAST_WIND_SPEED: self.conversions.speed(
                         row["wind_avg"], True
                     ),
-                    "wind_gust": self.conversions.speed(row["wind_gust"], True),
                     ATTR_FORECAST_WIND_BEARING: row["wind_direction"],
-                    "wind_direction_cardinal": self.conversions.translations[
-                        "wind_dir"
-                    ][row["wind_direction_cardinal"]],
-                    "uv": row.get("uv", 0),
-                    "feels_like": self.conversions.temperature(row["feels_like"]),
                 }
                 items.append(item)
                 # Limit number of Hours
